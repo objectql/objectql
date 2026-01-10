@@ -1,34 +1,103 @@
 # Hooks (Triggers)
 
-Hooks allow you to execute server-side logic before or after database operations. They are defined in a separate `*.hook.ts` file or registered dynamically.
+Hooks allow you to execute server-side logic before or after database operations. They are the primary mechanism for implementing business logic, validation, and side effects in ObjectQL.
 
-## 1. Supported Hooks
+## 1. Overview
 
-| Hook | Description | Context Properties |
-| :--- | :--- | :--- |
-| `beforeFind` | Before a query is executed. | `query` |
-| `afterFind` | After a query is executed (results available). | `query`, `result` |
-| `beforeCreate` | Before a record is inserted. | `doc` |
-| `afterCreate` | After a record is inserted. | `doc`, `result`, `id` |
-| `beforeUpdate` | Before a record is updated. | `id`, `doc`, `query` |
-| `afterUpdate` | After a record is updated. | `id`, `doc`, `result` |
-| `beforeDelete` | Before a record is deleted. | `id`, `query` |
-| `afterDelete` | After a record is deleted. | `id`, `result` |
+Hook files should be named `[object_name].hook.ts` and placed alongside your `*.object.yml` files.
 
-> **Note on Aggregation:**
-> If `query.aggregate` or `query.groupBy` is present (Aggregation Query), the `result` in `afterFind` will be an array of raw aggregation objects (e.g. `[{ total: 100, category: 'A' }]`) instead of standard object instances.
+### The "Optimal" Design Philosophy
 
-## 2. Hook Implementation
+Unlike traditional ORMs that provide generic contexts, ObjectQL hooks are **Typed**, **Context-Aware**, and **Smart**.
+
+*   **Type Safety**: Contexts are generic (e.g., `UpdateHookContext<Project>`), giving you autocomplete for fields.
+*   **Separation of Concerns**: `before` hooks focus on validation/mutation; `after` hooks focus on side-effects.
+*   **Change Tracking**: Built-in helpers like `isModified()` simplify "diff" logic.
+
+## 2. Supported Hooks
+
+| Hook | Operation | Context Properties | Purpose |
+| :--- | :--- | :--- | :--- |
+| `beforeFind` | Find/Count | `query` | Modify query filters, enforce security. |
+| `afterFind` | Find/Count | `query`, `result` | Transform results, logging. |
+| `beforeCreate` | Create | `data` | Validate inputs, set defaults, calculate fields. |
+| `afterCreate` | Create | `data`, `result` | Send welcome emails, create related records. |
+| `beforeUpdate` | Update | `id`, `data`, `previousData` | Validate state transitions (e.g., draft -> published). |
+| `afterUpdate` | Update | `id`, `data`, `previousData` | Notifications based on changes. |
+| `beforeDelete` | Delete | `id` | Check dependency constraints. |
+| `afterDelete` | Delete | `id`, `result` | Cleanup external resources (S3 files, etc). |
+
+## 3. Implementation
+
+The recommended way to define hooks is using the `ObjectHookDefinition` interface.
 
 ```typescript
-import { ObjectQL } from '@objectql/core';
+// src/objects/project.hook.ts
+import { ObjectHookDefinition } from '@objectql/types';
+import { Project } from './types'; // Your generated type
 
-// Inside your server-side loader
-const objectql = new ObjectQL();
+const hooks: ObjectHookDefinition<Project> = {
+    
+    // 1. Validation & Defaulting
+    beforeCreate: async ({ data, user, api }) => {
+        if (!data.name) {
+            throw new Error("Project name is required");
+        }
+        
+        // Auto-assign owner
+        data.owner_id = user?.id;
+        
+        // Check uniqueness via API
+        const existing = await api.count('project', [['name', '=', data.name]]);
+        if (existing > 0) throw new Error("Name taken");
+    },
 
-objectql.registerHook('projects', 'beforeCreate', async (ctx) => {
-    if (ctx.doc.budget < 0) {
-        throw new Error("Budget cannot be negative");
+    // 2. State Transition Logic
+    beforeUpdate: async ({ data, previousData, isModified }) => {
+        // 'previousData' is automatically fetched by the engine
+        
+        if (isModified('status')) {
+            if (previousData.status === 'Completed' && data.status !== 'Completed') {
+                throw new Error("Cannot reopen a completed project");
+            }
+        }
+    },
+
+    // 3. Side Effects (Notifications)
+    afterUpdate: async ({ isModified, data, api }) => {
+        if (isModified('status') && data.status === 'Completed') {
+            await api.create('notification', {
+                message: `Project ${data.name} finished!`,
+                user_id: data.owner_id
+            });
+        }
     }
-});
+};
+
+export default hooks;
+```
+
+## 4. Hook Context API
+
+The context object passed to your function is tailored to the operation.
+
+### 4.1 Base Properties (Available Everywhere)
+*   `objectName`: string
+*   `api`: The internal ObjectQL driver instance (for running queries).
+*   `user`: The current user session.
+*   `state`: A shared object to pass data from `before` to `after` hooks.
+
+### 4.2 Update Context (`beforeUpdate` / `afterUpdate`)
+*   `data`: The partial object containing changes.
+*   `previousData`: The full record **before** the update.
+*   `isModified(field)`: Returns `true` if the field is present in `data` AND different from `previousData`.
+
+### 4.3 Query Context (`beforeFind`)
+*   `query`: The AST of the query. You can inject extra filters here.
+
+```typescript
+beforeFind: async ({ query, user }) => {
+    // Force multi-tenancy filter
+    query.filters.push(['organization_id', '=', user.org_id]);
+}
 ```
