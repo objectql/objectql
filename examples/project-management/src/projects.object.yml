@@ -6,6 +6,8 @@ fields:
     type: text
     required: true
     label: Name
+    index: true # Field-level index
+
   status:
     type: select
     options:
@@ -13,6 +15,8 @@ fields:
       - in_progress
       - completed
     defaultValue: planned
+    index: true
+
   priority:
     type: select
     options:
@@ -20,17 +24,45 @@ fields:
       - normal
       - high
     defaultValue: normal
+
   description:
     type: textarea
+
   owner:
     type: text
     label: Project Owner
+
   budget:
     type: currency
     label: Total Budget
+
   start_date:
     type: date
     label: Start Date
+
   end_date:
     type: date
     label: End Date
+
+indexes:
+  # Composite index for reporting
+  status_priority_idx:
+    fields: [status, priority]
+
+ai:
+  search:
+    enabled: true
+    fields: [name, description]
+    model: text-embedding-3-small
+
+actions:
+  complete:
+    type: record
+    label: Complete Project
+    icon: checkbox-circle-line
+    confirm_text: "Are you sure you want to complete this project?"
+    params:
+      comment:
+        type: textarea
+        label: Completion Comment
+

@@ -5,14 +5,20 @@ fields:
   name:
     type: text
     required: true
+    index: true # Simple index
+    
   project:
     type: lookup
     reference_to: projects
+    
   due_date:
     type: date
+    
   completed:
     type: boolean
     defaultValue: false
+    index: true # Helpful for finding pending tasks
+    
   priority:
     type: select
     options:
@@ -20,10 +26,13 @@ fields:
       - medium
       - high
     defaultValue: medium
+    
   assigned_to:
     type: text
     label: Assignee
+    
   estimated_hours:
     type: number
     min: 0
     label: Estimated Hours
+

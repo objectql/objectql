@@ -1,23 +1,36 @@
-import { HookContext, ObjectQLContext } from '@objectql/core';
+import { ObjectHookDefinition } from '@objectql/types';
+import { Project } from './types';
 
-// Optional if filename matches object name, but good practice.
-export const listenTo = 'projects';
+const hooks: ObjectHookDefinition<Project> = {
+    
+    // Auto-assign owner on create
+    beforeCreate: async ({ data, user }) => {
+        if (!data.owner && user?.id) {
+            console.log(`[Hook] Projects: Auto-assigning owner ${user.id}`);
+            data.owner = String(user.id);
+        }
+    },
 
-export async function beforeFind(context: HookContext) {
-    if (!context.ctx.isSystem && context.ctx.userId) {
-        console.log(`[File Hook] Projects: Restricting access for ${context.ctx.userId}`);
-        context.utils.restrict(['owner', '=', context.ctx.userId]);
-    }
-}
+    // Restrict access using query filters
+    beforeFind: async ({ query, user, api }) => {
+        // Example: If not admin, restrict to own projects
+        /*
+        if (user && !user.isAdmin) {
+             query.filters.push(['owner', '=', user.id]);
+        }
+        */
+        console.log(`[Hook] Projects: beforeFind query on ${api}`);
+    },
 
-export async function beforeCreate(context: HookContext) {
-    if (context.doc) {
-        if (!context.doc.owner && context.ctx.userId) {
-            console.log(`[File Hook] Projects: Auto-assigning owner ${context.ctx.userId}`);
-            context.doc.owner = context.ctx.userId;
+    // Example: Check budget constraints on update
+    beforeUpdate: async ({ data, previousData, isModified }) => {
+        if (isModified('budget')) {
+            if (data.budget! < (previousData?.budget || 0)) {
+                console.warn("Warning: Budget is being reduced!");
+            }
         }
     }
-}
+};
 
-// Actions are now in projects.action.ts
+export default hooks;
 

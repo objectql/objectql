@@ -44,7 +44,8 @@ export default defineConfig({
           items: [
             { text: 'Writing Hooks', link: '/guide/logic-hooks' },
             { text: 'Custom Actions', link: '/guide/logic-actions' },
-            { text: 'Building AI Apps', link: '/guide/ai' }
+            { text: 'Building AI Apps', link: '/guide/ai' },
+            { text: 'CLI Tools', link: '/guide/cli' }
           ]
         }
       ],
