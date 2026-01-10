@@ -29,7 +29,8 @@ export function createMetadataHandler(app: IObjectQL) {
                     name: obj.name,
                     label: obj.label || obj.name,
                     icon: obj.icon,
-                    fields: obj.fields ? Object.keys(obj.fields) : []
+                    description: obj.description,
+                    fields: obj.fields || {}
                 }));
                 
                 res.setHeader('Content-Type', 'application/json');

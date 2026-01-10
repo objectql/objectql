@@ -21,12 +21,6 @@ export function createNodeHandler(app: IObjectQL) {
             return;
         }
 
-        if (req.method !== 'POST') {
-            res.statusCode = 405;
-            res.end('Method Not Allowed');
-            return;
-        }
-
         const handleRequest = async (json: any) => {
              try {
                 // TODO: Parse user from header or request override
@@ -47,6 +41,29 @@ export function createNodeHandler(app: IObjectQL) {
                 res.end(JSON.stringify({ error: { code: 'INTERNAL_ERROR', message: 'Internal Server Error' }}));
             }
         };
+
+        if (req.method !== 'POST') {
+            // Attempt to handle GET requests for simple queries like /api/objectql/table
+            // We map this to a find operation
+            // URL pattern: /api/objectql/:objectName
+            const match = req.url?.match(/\/([^\/?]+)(\?.*)?$/);
+            if (req.method === 'GET' && match) {
+                const objectName = match[1];
+                // Ignore special paths
+                if (objectName !== 'openapi.json' && objectName !== 'metadata') {
+                     await handleRequest({
+                        op: 'find',
+                        object: objectName,
+                        args: {} // TODO: Parse query params to args
+                     });
+                     return;
+                }
+            }
+
+            res.statusCode = 405;
+            res.end('Method Not Allowed');
+            return;
+        }
 
         // 1. Check if body is already parsed (e.g. by express.json())
         if (req.body && typeof req.body === 'object') {
