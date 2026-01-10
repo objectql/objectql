@@ -1,0 +1,37 @@
+import { ObjectRegistry } from "./registry";
+import { Driver } from "./driver";
+import { ObjectConfig } from "./object";
+import { ObjectQLPlugin } from "./plugin";
+
+export interface ObjectQLConfig {
+    registry?: ObjectRegistry;
+    datasources?: Record<string, Driver>;
+    /**
+     * Optional connection string for auto-configuration.
+     * e.g. "sqlite://dev.db", "postgres://localhost/db", "mongodb://localhost/db"
+     */
+    connection?: string;
+    /**
+     * Path(s) to the directory containing schema files (*.object.yml).
+     */
+    source?: string | string[];
+    objects?: Record<string, ObjectConfig>;
+    /**
+     * @deprecated Use 'presets' instead.
+     */
+    packages?: string[];
+    /**
+     * List of npm packages or presets to load.
+     */
+    presets?: string[];
+    /**
+     * List of plugins to load. 
+     * Can be an instance of ObjectQLPlugin or a package name string.
+     */
+    plugins?: (ObjectQLPlugin | string)[];
+    /**
+     * List of remote ObjectQL instances to connect to.
+     * e.g. ["http://user-service:3000", "http://order-service:3000"]
+     */
+    remotes?: string[];
+}
