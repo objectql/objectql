@@ -1,5 +1,4 @@
-import { BrowserRouter, Routes, Route, Link, useParams } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 import ObjectList from './components/ObjectList';
 import DataGrid from './components/DataGrid';

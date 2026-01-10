@@ -16,6 +16,3 @@ fields:
   age:
     type: number
     label: Age
-  created_at:
-    type: datetime
-    label: Created At

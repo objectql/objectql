@@ -4,13 +4,95 @@ import * as path from 'path';
 
 /**
  * Creates a handler to serve the console UI static files.
- * In production, this would serve the built files from @objectql/console/dist.
  */
 export function createConsoleHandler() {
+    // Try to find the built console files
+    const possiblePaths = [
+        path.join(__dirname, '../../console/dist'),
+        path.join(process.cwd(), 'node_modules/@objectql/console/dist'),
+        path.join(process.cwd(), 'packages/console/dist'),
+    ];
+    
+    let distPath: string | null = null;
+    for (const p of possiblePaths) {
+        if (fs.existsSync(p)) {
+            distPath = p;
+            break;
+        }
+    }
+    
     return async (req: IncomingMessage, res: ServerResponse) => {
-        // For now, return a simple placeholder page
-        // In a real implementation, this would serve the built React app
-        const html = `<!DOCTYPE html>
+        if (!distPath) {
+            // Return placeholder page if console is not built
+            const html = getPlaceholderPage();
+            res.setHeader('Content-Type', 'text/html');
+            res.statusCode = 200;
+            res.end(html);
+            return;
+        }
+        
+        // Parse the URL and remove /console prefix
+        let urlPath = (req.url || '').replace(/^\/console/, '') || '/';
+        
+        // Default to index.html for SPA routing
+        if (urlPath === '/' || !urlPath.includes('.')) {
+            urlPath = '/index.html';
+        }
+        
+        const filePath = path.join(distPath, urlPath);
+        
+        // Security check: ensure the file is within distPath
+        if (!filePath.startsWith(distPath)) {
+            res.statusCode = 403;
+            res.end('Forbidden');
+            return;
+        }
+        
+        // Check if file exists
+        if (!fs.existsSync(filePath)) {
+            // For SPA, return index.html for any non-existent routes
+            const indexPath = path.join(distPath, 'index.html');
+            if (fs.existsSync(indexPath)) {
+                const content = fs.readFileSync(indexPath);
+                res.setHeader('Content-Type', 'text/html');
+                res.statusCode = 200;
+                res.end(content);
+                return;
+            }
+            
+            res.statusCode = 404;
+            res.end('Not Found');
+            return;
+        }
+        
+        // Read and serve the file
+        const content = fs.readFileSync(filePath);
+        const ext = path.extname(filePath);
+        const contentType = getContentType(ext);
+        
+        res.setHeader('Content-Type', contentType);
+        res.statusCode = 200;
+        res.end(content);
+    };
+}
+
+function getContentType(ext: string): string {
+    const types: Record<string, string> = {
+        '.html': 'text/html',
+        '.js': 'application/javascript',
+        '.css': 'text/css',
+        '.json': 'application/json',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.gif': 'image/gif',
+        '.svg': 'image/svg+xml',
+        '.ico': 'image/x-icon',
+    };
+    return types[ext] || 'application/octet-stream';
+}
+
+function getPlaceholderPage(): string {
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -65,9 +147,4 @@ export function createConsoleHandler() {
     </div>
 </body>
 </html>`;
-        
-        res.setHeader('Content-Type', 'text/html');
-        res.statusCode = 200;
-        res.end(html);
-    };
 }
