@@ -1,7 +1,7 @@
 import express from 'express';
 import { ObjectQL } from '@objectql/core';
 import { KnexDriver } from '@objectql/driver-knex';
-import { createNodeHandler } from '@objectql/server';
+import { createNodeHandler, createMetadataHandler, createConsoleHandler } from '@objectql/server';
 import * as path from 'path';
 
 async function main() {
@@ -22,24 +22,49 @@ async function main() {
     app.loadFromDirectory(path.join(__dirname));
     await app.init();
 
-    // 3. Create Handler
+    // 3. Create Handlers
     const objectQLHandler = createNodeHandler(app);
+    const metadataHandler = createMetadataHandler(app);
+    const consoleHandler = createConsoleHandler();
 
     // 4. Setup Express
     const server = express();
     const port = 3004;
 
-    // Optional: Parse JSON body globally (or strict to other routes)
-    // server.use(express.json()); 
+    // Enable CORS for development
+    server.use((req, res, next) => {
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'Content-Type');
+        if (req.method === 'OPTIONS') {
+            res.sendStatus(200);
+        } else {
+            next();
+        }
+    });
 
-    // Mount ObjectQL handler
-    // Supports both /api/objectql (POST) or similar
+    // Mount handlers
     server.all('/api/objectql', objectQLHandler);
+    server.all('/api/metadata*', metadataHandler);
+    server.get('/console*', consoleHandler);
+
+    // Create some sample data
+    const ctx = app.createContext({ isSystem: true });
+    await ctx.object('User').create({ name: 'Alice', email: 'alice@example.com', age: 28, status: 'active' });
+    await ctx.object('User').create({ name: 'Bob', email: 'bob@example.com', age: 35, status: 'active' });
+    await ctx.object('User').create({ name: 'Charlie', email: 'charlie@example.com', age: 42, status: 'inactive' });
+    
+    await ctx.object('Task').create({ title: 'Complete project', description: 'Finish the ObjectQL console', status: 'in-progress', priority: 'high' });
+    await ctx.object('Task').create({ title: 'Write documentation', description: 'Document the new console feature', status: 'pending', priority: 'medium' });
+    await ctx.object('Task').create({ title: 'Code review', description: 'Review pull requests', status: 'pending', priority: 'low' });
+    await ctx.object('Task').create({ title: 'Deploy to production', description: 'Release version 1.0', status: 'pending', priority: 'high', completed: false });
 
     server.listen(port, () => {
-        console.log(`Express app listening on port ${port}`);
-        console.log(`Test CURL:`);
-        console.log(`curl -X POST http://localhost:${port}/api/objectql -H "Content-Type: application/json" -d '{"op": "create", "object": "User", "args": { "data": { "name": "ExpressUser", "email": "express@example.com" }}}'`);
+        console.log(`\n🚀 ObjectQL Server running on http://localhost:${port}`);
+        console.log(`\n📊 Console UI: http://localhost:${port}/console`);
+        console.log(`\n🔌 API Endpoint: http://localhost:${port}/api/objectql`);
+        console.log(`\nTest CURL:`);
+        console.log(`curl -X POST http://localhost:${port}/api/objectql -H "Content-Type: application/json" -d '{"op": "find", "object": "User", "args": {}}'`);
     });
 }
 
