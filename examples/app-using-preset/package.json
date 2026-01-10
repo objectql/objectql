@@ -8,7 +8,8 @@
     "repl": "objectql repl"
   },
   "dependencies": {
-    "@example/project-management": "workspace:*"
+    "@example/project-management": "workspace:*",
+    "@example/plugin-audit": "workspace:*"
   },
   "devDependencies": {
     "@objectql/core": "workspace:*",

@@ -51,6 +51,9 @@ importers:
 
   examples/app-using-preset:
     dependencies:
+      '@example/plugin-audit':
+        specifier: workspace:*
+        version: link:../plugin-audit
       '@example/project-management':
         specifier: workspace:*
         version: link:../project-management

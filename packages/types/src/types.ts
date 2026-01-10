@@ -53,9 +53,10 @@ export interface ObjectQLConfig {
      */
     presets?: string[];
     /**
-     * List of plugins to load.
+     * List of plugins to load. 
+     * Can be an instance of ObjectQLPlugin or a package name string.
      */
-    plugins?: ObjectQLPlugin[];
+    plugins?: (ObjectQLPlugin | string)[];
 }
 
 export interface IObjectQL {
