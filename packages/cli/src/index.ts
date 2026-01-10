@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { generateTypes } from './commands/generate';
 import { startRepl } from './commands/repl';
 import { serve } from './commands/serve';
+import { startConsole } from './commands/console';
 
 const program = new Command();
 
@@ -32,6 +33,15 @@ program
     .option('-c, --config <path>', 'Path to objectql.config.ts/js')
     .action(async (options) => {
         await startRepl(options.config);
+    });
+
+program
+    .command('console')
+    .alias('c')
+    .description('Start a visual console to browse and manage database tables')
+    .option('-c, --config <path>', 'Path to objectql.config.ts/js')
+    .action(async (options) => {
+        await startConsole(options.config);
     });
 
 program

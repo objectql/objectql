@@ -20,11 +20,14 @@
     "fast-glob": "^3.3.0",
     "js-yaml": "^4.1.0",
     "prettier": "^3.0.0",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "blessed": "^0.1.81",
+    "blessed-contrib": "^4.11.0"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
     "@types/node": "^20.0.0",
-    "@types/js-yaml": "^4.0.5"
+    "@types/js-yaml": "^4.0.5",
+    "@types/blessed": "^0.1.17"
   }
 }
