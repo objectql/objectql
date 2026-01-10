@@ -1,4 +1,5 @@
 import { FieldConfig } from './field';
+import { ActionConfig } from './action';
 
 export interface ObjectConfig {
     name: string;
@@ -8,6 +9,7 @@ export interface ObjectConfig {
     description?: string;
     
     fields: Record<string, FieldConfig>;
+    actions?: Record<string, ActionConfig>;
     
     /**
      * Whether this object can be modified or deleted.

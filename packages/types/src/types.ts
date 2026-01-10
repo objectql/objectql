@@ -3,10 +3,12 @@ import { Driver } from "./driver";
 import { UnifiedQuery, FilterCriterion } from "./query";
 import { MetadataRegistry } from "./registry";
 import { HookName, HookHandler, HookContext } from "./hook";
+import { ActionHandler, ActionContext } from "./action";
 
 export { ObjectConfig } from "./object";
 export { MetadataRegistry } from "./registry";
 export { HookName, HookHandler, HookContext } from "./hook";
+export { ActionConfig, ActionHandler, ActionContext } from "./action";
 
 /**
  * Interface for object repository like operations.
@@ -25,6 +27,7 @@ export interface IObjectRepository {
     createMany(data: any[]): Promise<any>;
     updateMany(filters: any, data: any): Promise<any>;
     deleteMany(filters: any): Promise<any>;
+    execute(actionName: string, id: string | number | undefined, params: any): Promise<any>;
 }
 
 export interface ObjectQLConfig {
@@ -46,6 +49,9 @@ export interface IObjectQL {
 
     on(event: HookName, objectName: string, handler: HookHandler): void;
     triggerHook(event: HookName, objectName: string, ctx: HookContext): Promise<void>;
+
+    registerAction(objectName: string, actionName: string, handler: ActionHandler): void;
+    executeAction(objectName: string, actionName: string, ctx: ActionContext): Promise<any>;
 }
 
 export interface ObjectQLContext {

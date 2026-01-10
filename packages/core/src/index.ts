@@ -8,7 +8,9 @@ import {
     ObjectQLConfig,
     HookName,
     HookHandler,
-    HookContext
+    HookContext,
+    ActionHandler,
+    ActionContext
 } from '@objectql/types';
 import { MetadataLoader } from './loader';
 export * from './loader';
@@ -19,6 +21,7 @@ export class ObjectQL implements IObjectQL {
     private loader: MetadataLoader;
     private datasources: Record<string, Driver> = {};
     private hooks: Record<string, Array<{ objectName: string, handler: HookHandler }>> = {};
+    private actions: Record<string, ActionHandler> = {};
 
     constructor(config: ObjectQLConfig) {
         this.metadata = config.registry || new MetadataRegistry();
@@ -59,6 +62,20 @@ export class ObjectQL implements IObjectQL {
                 await hook.handler(ctx);
             }
         }
+    }
+
+    registerAction(objectName: string, actionName: string, handler: ActionHandler) {
+        const key = `${objectName}:${actionName}`;
+        this.actions[key] = handler;
+    }
+
+    async executeAction(objectName: string, actionName: string, ctx: ActionContext) {
+        const key = `${objectName}:${actionName}`;
+        const handler = this.actions[key];
+        if (!handler) {
+            throw new Error(`Action '${actionName}' not found for object '${objectName}'`);
+        }
+        return await handler(ctx);
     }
 
     loadFromDirectory(dir: string, packageName?: string) {
