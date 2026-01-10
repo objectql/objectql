@@ -1,10 +1,11 @@
 import { ObjectQL } from '@objectql/core';
-import { KnexDriver } from '@objectql/driver-knex';
 import { createNodeHandler, createStudioHandler, createMetadataHandler } from '@objectql/server';
 import { createServer } from 'http';
 import * as path from 'path';
+import * as fs from 'fs';
 import chalk from 'chalk';
 import { exec } from 'child_process';
+import { register } from 'ts-node';
 
 function openBrowser(url: string) {
     const start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
@@ -18,30 +19,42 @@ export async function startStudio(options: { port: number; dir: string, open?: b
     console.log(chalk.blue('Starting ObjectQL Studio...'));
     console.log(chalk.gray(`Project Root: ${rootDir}`));
 
-    // 1. Init ObjectQL
-    // For Studio, we want to look for a dev database or default to sqlite file so data persists
-    const dbPath = path.join(rootDir, 'dev.db');
-    
-    const app = new ObjectQL({
-        datasources: {
-            default: new KnexDriver({
-                client: 'sqlite3',
-                connection: {
-                    filename: dbPath
-                },
-                useNullAsDefault: true
-            })
+    // Register ts-node
+    register({
+        transpileOnly: true,
+        compilerOptions: {
+            module: "commonjs"
         }
     });
 
-    // 2. Load Schema
+    let app: ObjectQL;
+    const configTs = path.join(rootDir, 'objectql.config.ts');
+    const configJs = path.join(rootDir, 'objectql.config.js');
+
+    if (fs.existsSync(configTs)) {
+        console.log(chalk.gray(`Loading config from ${configTs}`));
+        const mod = require(configTs);
+        app = mod.default || mod;
+    } else if (fs.existsSync(configJs)) {
+        console.log(chalk.gray(`Loading config from ${configJs}`));
+        const mod = require(configJs);
+        app = mod.default || mod;
+    } else {
+        console.error(chalk.red('\n❌ Error: Configuration file (objectql.config.ts) not found.'));
+        process.exit(1);
+    }
+
+    if (!app) {
+         console.error(chalk.red('\n❌ Error: No default export found in configuration file.'));
+         process.exit(1);
+    }
+
+    // 2. Load Schema & Init
     try {
-        app.loadFromDirectory(rootDir);
         await app.init();
     } catch (e: any) {
-        console.error(chalk.red('❌ Failed to load schema:'), e.message);
-        // Don't exit, studio can still start with empty schema (maybe?)
-        // process.exit(1);
+        console.error(chalk.red('❌ Failed to initialize application:'), e.message);
+        process.exit(1);
     }
 
     // 3. Setup HTTP Server

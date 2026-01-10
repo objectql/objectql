@@ -70,6 +70,7 @@ objectql> await projects.create({ name: 'New API' })
 ### 2.3 `studio` (Admin UI)
 
 Starts the web-based admin studio to browse data and view schema.
+Requires `objectql.config.ts` (or `.js`) to be present in the directory.
 
 ```bash
 npx objectql studio
