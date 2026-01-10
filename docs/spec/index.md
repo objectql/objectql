@@ -4,7 +4,6 @@ This section contains the technical specifications for the ObjectQL platform. It
 
 *   [**Metadata Format**](./metadata-format.md)
     *   Complete definition of the YAML/JSON schema for Objects and Fields.
-    *   Includes new types: `file`, `image`, `location`, `formula`, `summary`, etc.
 *   [**Query Language (JSON)**](./query-language.md)
     *   Specification of the Unified Query JSON format used by drivers and APIs.
 *   [**HTTP Protocol**](./http-protocol.md)
