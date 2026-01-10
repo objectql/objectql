@@ -1,6 +1,13 @@
 {
   "name": "@example/preset-usage",
   "version": "1.1.2",
+  "license": "MIT",
+  "author": "ObjectQL Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/objectql/objectql.git",
+    "directory": "examples/scenarios/preset-usage"
+  },
   "private": true,
   "main": "dist/index.js",
   "scripts": {

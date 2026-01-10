@@ -1,6 +1,13 @@
 {
   "name": "@example/audit-log",
   "version": "0.2.0",
+  "license": "MIT",
+  "author": "ObjectQL Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/objectql/objectql.git",
+    "directory": "examples/plugins/audit-log"
+  },
   "private": true,
   "main": "dist/index.js",
   "scripts": {

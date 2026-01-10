@@ -1,6 +1,13 @@
 {
   "name": "@example/basic-script",
   "version": "4.0.1",
+  "license": "MIT",
+  "author": "ObjectQL Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/objectql/objectql.git",
+    "directory": "examples/starters/basic-script"
+  },
   "private": true,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
