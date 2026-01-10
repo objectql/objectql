@@ -87,6 +87,7 @@ export async function serve(options: { port: number; dir: string }) {
     server.listen(options.port, () => {
         console.log(chalk.green(`\n🚀 Server ready at http://localhost:${options.port}`));
         console.log(chalk.green(`📚 Swagger UI:   http://localhost:${options.port}/swagger`));
+        console.log(chalk.blue(`📖 OpenAPI Spec:  http://localhost:${options.port}/openapi.json`));
         console.log(chalk.gray('\nTry a curl command:'));
         console.log(`curl -X POST http://localhost:${options.port} -H "Content-Type: application/json" -d '{"op": "find", "object": "YourObject", "args": {}}'`);
     });
