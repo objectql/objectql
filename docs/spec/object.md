@@ -1,24 +1,10 @@
-# ObjectQL Metadata Specification
-
-**Version:** 1.0.0
-
-## 1. Architecture Overview
-
-ObjectQL is a **query transpiler** that converts a standardized JSON-DSL into native database queries.
-
-* **Pattern:** Repository Pattern with a Multi-Datasource strategy.
-* **Datasources:**
-  * **MongoDB:** Schema-less, fast iteration.
-  * **PostgreSQL/Knex:** Schema-strict, JSONB hybrid storage.
-* **Execution Flow:** `Client -> JSON DSL -> ObjectQL Core -> Driver -> Native Query -> DB`.
-
-## 3. Object Definition
+# Object Definition
 
 Object files are typically defined in YAML (or JSON) and represent a business entity or database table.
 
 Files should use **Snake Case** filenames (e.g., `project_tasks.object.yml`).
 
-### 3.2 Root Properties
+## 1. Root Properties
 | Property | Type | Description |
 | :--- | :--- | :--- |
 | `name` | `string` | **Required.** Unique API name of the object. Should match filename. |
@@ -26,10 +12,10 @@ Files should use **Snake Case** filenames (e.g., `project_tasks.object.yml`).
 | `icon` | `string` | SLDS icon string (e.g., `standard:task`). |
 | `description` | `string` | Internal description of the object. |
 | `fields` | `Map` | Dictionary of field definitions. |
-| `actions` | `Map` | Dictionary of custom action definitions. See Section 5. |
-| `customizable` | `boolean` | Whether this object can be modified or deleted. System objects (e.g., `user`, `session`) should be set to `false`. **Default: `true`** (if not specified, the object is customizable). |
+| `actions` | `Map` | Dictionary of custom action definitions. |
+| `customizable` | `boolean` | Whether this object can be modified or deleted. System objects (e.g., `user`, `session`) should be set to `false`. **Default: `true`**. |
 
-## 4. Field Definitions
+## 2. Field Definitions
 
 Fields are defined under the `fields` key. The key for each entry corresponds to the field's API name.
 
@@ -40,11 +26,11 @@ fields:
     label: Field Label
 ```
 
-### 4.1 Common Properties
+### 2.1 Common Properties
 
 | Property | Type | Description |
 | :--- | :--- | :--- |
-| `type` | `string` | **Required.** Data type of the field. See Section 4.2. |
+| `type` | `string` | **Required.** Data type of the field. |
 | `label` | `string` | Display label for UI validation messages. |
 | `required` | `boolean` | If `true`, the field cannot be null/undefined. Default: `false`. |
 | `defaultValue` | `any` | Default value if not provided during creation. |
@@ -52,9 +38,9 @@ fields:
 | `searchable` | `boolean` | Hint to include this field in global search. |
 | `sortable` | `boolean` | Hint that this field can be used for sorting in UI. |
 | `description` | `string` | Help text or documentation for the field. |
-| `customizable` | `boolean` | Whether this field can be modified or deleted. System fields (e.g., `_id`, `createdAt`, `updatedAt`) should be set to `false`. **Default: `true`** (if not specified, the field is customizable). |
+| `customizable` | `boolean` | Whether this field can be modified or deleted. **Default: `true`**. |
 
-### 4.2 Supported Field Types
+### 2.2 Supported Field Types
 
 | Type | Description | Specific Properties |
 | :--- | :--- | :--- |
@@ -92,23 +78,7 @@ fields:
 | `object` | JSON object structure. | |
 | `grid` | Array of objects/rows. | |
 
-### 4.6 Field Attributes
-
-| Attribute | Type | Description |
-| :--- | :--- | :--- |
-| `required` | `boolean` | If true, database enforces NOT NULL. |
-| `unique` | `boolean` | If true, database enforces UNIQUE constraint. |
-| `readonly` | `boolean` | UI hint: Field should not be editable by users. |
-| `hidden` | `boolean` | UI/API hint: Field should be hidden by default. |
-| `defaultValue` | `any` | Default value on creation. |
-| `help_text` | `string` | Tooltip for end-users. |
-| `multiple` | `boolean` | Allows multiple values (stored as JSON array). |
-| `min`, `max` | `number` | Range validation for numeric types. |
-| `min_length`, `max_length` | `number` | Length validation for text types. |
-| `regex` | `string` | Custom regular expression validation. |
-
-
-### 4.3 Relationship Fields
+### 2.3 Relationship Fields
 
 Key properties for `lookup` or `master_detail`:
 
@@ -121,7 +91,7 @@ owner:
   label: Owner
 ```
 
-### 4.4 Select Options
+### 2.4 Select Options
 
 Options for `select` can be a simple list or label/value pairs.
 
@@ -135,19 +105,31 @@ status:
       value: in_progress
 ```
 
-## 5. Actions (RPC)
+## 3. Schema Protection
 
-Custom business logic can be defined in the `actions` section.
+ObjectQL supports protecting system schema from modification.
+
+### 3.1 Object-Level Protection
+
+Objects can be marked as `customizable: false` to prevent deletion or structural changes.
 
 ```yaml
-actions:
-  approve:
-    label: Approve Request
-    description: Approves the current record.
-    params:
-      comment:
-        type: textarea
-        label: Approval Comments
-    result:
-      type: boolean
+name: user
+customizable: false
+fields:
+  email:
+    type: email
+    required: true
+```
+
+### 3.2 Field-Level Protection
+
+Fields can be marked as `customizable: false` to prevent modification.
+
+```yaml
+name: user
+fields:
+  email:
+    type: email
+    customizable: false
 ```

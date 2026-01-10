@@ -43,12 +43,18 @@ export default defineConfig({
       // Sidebar for Spec section
       '/spec/': [
         {
-          text: 'Protocol Specifications',
+          text: 'Core Schema',
           items: [
             { text: 'Overview', link: '/spec/' },
-            { text: 'Metadata Format', link: '/spec/metadata-format' },
+            { text: 'Objects & Fields', link: '/spec/object' },
+            { text: 'Actions (RPC)', link: '/spec/action' },
+            { text: 'Hooks', link: '/spec/hook' },
+          ]
+        },
+        {
+          text: 'Data & Transport',
+          items: [
             { text: 'Query Language', link: '/spec/query-language' },
-            { text: 'HTTP Protocol', link: '/spec/http-protocol' }
           ]
         }
       ]
