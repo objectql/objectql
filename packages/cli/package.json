@@ -7,7 +7,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "studio": "node dist/index.js studio"
   },
   "dependencies": {
     "@objectql/types": "workspace:*",

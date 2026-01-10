@@ -67,7 +67,15 @@ objectql> await projects.create({ name: 'New API' })
 { id: 10, name: 'New API', ... }
 ```
 
-### 2.3 `migration` (Coming Soon)
+### 2.3 `studio` (Admin UI)
+
+Starts the web-based admin studio to browse data and view schema.
+
+```bash
+npx objectql studio
+```
+
+### 2.4 `migration` (Coming Soon)
 
 Future versions will include migration commands to sync your YAML schema with the database.
 

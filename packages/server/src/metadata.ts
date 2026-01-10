@@ -22,8 +22,8 @@ export function createMetadataHandler(app: IObjectQL) {
         }
 
         try {
-            // GET /api/metadata/objects - List all objects
-            if (url === '/api/metadata/objects') {
+            // GET /api/metadata or /api/metadata/objects - List all objects
+            if (url === '/api/metadata' || url === '/api/metadata/objects') {
                 const configs = app.getConfigs();
                 const objects = Object.values(configs).map(obj => ({
                     name: obj.name,

@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { generateTypes } from './commands/generate';
 import { startRepl } from './commands/repl';
 import { serve } from './commands/serve';
+import { startStudio } from './commands/studio';
 
 const program = new Command();
 
@@ -42,6 +43,21 @@ program
     .option('-d, --dir <path>', 'Directory containing schema', '.')
     .action(async (options) => {
         await serve({ port: parseInt(options.port), dir: options.dir });
+    });
+
+program
+    .command('studio')
+    .alias('ui')
+    .description('Start the ObjectQL Studio')
+    .option('-p, --port <number>', 'Port to listen on', '3000')
+    .option('-d, --dir <path>', 'Directory containing schema', '.')
+    .option('--no-open', 'Do not open browser automatically')
+    .action(async (options) => {
+        await startStudio({ 
+            port: parseInt(options.port), 
+            dir: options.dir,
+            open: options.open
+        });
     });
 
 program.parse();

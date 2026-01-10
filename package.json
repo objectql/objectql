@@ -4,6 +4,7 @@
   "scripts": {
     "build": "tsc -b && pnpm -r run build",
     "test": "pnpm -r run test",
+    "studio": "pnpm --filter @objectql/cli run studio",
     "changeset": "changeset",
     "version": "changeset version",
     "release": "pnpm run build && changeset publish",
