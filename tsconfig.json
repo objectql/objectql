@@ -1,9 +1,9 @@
 {
   "files": [],
   "references": [
-    { "path": "./packages/metadata" },
+    { "path": "./packages/types" },
     { "path": "./packages/core" },
     { "path": "./packages/driver-mongo" },
-    { "path": "./packages/driver-knex" },
+    { "path": "./packages/driver-knex" }
   ]
 }
