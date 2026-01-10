@@ -1,0 +1,4 @@
+name: note
+fields:
+  content:
+    type: text
