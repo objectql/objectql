@@ -69,6 +69,9 @@ export interface FieldConfig {
     /** Whether the field is unique in the table. */
     unique?: boolean;
 
+    /** Whether to create a database index for this field. */
+    index?: boolean;
+
     /** Whether the field is read-only in UI. */
     readonly?: boolean;
 

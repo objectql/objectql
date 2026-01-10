@@ -32,8 +32,9 @@ fields:
 | `type` | `string` | **Required.** Data type of the field. |
 | `label` | `string` | Display label for UI validation messages. |
 | `required` | `boolean` | If `true`, the field cannot be null/undefined. Default: `false`. |
+| `unique` | `boolean` | If `true`, enforces unique values in the database. Default: `false`. |
 | `defaultValue` | `any` | Default value if not provided during creation. |
-| `index` | `boolean` | Hint to create a database index. |
+| `index` | `boolean` | Creates a database index for this field. |
 | `searchable` | `boolean` | Hint to include this field in global search. |
 | `sortable` | `boolean` | Hint that this field can be used for sorting in UI. |
 | `description` | `string` | Help text or documentation for the field. |
@@ -102,3 +103,43 @@ status:
     - label: In Progress
       value: in_progress
 ```
+
+## 3. Indexes
+
+Indexes can be defined at the field level (for single-field indexes) or at the object level (for composite indexes).
+
+### 3.1 Field-Level Indexes
+
+You can define simple indexes directly on the field:
+
+```yaml
+fields:
+  email:
+    type: email
+    index: true   # Creates a standard index
+    unique: true  # Creates a unique index (constraint)
+```
+
+### 3.2 Object-Level Indexes
+
+For composite indexes (spanning multiple fields), define them under the `indexes` key at the root of the file.
+
+```yaml
+indexes:
+  # Index Name: Index Definition
+  
+  # Composite Index
+  project_status_idx:
+    fields: [project_id, status]
+  
+  # Unique Composite Index
+  unique_task_name:
+    fields: [project_id, name]
+    unique: true
+```
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `fields` | `string[]` | **Required.** List of field names to include in the index. |
+| `unique` | `boolean` | If `true`, requires values to be unique combination. Default: `false`. |
+

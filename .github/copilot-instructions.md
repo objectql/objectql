@@ -15,7 +15,6 @@ We use **Turborepo** + **PNPM Workspaces**.
 | Path | Package Name | Environment | Role | Description |
 | --- | --- | --- | --- | --- |
 | `packages/types` | `@objectql/types` | **Universal** | **The Contract** | Pure TS Interfaces, Enums, and Error Classes. **No deps.** |
-| `packages/parser` | `@objectql/parser` | **Universal** | **The Compiler** | YAML string -> JSON AST. Pure logic. |
 | `packages/core` | `@objectql/core` | **Universal** | **The Engine** | Main entry point (`ObjectQL` class). Connects Drivers & Registry. |
 | `packages/driver-pg` | `@objectql/driver-pg` | **Node.js** | **The Adapter** | Postgres implementation. Depends on `knex` or `pg`. |
 | `packages/driver-mongo` | `@objectql/driver-mongo` | **Node.js** | **The Adapter** | MongoDB implementation. |
@@ -59,12 +58,6 @@ You must strictly enforce the following dependency rules:
 
 
 * **Role:** It orchestrates the flow. It validates the request using `SimpleRegistry` and delegates execution to the injected `driver`.
-
-### 📦 `packages/parser`
-
-* **Content:** `function parse(yaml: string): ObjectConfig`
-* **Role:** Pure transformation. Uses `js-yaml`. Validation via `zod` (optional).
-* **Output:** Must strictly match `ObjectConfig` from `types`.
 
 ### 📦 `packages/driver-*`
 
