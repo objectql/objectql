@@ -1,6 +1,5 @@
 import { 
     MetadataRegistry, 
-    MetadataLoader, 
     Driver, 
     ObjectConfig, 
     ObjectQLContext, 
@@ -8,6 +7,8 @@ import {
     IObjectQL, 
     ObjectQLConfig 
 } from '@objectql/types';
+import { MetadataLoader } from './loader';
+export * from './loader';
 import { ObjectRepository } from './repository';
 
 export class ObjectQL implements IObjectQL {
