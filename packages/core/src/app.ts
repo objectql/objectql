@@ -1,5 +1,5 @@
 import { 
-    ObjectRegistry, 
+    MetadataRegistry, 
     Driver, 
     ObjectConfig, 
     ObjectQLContext, 
@@ -11,7 +11,8 @@ import {
     HookHandler,
     HookContext,
     ActionHandler,
-    ActionContext
+    ActionContext,
+    LoaderPlugin
 } from '@objectql/types';
 import { ObjectLoader } from './loader';
 import { ObjectRepository } from './repository';
@@ -23,7 +24,7 @@ import { registerHookHelper, triggerHookHelper, HookEntry } from './hook';
 import { registerObjectHelper, getConfigsHelper } from './object';
 
 export class ObjectQL implements IObjectQL {
-    public metadata: ObjectRegistry;
+    public metadata: MetadataRegistry;
     private loader: ObjectLoader;
     private datasources: Record<string, Driver> = {};
     private remotes: string[] = [];
@@ -32,7 +33,7 @@ export class ObjectQL implements IObjectQL {
     private pluginsList: ObjectQLPlugin[] = [];
 
     constructor(config: ObjectQLConfig) {
-        this.metadata = config.registry || new ObjectRegistry();
+        this.metadata = config.registry || new MetadataRegistry();
         this.loader = new ObjectLoader(this.metadata);
         this.datasources = config.datasources || {};
         this.remotes = config.remotes || [];
@@ -121,6 +122,10 @@ export class ObjectQL implements IObjectQL {
 
     loadFromDirectory(dir: string, packageName?: string) {
         this.loader.load(dir, packageName);
+    }
+
+    addLoader(plugin: LoaderPlugin) {
+        this.loader.use(plugin);
     }
 
     createContext(options: ObjectQLContextOptions): ObjectQLContext {

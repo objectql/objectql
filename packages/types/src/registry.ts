@@ -6,7 +6,7 @@ export interface Metadata {
     content: any;
 }
 
-export class ObjectRegistry {
+export class MetadataRegistry {
     // Map<type, Map<id, Metadata>>
     private store: Map<string, Map<string, Metadata>> = new Map();
 

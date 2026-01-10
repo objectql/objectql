@@ -1,6 +1,6 @@
-import { ObjectConfig, ObjectRegistry } from '@objectql/types';
+import { ObjectConfig, MetadataRegistry } from '@objectql/types';
 
-export function registerObjectHelper(metadata: ObjectRegistry, object: ObjectConfig) {
+export function registerObjectHelper(metadata: MetadataRegistry, object: ObjectConfig) {
     // Normalize fields
     if (object.fields) {
         for (const [key, field] of Object.entries(object.fields)) {
@@ -16,7 +16,7 @@ export function registerObjectHelper(metadata: ObjectRegistry, object: ObjectCon
     });
 }
 
-export function getConfigsHelper(metadata: ObjectRegistry): Record<string, ObjectConfig> {
+export function getConfigsHelper(metadata: MetadataRegistry): Record<string, ObjectConfig> {
     const result: Record<string, ObjectConfig> = {};
     const objects = metadata.list<ObjectConfig>('object');
     for (const obj of objects) {

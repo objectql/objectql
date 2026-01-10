@@ -1,128 +1,219 @@
 # Plugin System
 
-Plugins allow you to extend the core functionality of ObjectQL by intercepting lifecycle events, modifying metadata, or injecting new services.
+Plugins are the primary way to extend ObjectQL. They allow you to bundle behavior, schema modifications, and logic (hooks/actions) into reusable units.
 
-## The Plugin Interface
+## 1. Anatomy of a Plugin
 
-A plugin is simply a class (or object) implementing `ObjectQLPlugin`.
+A plugin is simply an object that implements the `ObjectQLPlugin` interface.
 
 ```typescript
 import { IObjectQL } from '@objectql/types';
 
 export interface ObjectQLPlugin {
+    /**
+     * The unique name of the plugin
+     */
     name: string;
+    
+    /**
+     * Called during initialization, before drivers connect.
+     * @param app The ObjectQL instance
+     */
     setup(app: IObjectQL): void | Promise<void>;
 }
 ```
 
-The `setup` method is called during `db.init()`, **before** the database drivers are initialized. This gives plugins a chance to modify the schema metadata.
+## 2. Creating Plugins
 
-## Capabilities
+You can define plugins in two styles: **Object** or **Class**.
 
-1.  **Metadata Mutation**: Modify `app.metadata` to inject fields or create objects dynamically.
-2.  **Global Hooks**: Use `app.on()` to listen to events on *all* objects.
-3.  **Action Registry**: Register new actions via `app.registerAction()`.
-
-## Example: Soft Delete Plugin
-
-This plugin automatically handles "Soft Delete" logic:
-1.  Injects an `isDeleted` field to all objects.
-2.  Intercepts `delete` operations to perform an update instead.
-3.  Intercepts `find` operations to filter out deleted records.
+### Option A: Object Style (Simpler)
+Useful for stateless, simple logic or one-off modifications.
 
 ```typescript
-import { ObjectQLPlugin, IObjectQL } from '@objectql/types';
+const MySimplePlugin = {
+    name: 'my-simple-plugin',
+    setup(app) {
+        app.on('before:create', 'user', async (ctx) => {
+            console.log('Creating user...');
+        });
+    }
+};
+```
 
-export class SoftDeletePlugin implements ObjectQLPlugin {
-    name = 'soft-delete';
-    
-    setup(app: IObjectQL) {
-        // 1. Inject 'isDeleted' field
-        const objects = app.metadata.list('object');
-        for (const obj of objects) {
-            if (!obj.fields.isDeleted) {
-                obj.fields.isDeleted = { type: 'boolean', default: false };
-            }
-        }
+### Option B: Class Style (Recommended)
+Useful when your plugin needs to maintain internal state, configuration, or complex initialization logic.
 
-        // 2. Intercept DELETE -> UPDATE
-        app.on('before:delete', '*', async (ctx) => {
-            // Prevent actual deletion
-            ctx.preventDefault(); 
-            
-            // Execute internal update
-            // We use a custom action or system updated to bypass recursion if needed
-            await app.executeAction(ctx.objectName, 'internalUpdate', {
-                id: ctx.id,
-                isDeleted: true
+```typescript
+class MyComplexPlugin implements ObjectQLPlugin {
+    name = 'my-complex-plugin';
+    private config;
+
+    constructor(config = {}) {
+        this.config = config;
+    }
+
+    async setup(app: IObjectQL) {
+        // Access config here
+        if (this.config.enableLogging) {
+            app.on('before:*', '*', async (ctx) => {
+                console.log(`[${ctx.event}] ${ctx.objectName}`);
             });
-        });
-
-        // 3. Intercept FIND -> Filter
-        app.on('before:find', '*', async (ctx) => {
-             if (ctx.query) {
-                 ctx.query.filters = {
-                     ...(ctx.query.filters || {}),
-                     isDeleted: false
-                 }
-             }
-        });
+        }
     }
 }
 ```
 
-## Usage
+## 3. Loading Plugins
 
-Plugins can be loaded in two ways: by instance or by package name.
+Plugins are passed to the `ObjectQL` constructor via the `plugins` array. The loader is very flexible.
 
-### 1. By Instance (Local Development)
+### Method 1: Inline Instance
+Pass the plugin object or class instance directly.
 
 ```typescript
 const db = new ObjectQL({
-    connection: 'sqlite://data.db',
     plugins: [
-        new SoftDeletePlugin()
+        MySimplePlugin,          // Object
+        new MyComplexPlugin({})  // Class Instance
     ]
 });
 ```
 
-### 2. By Package Name (Distribution)
-
-If you have installed a plugin via npm (e.g. `npm install @objectql/plugin-audit`), you can simply pass its name. ObjectQL will automatically resolve and instantiate it.
+### Method 2: NPM Package (String)
+You can specify the package name as a string. ObjectQL uses `require()` (Node.js) to resolve it.
 
 ```typescript
 const db = new ObjectQL({
-    connection: 'sqlite://data.db',
     plugins: [
-        '@objectql/plugin-audit'
+        '@objectql/plugin-audit', // Searches node_modules
+        './local-plugins/my-plugin' // Relative path
     ]
 });
 ```
 
-## Creating a Plugin Package
+#### Package Resolution Rules
+When loading from a string, ObjectQL tries to find the plugin in the exported module in this order:
 
-To publish a plugin as an npm package:
+1.  **Class Constructor**: If the module exports a Class (default or module.exports), it tries to instantiation it (`new Plugin()`).
+2.  **Plugin Object**: If the module exports an object with a `setup` function, it uses it directly.
+3.  **Default Export**: If the module has a `default` export, it checks that recursively.
 
-1.  Create a project exporting your plugin class/instance as the `default` export (or named export).
-2.  Ensure it implements `ObjectQLPlugin`.
+**Example Package (`node_modules/my-plugin/index.js`):**
+```javascript
+// This works
+module.exports = class MyPlugin { ... }
 
-**index.ts**
+// This also works
+module.exports = { name: '..', setup: () => {} }
+
+// This also works (ESM/TS)
+export default class MyPlugin { ... }
+```
+
+## 4. What can Plugins do?
+
+The `setup(app)` method gives you full access to the `ObjectQL` instance.
+
+### A. Manipulate Metadata (Schema)
+Plugins have full control over the schema. You can modify existing objects or register new ones.
+
+**Example 1: Injecting a global field**
 ```typescript
-import { ObjectQLPlugin, IObjectQL } from '@objectql/types';
-
-export default class MyPlugin implements ObjectQLPlugin {
-    name = 'my-plugin';
-    setup(app: IObjectQL) {
-        // ...
+setup(app) {
+    const allObjects = app.metadata.list('object');
+    for (const obj of allObjects) {
+        // Add 'createdAt' to every object if missing
+        if (!obj.fields.createdAt) {
+            obj.fields.createdAt = { type: 'datetime' };
+        }
     }
 }
 ```
 
-Then in another project:
-```bash
-npm install my-plugin-package
-```
+**Example 2: Registering a new Object**
+Plugins can bundle their own data models (e.g. an audit log table).
+
 ```typescript
-// objectql.config.ts
-plugins: ['my-plugin-package']
+setup(app) {
+    app.registerObject({
+        name: 'audit_log',
+        fields: {
+            action: { type: 'string' },
+            userId: { type: 'string' },
+            timestamp: { type: 'datetime' }
+        }
+    });
+}
 ```
+
+**Example 3: Scanning a Directory**
+Plugins can also scan a directory to load `*.object.yml` files, just like the main application. This is useful for bundling a set of objects.
+
+```typescript
+import * as path from 'path';
+
+setup(app) {
+    // Scan the 'objects' folder inside the plugin directory
+    const objectsDir = path.join(__dirname, 'objects');
+    app.loadFromDirectory(objectsDir);
+}
+```
+
+### B. Register Global Hooks
+Listen to lifecycle events on specific objects or `*` (wildcard).
+
+```typescript
+setup(app) {
+    app.on('before:delete', '*', async (ctx) => {
+        if (ctx.objectName === 'system_log') {
+            throw new Error("Logs cannot be deleted");
+        }
+    });
+}
+```
+
+### C. Register Custom Actions
+Add new capabilities to objects.
+
+```typescript
+setup(app) {
+    // Usage: objectql.executeAction('user', 'sendEmail', { ... })
+    app.registerAction('user', 'sendEmail', async (ctx) => {
+        await emailService.send(ctx.args.to, ctx.args.body);
+    });
+}
+```
+
+### D. Custom Metadata Loaders
+Plugins can register new loaders to scan for custom file types (e.g. `*.workflow.yml`). This allows ObjectQL to act as a unified metadata engine.
+
+```typescript
+import * as yaml from 'js-yaml';
+
+setup(app) {
+    app.addLoader({
+        name: 'workflow-loader',
+        glob: ['**/*.workflow.yml'],
+        handler: (ctx) => {
+            const doc = yaml.load(ctx.content);
+            const workflowName = doc.name;
+            
+            // Register into MetadataRegistry with a custom type
+            ctx.registry.register('workflow', {
+                type: 'workflow',
+                id: workflowName,
+                path: ctx.file,
+                content: doc
+            });
+        }
+    });
+}
+```
+
+## 5. Scope Isolation
+
+
+When a plugin is loaded via **Package Name** (Method 2), ObjectQL automatically marks the hooks and actions registered by that plugin with its package name.
+
+This allows `app.removePackage('@objectql/plugin-auth')` to cleanly remove all hooks and actions associated with that plugin, without affecting others.

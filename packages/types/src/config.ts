@@ -1,10 +1,10 @@
-import { ObjectRegistry } from "./registry";
+import { MetadataRegistry } from "./registry";
 import { Driver } from "./driver";
 import { ObjectConfig } from "./object";
 import { ObjectQLPlugin } from "./plugin";
 
 export interface ObjectQLConfig {
-    registry?: ObjectRegistry;
+    registry?: MetadataRegistry;
     datasources?: Record<string, Driver>;
     /**
      * Optional connection string for auto-configuration.

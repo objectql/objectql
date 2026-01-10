@@ -1,4 +1,4 @@
-import { HookContext, HookHandler, HookName, ObjectRegistry } from '@objectql/types';
+import { HookContext, HookHandler, HookName, MetadataRegistry } from '@objectql/types';
 
 export interface HookEntry {
     objectName: string;
@@ -20,7 +20,7 @@ export function registerHookHelper(
 }
 
 export async function triggerHookHelper(
-    metadata: ObjectRegistry,
+    metadata: MetadataRegistry,
     runtimeHooks: Record<string, HookEntry[]>,
     event: HookName,
     objectName: string,

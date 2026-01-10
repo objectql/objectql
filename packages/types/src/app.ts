@@ -1,8 +1,9 @@
 import { ObjectConfig } from "./object";
 import { Driver } from "./driver";
-import { ObjectRegistry } from "./registry";
+import { MetadataRegistry } from "./registry";
 import { HookName, HookHandler, HookContext } from "./hook";
 import { ActionHandler, ActionContext } from "./action";
+import { LoaderPlugin } from "./loader";
 
 export interface IObjectQL {
     getObject(name: string): ObjectConfig | undefined;
@@ -11,7 +12,11 @@ export interface IObjectQL {
     init(): Promise<void>;
     addPackage(name: string): void;
     removePackage(name: string): void;
-    metadata: ObjectRegistry; 
+    metadata: MetadataRegistry; 
+
+    registerObject(object: ObjectConfig): void;
+    loadFromDirectory(dir: string): void;
+    addLoader(plugin: LoaderPlugin): void;
 
     on(event: HookName, objectName: string, handler: HookHandler): void;
     triggerHook(event: HookName, objectName: string, ctx: HookContext): Promise<void>;

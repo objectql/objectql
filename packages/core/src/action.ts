@@ -1,4 +1,4 @@
-import { ActionContext, ActionHandler, ObjectRegistry } from '@objectql/types';
+import { ActionContext, ActionHandler, MetadataRegistry } from '@objectql/types';
 
 export interface ActionEntry {
     handler: ActionHandler;
@@ -17,7 +17,7 @@ export function registerActionHelper(
 }
 
 export async function executeActionHelper(
-    metadata: ObjectRegistry,
+    metadata: MetadataRegistry,
     runtimeActions: Record<string, ActionEntry>,
     objectName: string,
     actionName: string,
