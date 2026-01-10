@@ -18,13 +18,6 @@ export class MetadataRegistry {
     }
 
     unregister(type: string, id: string) {
-        // Check if the metadata is customizable before allowing unregister
-        if (type === 'object') {
-            const existing = this.getEntry(type, id);
-            if (existing && !this.isObjectCustomizable(existing.content)) {
-                throw new Error(`Cannot delete system object '${id}'. This object is marked as non-customizable.`);
-            }
-        }
         this.store.get(type)?.delete(id);
     }
     
@@ -34,10 +27,6 @@ export class MetadataRegistry {
             
             for (const [id, meta] of map.entries()) {
                 if (meta.package === packageName) {
-                    // Check if the metadata is customizable before allowing unregister
-                    if (type === 'object' && !this.isObjectCustomizable(meta.content)) {
-                        throw new Error(`Cannot unregister package '${packageName}'. It contains non-customizable object '${id}'.`);
-                    }
                     entriesToDelete.push(id);
                 }
             }
