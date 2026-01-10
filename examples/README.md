@@ -1,52 +1,46 @@
-# ObjectQL Examples
+# ObjectQL Examples Gallery
 
-This directory contains example projects and demonstrations for ObjectQL.
+Welcome to the ObjectQL examples collection. This directory is organized to help you find the right starting point for your needs, from simple scripts to complex real-world applications.
 
-## Examples
+## 🚀 Starters
+*Boilerplates and minimal setups to get you coding in seconds.*
 
-### 1. Project Management (`project-management/`)
+| Example | Description | Proficiency |
+| :--- | :--- | :--- |
+| **[Basic Script](./starters/basic-script)** | A simple TypeScript script initializing ObjectQL with SQLite. Perfect for testing logic. | 🌱 Beginner |
+| **[Express API](./starters/express-api)** | A REST API server using Express.js + ObjectQL. Shows how to mount the server adapter. | ⚡️ Intermediate |
 
-A complete project management application demonstrating:
-- Object definitions with fields, relationships, and validations
-- Custom actions and lifecycle hooks
-- Data modeling best practices
+## 🧩 Plugins & Extensions
+*Learn how to extend the core capabilities of ObjectQL.*
 
-**Run:**
+| Example | Description | Proficiency |
+| :--- | :--- | :--- |
+| **[Audit Log](./plugins/audit-log)** | A fully functional plugin that tracks changes (`afterCreate`, `afterUpdate`) and stores them. | 🔧 Advanced |
+
+## 🏗 Scenarios & Patterns
+*Demonstrations of specific architectural patterns.*
+
+| Example | Description | Proficiency |
+| :--- | :--- | :--- |
+| **[Preset Usage](./scenarios/preset-usage)** | Shows how to consume pre-packaged business logic (presets) in an application. | 💡 Intermediate |
+
+## 🚧 Coming Soon
+We are working on high-fidelity examples:
+- **CRM System**: A Salesforce-like CRM with rich permission rules.
+- **E-Commerce**: High-performance catalog and order management.
+- **Next.js Integration**: Using Server Actions with ObjectQL.
+- **AI RAG Demo**: Semantic search connecting to OpenAI.
+
+---
+## How to Run
+
+Each example is a self-contained NPM package.
+
 ```bash
-cd project-management
-npm install
-npm run build
-npm start
+cd examples/starters/express-api
+pnpm install
+pnpm start
 ```
-
-### 2. Metadata Protection Demo (`metadata-protection-demo.ts`)
-
-A demonstration of ObjectQL's metadata protection feature, similar to Salesforce's approach to protecting system objects and fields.
-
-**Features demonstrated:**
-- Protecting system fields from modification
-- Validation of metadata changes
-- Better-auth integration protection
-
-**Run:**
-```bash
-npx ts-node metadata-protection-demo.ts
-```
-
-**What you'll see:**
-- System objects (like `user`) cannot be modified or deleted
-- System fields (like `createdAt`, `updatedAt`) are protected
-- Custom objects and fields can be freely modified
-- Packages containing system objects cannot be unregistered
-- Clear error messages when attempting to modify protected metadata
-
-**Use Cases:**
-- Protecting authentication system integrity
-- Preventing accidental modification of core system objects
-- Maintaining audit trail fields
-- Enforcing schema stability for critical infrastructure
-
-## Learn More
 
 - [ObjectQL Documentation](../docs/)
 - [Metadata Specification](../docs/spec/metadata-format.md)
