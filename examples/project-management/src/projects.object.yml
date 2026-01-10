@@ -1,0 +1,36 @@
+name: projects
+label: Project
+icon: building-line
+fields:
+  name:
+    type: text
+    required: true
+    label: Name
+  status:
+    type: select
+    options:
+      - planned
+      - in_progress
+      - completed
+    defaultValue: planned
+  priority:
+    type: select
+    options:
+      - low
+      - normal
+      - high
+    defaultValue: normal
+  description:
+    type: textarea
+  owner:
+    type: text
+    label: Project Owner
+  budget:
+    type: currency
+    label: Total Budget
+  start_date:
+    type: date
+    label: Start Date
+  end_date:
+    type: date
+    label: End Date

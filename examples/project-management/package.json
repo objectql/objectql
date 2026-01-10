@@ -1,0 +1,21 @@
+{
+  "name": "@example/project-management",
+  "version": "2.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && cp src/*.yml dist/",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "peerDependencies": {
+    "@objectql/core": "^1.1.0"
+  },
+  "devDependencies": {
+    "@objectql/core": "^1.1.0",
+    "typescript": "^5.3.0"
+  }
+}
