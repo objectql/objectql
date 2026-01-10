@@ -15,8 +15,7 @@ export default defineConfig({
     // Top Navigation
     nav: [
       { text: 'Guide', link: '/guide/' },
-      { text: 'Specifications', link: '/spec/' },
-      { text: 'AI Context', link: '/AI_CONTEXT' }
+      { text: 'Protocol', link: '/spec/' },
     ],
 
     // Sidebar Configuration
@@ -24,21 +23,18 @@ export default defineConfig({
       // Sidebar for Guide section
       '/guide/': [
         {
-          text: 'Essentials',
+          text: 'Developer Guide',
           items: [
             { text: 'Introduction', link: '/guide/' },
             { text: 'Quick Start', link: '/guide/getting-started' },
             { text: 'Data Modeling', link: '/guide/data-modeling' },
-            { text: 'Security Guide', link: '/guide/security-guide' },
             { text: 'Building AI Apps', link: '/guide/ai' }
           ]
         },
         {
           text: 'Server-Side Logic',
           items: [
-            { text: 'SDK Reference', link: '/guide/sdk-reference' },
             { text: 'Writing Hooks', link: '/guide/logic-hooks' },
-            { text: 'Hooks Examples', link: '/guide/logic-hooks-examples' },
             { text: 'Custom Actions', link: '/guide/logic-actions' }
           ]
         }
