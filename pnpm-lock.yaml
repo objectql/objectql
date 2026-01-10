@@ -121,30 +121,6 @@ importers:
         specifier: ^5.0.0
         version: 5.9.3
 
-  examples/http-server:
-    dependencies:
-      '@objectql/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@objectql/driver-knex':
-        specifier: ^1.1.0
-        version: 1.1.0(sqlite3@5.1.7)
-      '@objectql/server':
-        specifier: workspace:*
-        version: link:../../packages/server
-      '@objectql/types':
-        specifier: workspace:*
-        version: link:../../packages/types
-      sqlite3:
-        specifier: ^5.1.7
-        version: 5.1.7
-      ts-node:
-        specifier: ^10.0.0
-        version: 10.9.2(@types/node@20.19.28)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.0.0
-        version: 5.9.3
-
   examples/integrated-app:
     dependencies:
       '@example/audit-plugin':
@@ -178,6 +154,12 @@ importers:
       '@objectql/core':
         specifier: workspace:*
         version: link:../core
+      '@objectql/driver-knex':
+        specifier: workspace:*
+        version: link:../driver-knex
+      '@objectql/server':
+        specifier: workspace:*
+        version: link:../server
       '@objectql/types':
         specifier: workspace:*
         version: link:../types
@@ -196,6 +178,9 @@ importers:
       prettier:
         specifier: ^3.0.0
         version: 3.7.4
+      sqlite3:
+        specifier: ^5.1.7
+        version: 5.1.7
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@20.19.28)(typescript@5.9.3)
@@ -915,15 +900,6 @@ packages:
     resolution: {integrity: sha512-1SUf/Cg2GzGDyaf15aR9St9TWlb+XvbZXWpDx8YKs7MLzMH/BCeopv+y9vzrzgkfykCGuWOlSu3mZhj2+FQcrg==}
     engines: {node: '>=10'}
     deprecated: This functionality has been moved to @npmcli/fs
-
-  '@objectql/core@1.1.0':
-    resolution: {integrity: sha512-KVoxpc2RgzfzQpWGLGcCHI7yFwkq/RXaVOLg/+CuUxk4Tf+qoBzCtjx5H5+bmHb+xRnifwjsFNGTczMuaZdnFA==}
-
-  '@objectql/driver-knex@1.1.0':
-    resolution: {integrity: sha512-9LDNJhsMEdM2g9YmgrMLBLj/y3agjz5ElnnQxZZ1vR3adY45Pjbf2r+9GoeP3o/Wib8WVYCM0axAc/AUAh1pUw==}
-
-  '@objectql/metadata@0.2.0':
-    resolution: {integrity: sha512-KzdRh5cVvVc5pIorAhbJr+yLfsszXUzDG3DtVgyQ9lF7bypNLzoUO85CbbPdBQb0RLhZG8E/m/OUVYV0nZFA8w==}
 
   '@paralleldrive/cuid2@2.3.1':
     resolution: {integrity: sha512-XO7cAxhnTZl0Yggq6jOgjiOHhbgcO4NqFqwSmQpjK3b6TEE6Uj/jfSk6wzYyemh3+I0sHirKSetjQwn5cZktFw==}
@@ -4527,31 +4503,6 @@ snapshots:
       mkdirp: 1.0.4
       rimraf: 3.0.2
     optional: true
-
-  '@objectql/core@1.1.0':
-    dependencies:
-      '@objectql/metadata': 0.2.0
-      fast-glob: 3.3.3
-      js-yaml: 4.1.1
-
-  '@objectql/driver-knex@1.1.0(sqlite3@5.1.7)':
-    dependencies:
-      '@objectql/core': 1.1.0
-      knex: 3.1.0(sqlite3@5.1.7)
-    transitivePeerDependencies:
-      - better-sqlite3
-      - mysql
-      - mysql2
-      - pg
-      - pg-native
-      - sqlite3
-      - supports-color
-      - tedious
-
-  '@objectql/metadata@0.2.0':
-    dependencies:
-      fast-glob: 3.3.3
-      js-yaml: 4.1.1
 
   '@paralleldrive/cuid2@2.3.1':
     dependencies:

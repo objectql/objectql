@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { generateTypes } from './commands/generate';
 import { startRepl } from './commands/repl';
+import { serve } from './commands/serve';
 
 const program = new Command();
 
@@ -31,6 +32,16 @@ program
     .option('-c, --config <path>', 'Path to objectql.config.ts/js')
     .action(async (options) => {
         await startRepl(options.config);
+    });
+
+program
+    .command('serve')
+    .alias('s')
+    .description('Start a development server')
+    .option('-p, --port <number>', 'Port to listen on', '3000')
+    .option('-d, --dir <path>', 'Directory containing schema', '.')
+    .action(async (options) => {
+        await serve({ port: parseInt(options.port), dir: options.dir });
     });
 
 program.parse();

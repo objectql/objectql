@@ -12,6 +12,9 @@
   "dependencies": {
     "@objectql/types": "workspace:*",
     "@objectql/core": "workspace:*",
+    "@objectql/server": "workspace:*",
+    "@objectql/driver-knex": "workspace:*",
+    "sqlite3": "^5.1.7",
     "commander": "^11.0.0",
     "chalk": "^4.1.2",
     "fast-glob": "^3.3.0",

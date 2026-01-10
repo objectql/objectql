@@ -1,0 +1,6 @@
+name: User
+fields:
+  name:
+    type: string
+  email:
+    type: string
