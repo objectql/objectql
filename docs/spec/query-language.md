@@ -55,6 +55,10 @@ export interface UnifiedQuery {
   sort?: Array<[string, 'asc' | 'desc']>;
   top?: number;  // LIMIT
   skip?: number; // OFFSET
+
+  // === 5. Aggregation ===
+  groupBy?: string[];
+  aggregate?: Array<{ func: 'sum' | 'count' | 'avg' | 'min' | 'max', field: string, alias?: string }>;
 }
 ```
 
@@ -202,21 +206,33 @@ Fetching orders with complex filtering and related customer data.
 
 ```
 
-### 4.2 Aggregation Query
+### 4.2 Aggregation Query (AST)
 
-Calculating sales statistics by category.
+To perform data analysis, use `groupBy` combined with `aggregate`.
+
+**JS Object Representation:**
 
 ```javascript
 {
-  "entity": "orders",
   "groupBy": ["category"],
-  "aggregate": {
-    "amount": "sum",    // SUM(amount)
-    "id": "count",      // COUNT(id)
-    "profit": "avg"     // AVG(profit)
-  },
-  // Optional: Filter before aggregation
-  "filters": [["status", "=", "paid"]]
+  "aggregate": [
+    { "func": "sum", "field": "amount", "alias": "total_sales" },
+    { "func": "count", "field": "id", "alias": "order_count" }
+  ],
+  // Filter is applied BEFORE aggregation
+  "filters": [
+    ["status", "=", "paid"],
+    "and",
+    ["date", ">", "2024-01-01"]
+  ]
 }
-
 ```
+
+**SQL Equivalent:**
+```sql
+SELECT category, SUM(amount) as total_sales, COUNT(id) as order_count 
+FROM table 
+WHERE status = 'paid' AND date > '2024-01-01' 
+GROUP BY category
+```
+

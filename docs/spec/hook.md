@@ -15,6 +15,9 @@ Hooks allow you to execute server-side logic before or after database operations
 | `beforeDelete` | Before a record is deleted. | `id`, `query` |
 | `afterDelete` | After a record is deleted. | `id`, `result` |
 
+> **Note on Aggregation:**
+> If `query.aggregate` or `query.groupBy` is present (Aggregation Query), the `result` in `afterFind` will be an array of raw aggregation objects (e.g. `[{ total: 100, category: 'A' }]`) instead of standard object instances.
+
 ## 2. Hook Implementation
 
 ```typescript
