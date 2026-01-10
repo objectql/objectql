@@ -9,3 +9,7 @@ dist
 # VitePress 
 docs/.vitepress/cache
 docs/.vitepress/dist
+
+# Database
+*.sqlite3
+*.db
