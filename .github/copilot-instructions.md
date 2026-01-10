@@ -16,22 +16,22 @@ We use **Turborepo** + **PNPM Workspaces**.
 | --- | --- | --- | --- | --- |
 | `packages/types` | `@objectql/types` | **Universal** | **The Contract** | Pure TS Interfaces, Enums, and Error Classes. **No deps.** |
 | `packages/core` | `@objectql/core` | **Universal** | **The Engine** | Main entry point (`ObjectQL` class). Connects Drivers & Registry. |
-| `packages/driver-pg` | `@objectql/driver-pg` | **Node.js** | **The Adapter** | Postgres implementation. Depends on `knex` or `pg`. |
+| `packages/driver-knex` | `@objectql/driver-knex` | **Node.js** | **The Adapter** | SQL implementation (SQLite/Postgres/MySQL) via Knex. |
 | `packages/driver-mongo` | `@objectql/driver-mongo` | **Node.js** | **The Adapter** | MongoDB implementation. |
+| `packages/server` | `@objectql/server` | **Node.js** | **The Adapter** | HTTP Server Adapter for ObjectQL API. |
 | `packages/cli` | `@objectql/cli` | **Node.js** | **The Tools** | CLI for validation and migration. |
+| `packages/console` | `@objectql/console` | **Browser** | **The UI** | Web-based admin console for data management. |
 
 ## 3. Dependency Graph & Constraints (CRITICAL)
 
 You must strictly enforce the following dependency rules:
 
 1. **The Base:** `@objectql/types` is the bottom layer. It relies on NOTHING.
-2. **The Middle:** `@objectql/parser` depends only on `types`.
-3. **The Facade:** `@objectql/core` depends on `types` and `parser`.
-4. **The Drivers:** `@objectql/driver-*` depends on `types` (to implement interfaces).
+2. **The Facade:** `@objectql/core` depends on `types`.
+3. **The Drivers:** `@objectql/driver-*` depends on `types` (to implement interfaces) and external libs (knex, mongodb).
+4. **The Server:** `@objectql/server` depends on `core` and `types`.
 * 🔴 **FORBIDDEN:** Drivers must **NOT** depend on `core`. This prevents circular dependencies.
-* 🔴 **FORBIDDEN:** `types`, `parser`, and `core` must **NOT** import Node.js native modules (`fs`, `net`, `crypto`) to ensure browser compatibility.
-
-
+* 🔴 **FORBIDDEN:** `types` and `core` must **NOT** import Node.js native modules (`fs`, `net`, `crypto`) to ensure browser compatibility (except where polyfilled or ignored in browser builds).
 
 ## 4. Specific Package Instructions
 
@@ -44,7 +44,6 @@ You must strictly enforce the following dependency rules:
 * `enum FieldType`: `'text' | 'select' | 'lookup' ...`
 * `class ObjectQLError`: Shared error types.
 
-
 * **Rule:** Keep it extremely lightweight. No business logic.
 
 ### 📦 `packages/core` (The User Entry Point)
@@ -53,13 +52,11 @@ You must strictly enforce the following dependency rules:
 * `class ObjectQL`: The main class (similar to TypeORM `DataSource`).
 * Methods: `connect()`, `register()`, `find()`, `create()`.
 
-
 * `class SimpleRegistry`: A default in-memory implementation of `IObjectRegistry`.
-
 
 * **Role:** It orchestrates the flow. It validates the request using `SimpleRegistry` and delegates execution to the injected `driver`.
 
-### 📦 `packages/driver-*`
+### 📦 `packages/driver-*` (Knex / Mongo)
 
 * **Content:** Implementation of `ObjectQLDriver`.
 * **Role:**
@@ -67,8 +64,12 @@ You must strictly enforce the following dependency rules:
 * Execute query via underlying lib (e.g., `knex`, `mongodb`).
 * Map DB results back to ObjectQL format.
 
-
 * **Note:** Drivers should maintain their own minimal mapping of "Object Name -> Table Name".
+
+### 📦 `packages/server`
+
+* **Content:** HTTP adapter.
+* **Role:** Exposes ObjectQL operations via REST/GraphQL-like API.
 
 ## 5. Development Standards
 
