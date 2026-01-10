@@ -55,6 +55,24 @@ export async function startRepl(configPath?: string) {
             useColors: true
         });
 
+        // Enable Auto-Await for Promises
+        const defaultEval = r.eval;
+        (r as any).eval = (cmd: string, context: any, filename: string, callback: any) => {
+            defaultEval.call(r, cmd, context, filename, async (err: Error | null, result: any) => {
+                if (err) return callback(err, null);
+                if (result && typeof result.then === 'function') {
+                    try {
+                        const value = await result;
+                        callback(null, value);
+                    } catch (e: any) {
+                        callback(e, null);
+                    }
+                } else {
+                    callback(null, result);
+                }
+            });
+        };
+
         // 4. Inject Context
         r.context.app = app;
         r.context.object = (name: string) => app.getObject(name);
@@ -89,7 +107,7 @@ export async function startRepl(configPath?: string) {
         }
 
         console.log(`\nAvailable Objects: ${objects.map((o: any) => o.name).join(', ')}`);
-        console.log(`Usage: await tasks.find()`);
+        console.log(`Usage: tasks.find()  (Auto-await enabled)`);
 
     } catch (error) {
         console.error("Failed to load or start:", error);
