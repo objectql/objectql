@@ -17,6 +17,11 @@ export interface IObjectQL {
     registerObject(object: ObjectConfig): void;
     loadFromDirectory(dir: string): void;
     addLoader(plugin: LoaderPlugin): void;
+    /**
+     * Updates and persists metadata content.
+     * Only works if the metadata was loaded from a writable file source (e.g. local disk).
+     */
+    updateMetadata(type: string, id: string, content: any): Promise<void>;
 
     on(event: HookName, objectName: string, handler: HookHandler): void;
     triggerHook(event: HookName, objectName: string, ctx: HookContext): Promise<void>;

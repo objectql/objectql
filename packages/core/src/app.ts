@@ -14,6 +14,9 @@ import {
     ActionContext,
     LoaderPlugin
 } from '@objectql/types';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as yaml from 'js-yaml';
 import { ObjectLoader } from './loader';
 import { ObjectRepository } from './repository';
 import { loadPlugin } from './plugin';
@@ -104,6 +107,45 @@ export class ObjectQL implements IObjectQL {
 
     addLoader(plugin: LoaderPlugin) {
         this.loader.use(plugin);
+    }
+
+    async updateMetadata(type: string, id: string, content: any): Promise<void> {
+        // Use registry to find the entry so we can get the file path
+        const entry = this.metadata.getEntry(type, id);
+        if (!entry) {
+            throw new Error(`Metadata ${type}:${id} not found`);
+        }
+
+        if (!entry.path) {
+            throw new Error('Cannot update: Metadata source file not found (in-memory only?)');
+        }
+
+        // Check file extension
+        const ext = path.extname(entry.path).toLowerCase();
+        let newContent = '';
+
+        if (ext === '.yml' || ext === '.yaml') {
+            newContent = yaml.dump(content);
+        } else if (ext === '.json') {
+            newContent = JSON.stringify(content, null, 2);
+        } else {
+            throw new Error(`Cannot update: Unsupported file format ${ext} (only .yml, .yaml, .json supported)`);
+        }
+
+        // Write file
+        try {
+            await fs.promises.chmod(entry.path, 0o666).catch(() => {}); // Try to ensure writable
+            await fs.promises.writeFile(entry.path, newContent, 'utf8');
+        } catch (e: any) {
+            throw new Error(`Failed to write file ${entry.path}: ${e.message}`);
+        }
+
+        // Update registry in-memory
+        entry.content = content;
+        
+        // If it's an object update, we might need some re-processing? 
+        // For now, assume a restart or reload is needed for deep schema changes, 
+        // but simple property updates are reflected immediately in registry.
     }
 
     createContext(options: ObjectQLContextOptions): ObjectQLContext {

@@ -254,7 +254,13 @@ importers:
       '@objectql/types':
         specifier: workspace:*
         version: link:../types
+      js-yaml:
+        specifier: ^4.1.1
+        version: 4.1.1
     devDependencies:
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
       '@types/node':
         specifier: ^20.10.0
         version: 20.19.28
