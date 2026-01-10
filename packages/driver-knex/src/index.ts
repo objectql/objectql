@@ -1,4 +1,4 @@
-import { Driver } from '@objectql/core';
+import { Driver } from '@objectql/types';
 import knex, { Knex } from 'knex';
 
 export class KnexDriver implements Driver {

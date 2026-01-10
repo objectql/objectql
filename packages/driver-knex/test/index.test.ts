@@ -1,5 +1,5 @@
 import { KnexDriver } from '../src';
-import { UnifiedQuery } from '@objectql/core';
+import { UnifiedQuery } from '@objectql/types';
 
 describe('KnexDriver (SQLite Integration)', () => {
     let driver: KnexDriver;

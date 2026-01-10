@@ -1,13 +1,32 @@
-import { ObjectRepository } from "./repository";
-import { ObjectConfig } from "./metadata";
+import { ObjectConfig } from "./object";
 import { Driver } from "./driver";
 import { UnifiedQuery, FilterCriterion } from "./query";
 import { MetadataRegistry } from "./registry";
 
-export { ObjectConfig } from "./metadata";
+export { ObjectConfig } from "./object";
 export { MetadataRegistry } from "./registry";
 
+/**
+ * Interface for object repository like operations.
+ * Defined here for context typing, but implemented in client.
+ */
+export interface IObjectRepository {
+    find(query?: UnifiedQuery): Promise<any[]>;
+    findOne(idOrQuery: string | number | UnifiedQuery): Promise<any>;
+    count(filters: any): Promise<number>;
+    create(doc: any): Promise<any>;
+    update(id: string | number, doc: any, options?: any): Promise<any>;
+    delete(id: string | number): Promise<any>;
+    aggregate(query: any): Promise<any>;
+    distinct(field: string, filters?: any): Promise<any[]>;
+    findOneAndUpdate?(filters: any, update: any, options?: any): Promise<any>;
+    createMany(data: any[]): Promise<any>;
+    updateMany(filters: any, data: any): Promise<any>;
+    deleteMany(filters: any): Promise<any>;
+}
+
 export interface ObjectQLConfig {
+
     registry?: MetadataRegistry;
     datasources: Record<string, Driver>;
     objects?: Record<string, ObjectConfig>;
@@ -41,7 +60,7 @@ export interface ObjectQLContext {
      * Returns a repository proxy bound to this context.
      * All operations performed via this proxy inherit userId, spaceId, and transaction.
      */
-    object(entityName: string): ObjectRepository;
+    object(entityName: string): IObjectRepository;
 
     /**
      * Execute a function within a transaction.

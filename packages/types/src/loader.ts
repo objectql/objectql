@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as glob from 'fast-glob';
 import * as path from 'path';
 import { MetadataRegistry } from './registry';
-import { ObjectConfig } from './metadata';
+import { ObjectConfig } from './object';
 import * as yaml from 'js-yaml';
 
 export interface LoaderHandlerContext {

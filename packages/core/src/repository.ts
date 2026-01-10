@@ -1,7 +1,4 @@
-import { ObjectQLContext, IObjectQL } from './types';
-import { ObjectConfig, FieldConfig } from './metadata';
-import { Driver } from './driver';
-import { UnifiedQuery, FilterCriterion } from './query';
+import { ObjectQLContext, IObjectQL, ObjectConfig, Driver, UnifiedQuery } from '@objectql/types';
 
 export class ObjectRepository {
     constructor(
@@ -112,4 +109,3 @@ export class ObjectRepository {
         return driver.deleteMany(this.objectName, filters, this.getOptions());
     }
 }
-

@@ -1,19 +1,14 @@
-import * as path from 'path';
-
-export * from './metadata';
-export * from './types';
-export * from './driver';
-export * from './repository';
-export * from './query';
-export * from './registry';
-export * from './loader';
-
-import { ObjectConfig } from './metadata';
-import { ObjectQLContext, ObjectQLContextOptions, IObjectQL, ObjectQLConfig } from './types';
+import { 
+    MetadataRegistry, 
+    MetadataLoader, 
+    Driver, 
+    ObjectConfig, 
+    ObjectQLContext, 
+    ObjectQLContextOptions, 
+    IObjectQL, 
+    ObjectQLConfig 
+} from '@objectql/types';
 import { ObjectRepository } from './repository';
-import { Driver } from './driver';
-import { MetadataLoader } from './loader';
-import { MetadataRegistry } from './registry';
 
 export class ObjectQL implements IObjectQL {
     public metadata: MetadataRegistry;
@@ -134,9 +129,6 @@ export class ObjectQL implements IObjectQL {
         const objects = this.metadata.list<ObjectConfig>('object');
         
         // 1. Init Drivers (e.g. Sync Schema)
-        // We probably should pass all objects to all drivers, or split them by datasource if objects were assigned to specific DS.
-        // For now, assume all objects go to default driver or driver handles filtering if needed (but driver doesn't know mapping usually).
-        // Actually, ObjectQL currently doesn't seem to support multiple datasources per object mapping strictly yet (default is used).
         // Let's pass all objects to all configured drivers.
         for (const [name, driver] of Object.entries(this.datasources)) {
             if (driver.init) {
@@ -146,3 +138,5 @@ export class ObjectQL implements IObjectQL {
         }
     }
 }
+
+export * from './repository';

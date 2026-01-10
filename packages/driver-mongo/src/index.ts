@@ -1,4 +1,4 @@
-import { Driver } from '@objectql/core';
+import { Driver } from '@objectql/types';
 import { MongoClient, Db, Filter, ObjectId, FindOptions } from 'mongodb';
 
 export class MongoDriver implements Driver {
