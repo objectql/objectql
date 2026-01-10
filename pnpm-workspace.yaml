@@ -1,3 +1,8 @@
 packages:
-  - 'packages/*'
-  - 'examples/*'
+  - packages/*
+  - examples/*
+
+onlyBuiltDependencies:
+  - esbuild
+  - sqlite3
+  - unrs-resolver

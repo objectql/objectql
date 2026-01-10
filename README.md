@@ -48,6 +48,12 @@ It is **not** an ORM, but a high-level data protocol designed for AI agents, low
 * Built-in HTTP adapter (`@objectql/server`) to run anywhere (Node, Express, Next.js).
 * Standardized JSON API for CRUD and Actions.
 
+* **🎨 Web Console:**
+* Beautiful web-based admin interface for database management.
+* Browse objects, view data grids, perform CRUD operations.
+* Schema inspector to view object definitions and field metadata.
+* Modern, responsive design with intuitive navigation.
+
 ## 📦 Installation
 
 ```bash
@@ -112,6 +118,44 @@ const resultsMongo = await app.datasource('design').find(query);
 const resultsSql = await app.datasource('runtime').find(query);
 
 ```
+
+## 🎨 Web Console
+
+ObjectQL includes a beautiful web-based admin console for database management.
+
+![ObjectQL Console - Home](https://github.com/user-attachments/assets/c3613831-c73b-413e-bd0a-996841c072fb)
+
+### Features
+
+* **Object Browser**: View all registered objects/tables in your database
+* **Data Grid**: Browse and search records with pagination
+* **CRUD Operations**: Create, read, update, and delete records through an intuitive UI
+* **Schema Inspector**: View object definitions and field metadata
+
+![ObjectQL Console - Data Grid](https://github.com/user-attachments/assets/45812de8-4476-4ff1-90cd-bf41515157a5)
+
+### Usage
+
+```typescript
+import express from 'express';
+import { ObjectQL } from '@objectql/core';
+import { createNodeHandler, createMetadataHandler, createConsoleHandler } from '@objectql/server';
+
+const app = new ObjectQL({ /* ... */ });
+const server = express();
+
+// API endpoints
+server.all('/api/objectql', createNodeHandler(app));
+server.all('/api/metadata*', createMetadataHandler(app));
+
+// Serve console UI
+server.get('/console*', createConsoleHandler());
+
+server.listen(3004);
+// Visit http://localhost:3004/console
+```
+
+![ObjectQL Console - Schema Inspector](https://github.com/user-attachments/assets/ee5b9e77-f8c8-4a01-a933-d20d82a424cd)
 
 ## 🏗 Architecture
 
