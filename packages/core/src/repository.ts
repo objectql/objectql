@@ -122,6 +122,7 @@ export class ObjectRepository {
     }
 
     async update(id: string | number, doc: any, options?: any): Promise<any> {
+        const previousData = await this.findOne(id);
         const hookCtx: UpdateHookContext = {
             ...this.context,
             objectName: this.objectName,
@@ -130,6 +131,7 @@ export class ObjectRepository {
             api: this.getHookAPI(),
             id,
             data: doc,
+            previousData,
             isModified: (field) => hookCtx.data ? Object.prototype.hasOwnProperty.call(hookCtx.data, field) : false
         };
         await this.app.triggerHook('beforeUpdate', this.objectName, hookCtx);
@@ -142,13 +144,15 @@ export class ObjectRepository {
     }
 
     async delete(id: string | number): Promise<any> {
+        const previousData = await this.findOne(id);
         const hookCtx: MutationHookContext = {
             ...this.context,
             objectName: this.objectName,
             operation: 'delete',
             state: {},
             api: this.getHookAPI(),
-            id
+            id,
+            previousData
         };
         await this.app.triggerHook('beforeDelete', this.objectName, hookCtx);
 

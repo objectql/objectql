@@ -85,6 +85,12 @@ export interface MutationHookContext<T = any> extends BaseHookContext<T> {
      * Only available in 'after' hooks.
      */
     result?: T;
+
+    /**
+     * The existing record fetched from DB before operation.
+     * Available in 'update' and 'delete' hooks.
+     */
+    previousData?: T;
 }
 
 /**
@@ -92,13 +98,6 @@ export interface MutationHookContext<T = any> extends BaseHookContext<T> {
  */
 export interface UpdateHookContext<T = any> extends MutationHookContext<T> {
     operation: 'update';
-    
-    /** 
-     * The record state BEFORE the update.
-     * Useful for comparison logic (e.g. status changed from A to B).
-     * Note: This may require a pre-fetch lookup depending on engine configuration.
-     */
-    previousData?: T;
     
     /**
      * Helper to check if a specific field is being modified.
