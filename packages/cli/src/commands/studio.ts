@@ -180,6 +180,49 @@ export async function startStudio(options: { port: number; dir: string, open?: b
             }
         }
 
+        if (req.url?.startsWith('/api/schema/find')) {
+            const urlObj = new URL(req.url, `http://${req.headers.host}`);
+            const objectName = urlObj.searchParams.get('object');
+            
+            if (!objectName) {
+                res.statusCode = 400;
+                res.end(JSON.stringify({ error: 'Missing object parameter' }));
+                return;
+            }
+
+            try {
+                // Find all object.yml files
+                const files = await glob('**/*.object.yml', { cwd: rootDir, ignore: ['node_modules/**'] });
+                let foundFile = null;
+
+                // Naive parsing to find the object definition
+                // We don't use the FULL parser, just checks if "name: objectName" is present
+                for (const file of files) {
+                    const content = fs.readFileSync(path.join(rootDir, file), 'utf-8');
+                    // Simple check: name: <objectName> or name: "<objectName>"
+                    // This creates a regex that looks for `name:` followed by the objectName
+                    // Handles spaces, quotes
+                    const regex = new RegExp(`^\\s*name:\\s*["']?${objectName}["']?\\s*$`, 'm');
+                    if (regex.test(content)) {
+                        foundFile = file;
+                        break;
+                    }
+                }
+
+                if (foundFile) {
+                    res.setHeader('Content-Type', 'application/json');
+                    res.end(JSON.stringify({ file: foundFile }));
+                } else {
+                    res.statusCode = 404;
+                    res.end(JSON.stringify({ error: 'Object definition file not found' }));
+                }
+            } catch (e: any) {
+                res.statusCode = 500;
+                res.end(JSON.stringify({ error: e.message }));
+            }
+            return;
+        }
+
         if (req.url?.startsWith('/api/metadata')) {
             return metadataHandler(req, res);
         }

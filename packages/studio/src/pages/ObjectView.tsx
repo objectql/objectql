@@ -4,7 +4,9 @@ import { ColDef } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Plus } from 'lucide-react';
+import { RefreshCw, Plus, Table2, FileCode } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { FileEditor } from '@/components/FileEditor';
 
 interface ObjectViewProps {
     objectName: string;
@@ -14,6 +16,8 @@ export function ObjectView({ objectName }: ObjectViewProps) {
     const [rowData, setRowData] = useState<any[]>([]);
     const [columnDefs, setColumnDefs] = useState<ColDef[]>([]);
     const [loading, setLoading] = useState(false);
+    const [activeTab, setActiveTab] = useState<'data' | 'schema'>('data');
+    const [schemaFile, setSchemaFile] = useState<string | null>(null);
 
     const fetchData = async () => {
         setLoading(true);
@@ -58,9 +62,34 @@ export function ObjectView({ objectName }: ObjectViewProps) {
         }
     };
 
+    const fetchSchemaFile = async () => {
+        // If we already have the file for this object, don't re-fetch unless objectName changed
+        // But here we rely on useEffect deps
+        try {
+            const res = await fetch(`/api/schema/find?object=${objectName}`);
+            if (res.ok) {
+                const data = await res.json();
+                setSchemaFile(data.file);
+            } else {
+                setSchemaFile(null);
+                console.error('Failed to find schema file');
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
     useEffect(() => {
-        fetchData();
+        setActiveTab('data');
     }, [objectName]);
+
+    useEffect(() => {
+        if (activeTab === 'data') {
+            fetchData();
+        } else {
+            fetchSchemaFile();
+        }
+    }, [objectName, activeTab]);
 
     const defaultColDef = useMemo(() => {
         return {
@@ -71,34 +100,79 @@ export function ObjectView({ objectName }: ObjectViewProps) {
     }, []);
 
     return (
-        <div className="h-full flex flex-col space-y-4 p-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight">{objectName}</h2>
-                    <p className="text-muted-foreground">Manage {objectName} records</p>
+        <div className="flex h-full flex-col">
+            {/* Header */}
+            <div className="border-b px-6 py-4 flex items-center justify-between bg-card text-card-foreground">
+                <div className="flex flex-col gap-1">
+                    <h1 className="text-2xl font-bold tracking-tight capitalize">{objectName}</h1>
+                    <div className="flex space-x-1">
+                         <button
+                            onClick={() => setActiveTab('data')}
+                            className={cn(
+                                "flex items-center space-x-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
+                                activeTab === 'data' 
+                                    ? "bg-primary/10 text-primary" 
+                                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                            )}
+                        >
+                            <Table2 className="h-4 w-4" />
+                            <span>Data</span>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('schema')}
+                            className={cn(
+                                "flex items-center space-x-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
+                                activeTab === 'schema' 
+                                    ? "bg-primary/10 text-primary" 
+                                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                            )}
+                        >
+                            <FileCode className="h-4 w-4" />
+                            <span>Schema</span>
+                        </button>
+                    </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="icon" onClick={fetchData} disabled={loading}>
-                        <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                    </Button>
-                    <Button>
-                        <Plus className="mr-2 h-4 w-4" /> Create New
-                    </Button>
-                </div>
+                
+                {activeTab === 'data' && (
+                    <div className="flex items-center space-x-2">
+                        <Button variant="outline" size="sm" onClick={fetchData} disabled={loading}>
+                            <RefreshCw className={cn("mr-2 h-4 w-4", loading && "animate-spin")} />
+                            Refresh
+                        </Button>
+                        <Button size="sm">
+                            <Plus className="mr-2 h-4 w-4" />
+                            New Record
+                        </Button>
+                    </div>
+                )}
             </div>
 
-            <div className="flex-1 border rounded-md overflow-hidden bg-card" style={{opacity: loading ? 0.6 : 1}}>
-                {/* Ag-Grid Container */}
-                <div className="ag-theme-quartz h-full w-full">
-                    <AgGridReact
-                        rowData={rowData}
-                        columnDefs={columnDefs}
-                        defaultColDef={defaultColDef}
-                        pagination={true}
-                        paginationPageSize={20}
-                        rowSelection="multiple"
-                    />
-                </div>
+            {/* Content */}
+            <div className="flex-1 overflow-hidden p-6 bg-muted/20">
+                {activeTab === 'data' ? (
+                     <div className="border rounded-md overflow-hidden bg-card h-full" style={{opacity: loading ? 0.6 : 1}}>
+                        <div className="ag-theme-quartz h-full w-full">
+                            <AgGridReact
+                                rowData={rowData}
+                                columnDefs={columnDefs}
+                                defaultColDef={defaultColDef}
+                                pagination={true}
+                                paginationPageSize={20}
+                                rowSelection="multiple"
+                            />
+                        </div>
+                    </div>
+                ) : (
+                    <div className="h-full bg-card rounded-md border">
+                        {schemaFile ? (
+                            <FileEditor filePath={schemaFile} className="h-full border-0" />
+                        ) : (
+                            <div className="flex h-full items-center justify-center text-muted-foreground">
+                                {loading ? 'Loading schema...' : 'Could not find definition file for this object.'}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -38,7 +38,7 @@ fields:
 
   start_date:
     type: date
-    label: Start Date
+    label: Start2 Date
 
   end_date:
     type: date
