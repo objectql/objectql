@@ -23,19 +23,28 @@ export default defineConfig({
       // Sidebar for Guide section
       '/guide/': [
         {
-          text: 'Developer Guide',
+          text: 'Core Concepts',
           items: [
             { text: 'Introduction', link: '/guide/' },
+            { text: 'Architecture', link: '/guide/architecture' },
             { text: 'Quick Start', link: '/guide/getting-started' },
             { text: 'Data Modeling', link: '/guide/data-modeling' },
-            { text: 'Building AI Apps', link: '/guide/ai' }
           ]
         },
         {
-          text: 'Server-Side Logic',
+          text: 'Database Drivers',
+          items: [
+            { text: 'Overview', link: '/guide/drivers/' },
+            { text: 'SQL (Knex)', link: '/guide/drivers/sql' },
+            { text: 'MongoDB', link: '/guide/drivers/mongo' },
+          ]
+        },
+        {
+          text: 'Building Apps',
           items: [
             { text: 'Writing Hooks', link: '/guide/logic-hooks' },
-            { text: 'Custom Actions', link: '/guide/logic-actions' }
+            { text: 'Custom Actions', link: '/guide/logic-actions' },
+            { text: 'Building AI Apps', link: '/guide/ai' }
           ]
         }
       ],
