@@ -1,13 +1,13 @@
 import * as fs from 'fs';
 import * as glob from 'fast-glob';
 import * as path from 'path';
-import { MetadataRegistry, ObjectConfig } from '@objectql/types';
+import { ObjectRegistry, ObjectConfig } from '@objectql/types';
 import * as yaml from 'js-yaml';
 
 export interface LoaderHandlerContext {
     file: string;
     content: string;
-    registry: MetadataRegistry;
+    registry: ObjectRegistry;
     packageName?: string;
 }
 
@@ -20,10 +20,10 @@ export interface LoaderPlugin {
     options?: any;
 }
 
-export class MetadataLoader {
+export class ObjectLoader {
     private plugins: LoaderPlugin[] = [];
 
-    constructor(protected registry: MetadataRegistry) {
+    constructor(protected registry: ObjectRegistry) {
         this.registerBuiltinPlugins();
     }
 
@@ -174,7 +174,7 @@ export class MetadataLoader {
     }
 }
 
-function registerObject(registry: MetadataRegistry, obj: any, file: string, packageName?: string) {
+function registerObject(registry: ObjectRegistry, obj: any, file: string, packageName?: string) {
     // Normalize fields
     if (obj.fields) {
         for (const [key, field] of Object.entries(obj.fields)) {
@@ -195,8 +195,8 @@ function registerObject(registry: MetadataRegistry, obj: any, file: string, pack
 }
 
 export function loadObjectConfigs(dir: string): Record<string, ObjectConfig> {
-    const registry = new MetadataRegistry();
-    const loader = new MetadataLoader(registry);
+    const registry = new ObjectRegistry();
+    const loader = new ObjectLoader(registry);
     loader.load(dir);
     const result: Record<string, ObjectConfig> = {};
     for (const obj of registry.list<ObjectConfig>('object')) {

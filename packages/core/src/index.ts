@@ -1,5 +1,5 @@
 import { 
-    MetadataRegistry, 
+    ObjectRegistry, 
     Driver, 
     ObjectConfig, 
     ObjectQLContext, 
@@ -13,21 +13,21 @@ import {
     ActionHandler,
     ActionContext
 } from '@objectql/types';
-import { MetadataLoader } from './loader';
+import { ObjectLoader } from './loader';
 export * from './loader';
 import { ObjectRepository } from './repository';
 
 export class ObjectQL implements IObjectQL {
-    public metadata: MetadataRegistry;
-    private loader: MetadataLoader;
+    public metadata: ObjectRegistry;
+    private loader: ObjectLoader;
     private datasources: Record<string, Driver> = {};
-    private hooks: Record<string, Array<{ objectName: string, handler: HookHandler }>> = {};
-    private actions: Record<string, ActionHandler> = {};
+    private hooks: Record<string, Array<{ objectName: string, handler: HookHandler, packageName?: string }>> = {};
+    private actions: Record<string, { handler: ActionHandler, packageName?: string }> = {};
     private pluginsList: ObjectQLPlugin[] = [];
 
     constructor(config: ObjectQLConfig) {
-        this.metadata = config.registry || new MetadataRegistry();
-        this.loader = new MetadataLoader(this.metadata);
+        this.metadata = config.registry || new ObjectRegistry();
+        this.loader = new ObjectLoader(this.metadata);
         this.datasources = config.datasources || {};
         
         if (config.connection) {
@@ -116,6 +116,7 @@ export class ObjectQL implements IObjectQL {
         }
 
         if (instance) {
+            (instance as any)._packageName = packageName;
             this.use(instance);
         } else {
             console.error(`[PluginLoader] Failed to find ObjectQLPlugin in '${packageName}'. Exports:`, Object.keys(mod));
@@ -133,16 +134,35 @@ export class ObjectQL implements IObjectQL {
 
     removePackage(name: string) {
         this.metadata.unregisterPackage(name);
+        
+        // Remove hooks
+        for (const event of Object.keys(this.hooks)) {
+            this.hooks[event] = this.hooks[event].filter(h => h.packageName !== name);
+        }
+        
+        // Remove actions
+        for (const key of Object.keys(this.actions)) {
+            if (this.actions[key].packageName === name) {
+                delete this.actions[key];
+            }
+        }
     }
 
-    on(event: HookName, objectName: string, handler: HookHandler) {
+    on(event: HookName, objectName: string, handler: HookHandler, packageName?: string) {
         if (!this.hooks[event]) {
             this.hooks[event] = [];
         }
-        this.hooks[event].push({ objectName, handler });
+        this.hooks[event].push({ objectName, handler, packageName });
     }
 
     async triggerHook(event: HookName, objectName: string, ctx: HookContext) {
+        // 1. Registry Hooks (File-based)
+        const fileHooks = this.metadata.get<any>('hook', objectName);
+        if (fileHooks && typeof fileHooks[event] === 'function') {
+            await fileHooks[event](ctx);
+        }
+
+        // 2. Programmatic Hooks
         const hooks = this.hooks[event] || [];
         for (const hook of hooks) {
             if (hook.objectName === '*' || hook.objectName === objectName) {
@@ -151,18 +171,26 @@ export class ObjectQL implements IObjectQL {
         }
     }
 
-    registerAction(objectName: string, actionName: string, handler: ActionHandler) {
+    registerAction(objectName: string, actionName: string, handler: ActionHandler, packageName?: string) {
         const key = `${objectName}:${actionName}`;
-        this.actions[key] = handler;
+        this.actions[key] = { handler, packageName };
     }
 
     async executeAction(objectName: string, actionName: string, ctx: ActionContext) {
+        // 1. Programmatic
         const key = `${objectName}:${actionName}`;
-        const handler = this.actions[key];
-        if (!handler) {
-            throw new Error(`Action '${actionName}' not found for object '${objectName}'`);
+        const actionEntry = this.actions[key];
+        if (actionEntry) {
+            return await actionEntry.handler(ctx);
         }
-        return await handler(ctx);
+
+        // 2. Registry (File-based)
+        const fileActions = this.metadata.get<any>('action', objectName);
+        if (fileActions && typeof fileActions[actionName] === 'function') {
+            return await fileActions[actionName](ctx);
+        }
+
+        throw new Error(`Action '${actionName}' not found for object '${objectName}'`);
     }
 
     loadFromDirectory(dir: string, packageName?: string) {
@@ -229,6 +257,10 @@ export class ObjectQL implements IObjectQL {
         });
     }
 
+    unregisterObject(name: string) {
+        this.metadata.unregister('object', name);
+    }
+
     getObject(name: string): ObjectConfig | undefined {
         return this.metadata.get<ObjectConfig>('object', name);
     }
@@ -254,7 +286,28 @@ export class ObjectQL implements IObjectQL {
         // 0. Init Plugins
         for (const plugin of this.pluginsList) {
             console.log(`Initializing plugin '${plugin.name}'...`);
-            await plugin.setup(this);
+            
+            let app: IObjectQL = this;
+            const pkgName = (plugin as any)._packageName;
+
+            if (pkgName) {
+                app = new Proxy(this, {
+                    get(target, prop) {
+                        if (prop === 'on') {
+                            return (event: HookName, obj: string, handler: HookHandler) => 
+                                target.on(event, obj, handler, pkgName);
+                        }
+                        if (prop === 'registerAction') {
+                            return (obj: string, act: string, handler: ActionHandler) => 
+                                target.registerAction(obj, act, handler, pkgName);
+                        }
+                        const value = (target as any)[prop];
+                        return typeof value === 'function' ? value.bind(target) : value;
+                    }
+                });
+            }
+
+            await plugin.setup(app);
         }
 
         const objects = this.metadata.list<ObjectConfig>('object');

@@ -1,12 +1,12 @@
 import { ObjectConfig } from "./object";
 import { Driver } from "./driver";
 import { UnifiedQuery, FilterCriterion } from "./query";
-import { MetadataRegistry } from "./registry";
+import { ObjectRegistry } from "./registry";
 import { HookName, HookHandler, HookContext } from "./hook";
 import { ActionHandler, ActionContext } from "./action";
 
 export { ObjectConfig } from "./object";
-export { MetadataRegistry } from "./registry";
+export { ObjectRegistry } from "./registry";
 export * from "./hook";
 export * from "./action";
 
@@ -32,7 +32,7 @@ export interface ObjectQLPlugin {
 }
 
 export interface ObjectQLConfig {
-    registry?: MetadataRegistry;
+    registry?: ObjectRegistry;
     datasources?: Record<string, Driver>;
     /**
      * Optional connection string for auto-configuration.
@@ -66,7 +66,7 @@ export interface IObjectQL {
     init(): Promise<void>;
     addPackage(name: string): void;
     removePackage(name: string): void;
-    metadata: MetadataRegistry; 
+    metadata: ObjectRegistry; 
 
     on(event: HookName, objectName: string, handler: HookHandler): void;
     triggerHook(event: HookName, objectName: string, ctx: HookContext): Promise<void>;
