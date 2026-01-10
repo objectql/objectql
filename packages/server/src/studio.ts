@@ -6,18 +6,31 @@ import * as path from 'path';
  * Creates a handler to serve the Studio UI static files.
  */
 export function createStudioHandler() {
-    // Try to find the built studio files
-    const possiblePaths = [
-        path.join(__dirname, '../../studio/dist'),
-        path.join(process.cwd(), 'node_modules/@objectql/studio/dist'),
-        path.join(process.cwd(), 'packages/studio/dist'),
-    ];
-    
     let distPath: string | null = null;
-    for (const p of possiblePaths) {
-        if (fs.existsSync(p)) {
-            distPath = p;
-            break;
+
+    // 1. Try to resolve from installed package (Standard way)
+    try {
+        const studioPkg = require.resolve('@objectql/studio/package.json');
+        const candidate = path.join(path.dirname(studioPkg), 'dist');
+        if (fs.existsSync(candidate)) {
+            distPath = candidate;
+        }
+    } catch (e) {
+        // @objectql/studio might not be installed
+    }
+
+    // 2. Fallback for local development (Monorepo)
+    if (!distPath) {
+        const possiblePaths = [
+            path.join(__dirname, '../../studio/dist'),
+            path.join(process.cwd(), 'packages/studio/dist'),
+        ];
+        
+        for (const p of possiblePaths) {
+            if (fs.existsSync(p)) {
+                distPath = p;
+                break;
+            }
         }
     }
     
