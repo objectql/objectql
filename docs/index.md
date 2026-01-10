@@ -14,7 +14,7 @@ hero:
       link: /guide/getting-started
     - theme: alt
       text: AI Integration
-      link: /guide/ai-coding
+      link: /ai/
 
 features:
   - icon: 🤖
@@ -51,5 +51,5 @@ Traditional ORMs (Sequelize, TypeORM, Prisma) were designed for humans to write 
 ## Get Started
 
 *   **[Installation & Hello World](/guide/getting-started)**: Build your first API in 5 minutes.
-*   **[Building AI Apps](/guide/ai)**: Learn how to connect GPT-4 to your database safely.
+*   **[Building AI Apps](/ai/building-apps)**: Learn how to connect GPT-4 to your database safely.
 *   **[Core Concepts](/guide/data-modeling)**: Define Objects, Fields, and Relationships.

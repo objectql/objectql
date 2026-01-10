@@ -15,11 +15,24 @@ export default defineConfig({
     // Top Navigation
     nav: [
       { text: 'Guide', link: '/guide/' },
+      { text: 'AI', link: '/ai/' },
       { text: 'Protocol', link: '/spec/' },
     ],
 
     // Sidebar Configuration
     sidebar: {
+      // Sidebar for AI section
+      '/ai/': [
+         {
+           text: 'AI Integration',
+           items: [
+             { text: 'Overview', link: '/ai/' },
+             { text: 'Building AI Apps', link: '/ai/building-apps' },
+             { text: 'AI Coding Assistant', link: '/ai/coding-assistant' },
+           ]
+         }
+      ],
+
       // Sidebar for Guide section
       '/guide/': [
         {
@@ -46,8 +59,6 @@ export default defineConfig({
             { text: 'Writing Hooks', link: '/guide/logic-hooks' },
             { text: 'Custom Actions', link: '/guide/logic-actions' },
             { text: 'Plugin System', link: '/guide/plugins' },
-            { text: 'Building AI Apps', link: '/guide/ai' },
-            { text: 'AI Coding Assistant', link: '/guide/ai-coding' },
             { text: 'CLI Tools', link: '/guide/cli' }
           ]
         }
