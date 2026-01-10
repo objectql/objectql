@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
 import { Sidebar } from '@/components/Sidebar';
 import { Dashboard } from '@/pages/Dashboard';
 import { ObjectView } from '@/pages/ObjectView';
+import { SchemaEditor } from '@/pages/SchemaEditor';
 import './index.css';
 
 // Wrapper to extract params
@@ -19,6 +20,7 @@ function App() {
         <main className="flex-1 overflow-auto bg-muted/20">
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/schema" element={<SchemaEditor />} />
             <Route path="/object/:name" element={<ObjectViewWrapper />} />
           </Routes>
         </main>

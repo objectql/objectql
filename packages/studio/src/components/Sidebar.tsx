@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useMetadata } from '@/hooks/use-metadata';
-import { Database, Home, Loader2, Table2 } from 'lucide-react';
+import { Database, Home, Loader2, Table2, FileCode, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function Sidebar() {
@@ -26,6 +26,33 @@ export function Sidebar() {
                         <Home className="h-4 w-4" />
                         <span>Dashboard</span>
                     </NavLink>
+
+                    <div className="pt-4 px-4 pb-2">
+                        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                            Development
+                        </h4>
+                    </div>
+
+                    <NavLink 
+                        to="/schema" 
+                        className={({isActive}) => cn(
+                            "flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                            isActive && "bg-accent/50 text-accent-foreground"
+                        )}
+                    >
+                        <FileCode className="h-4 w-4" />
+                        <span>Schema Editor</span>
+                    </NavLink>
+
+                    <a
+                        href="/swagger" 
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+                    >
+                        <BookOpen className="h-4 w-4" />
+                        <span>API Docs</span>
+                    </a>
 
                     <div className="pt-4 px-4 pb-2">
                         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">

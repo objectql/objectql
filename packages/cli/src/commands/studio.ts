@@ -6,6 +6,34 @@ import * as fs from 'fs';
 import chalk from 'chalk';
 import { exec } from 'child_process';
 import { register } from 'ts-node';
+import glob from 'fast-glob';
+
+const SWAGGER_HTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ObjectQL Swagger UI</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css" />
+  <style>
+    body { margin: 0; padding: 0; }
+  </style>
+</head>
+<body>
+<div id="swagger-ui"></div>
+<script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js" crossorigin></script>
+<script>
+  window.onload = () => {
+    window.ui = SwaggerUIBundle({
+      url: '/openapi.json',
+      dom_id: '#swagger-ui',
+    });
+  };
+</script>
+</body>
+</html>
+`;
 
 function openBrowser(url: string) {
     const start = (process.platform == 'darwin' ? 'open' : process.platform == 'win32' ? 'start' : 'xdg-open');
@@ -74,9 +102,82 @@ export async function startStudio(options: { port: number; dir: string, open?: b
             return;
         }
 
+        if (req.url === '/openapi.json') {
+            return nodeHandler(req, res);
+        }
+
+        if (req.url === '/swagger') {
+            res.writeHead(200, { 'Content-Type': 'text/html' });
+            res.end(SWAGGER_HTML);
+            return;
+        }
+
         // Routing
         if (req.url?.startsWith('/studio')) {
             return studioHandler(req, res);
+        }
+
+        if (req.url?.startsWith('/api/schema/files')) {
+            // List all .object.yml files
+            try {
+                // Find all object.yml files relative to rootDir
+                // Note: User might have configured objectql with specific source paths. 
+                // Ideally we should ask app where it loaded files from, but scanning rootDir is a good fallback for simple projects.
+                const files = await glob('**/*.object.yml', { cwd: rootDir, ignore: ['node_modules/**'] });
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ files }));
+            } catch (e: any) {
+                res.statusCode = 500;
+                res.end(JSON.stringify({ error: e.message }));
+            }
+            return;
+        }
+
+        if (req.url?.startsWith('/api/schema/content')) {
+            const urlObj = new URL(req.url, `http://${req.headers.host}`);
+            const file = urlObj.searchParams.get('file');
+
+            if (!file) {
+                res.statusCode = 400;
+                res.end(JSON.stringify({ error: 'Missing file parameter' }));
+                return;
+            }
+
+            const filePath = path.join(rootDir, file);
+            // Security check
+            if (!filePath.startsWith(rootDir)) {
+                res.statusCode = 403;
+                res.end(JSON.stringify({ error: 'Access denied' }));
+                return;
+            }
+
+            if (req.method === 'GET') {
+                try {
+                    const content = fs.readFileSync(filePath, 'utf-8');
+                    res.setHeader('Content-Type', 'text/plain'); // Plain text (YAML)
+                    res.end(content);
+                } catch (e) {
+                    res.statusCode = 404;
+                    res.end(JSON.stringify({ error: 'File not found' }));
+                }
+                return;
+            }
+
+            if (req.method === 'POST') {
+                let body = '';
+                req.on('data', chunk => body += chunk);
+                req.on('end', () => {
+                   try {
+                       fs.writeFileSync(filePath, body, 'utf-8');
+                       res.statusCode = 200;
+                       res.end(JSON.stringify({ success: true }));
+                   } catch (e: any) {
+                       res.statusCode = 500;
+                       res.end(JSON.stringify({ error: e.message }));
+                   }
+                });
+                return;
+            }
         }
 
         if (req.url?.startsWith('/api/metadata')) {
