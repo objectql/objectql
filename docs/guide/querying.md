@@ -153,6 +153,41 @@ app.object('project').find({
 })
 ```
 
+## Aggregation
+
+ObjectQL supports SQL-like aggregation via the `aggregate()` method on the repository.
+
+```typescript
+const stats = await app.object('order').aggregate({
+    // 1. Filter first
+    filters: [['status', '=', 'paid']],
+    
+    // 2. Group by specific fields
+    groupBy: ['customer_id'],
+    
+    // 3. Define aggregate functions
+    aggregate: [
+        { func: 'sum', field: 'total', alias: 'total_revenue' },
+        { func: 'count', field: 'id', alias: 'order_count' },
+        { func: 'max', field: 'created_at', alias: 'last_order_date' }
+    ]
+});
+
+/* Result:
+[
+    { customer_id: "101", total_revenue: 5000, order_count: 3, last_order_date: "2023-12-01..." },
+    { customer_id: "102", total_revenue: 1200, order_count: 1, last_order_date: "2023-11-15..." }
+]
+*/
+```
+
+### Supported Functions
+*   `count`
+*   `sum`
+*   `avg`
+*   `min`
+*   `max`
+
 ## Why JSON?
 
 1.  **Transportable**: The query IS the HTTP request body. No translation needed.

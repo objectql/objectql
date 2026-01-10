@@ -181,6 +181,51 @@ export class KnexDriver implements Driver {
     async rollbackTransaction(trx: Knex.Transaction): Promise<void> {
         await trx.rollback();
     }
+
+    // Aggregation
+    async aggregate(objectName: string, query: any, options?: any): Promise<any> {
+        const builder = this.getBuilder(objectName, options);
+        
+        // 1. Filter
+        if (query.filters) {
+            this.applyFilters(builder, query.filters);
+        }
+
+        // 2. GroupBy
+        if (query.groupBy) {
+            builder.groupBy(query.groupBy);
+            // Select grouping keys
+            for (const field of query.groupBy) {
+                builder.select(field);
+            }
+        }
+
+        // 3. Aggregate Functions
+        if (query.aggregate) {
+            for (const agg of query.aggregate) {
+                // func: 'sum', field: 'amount', alias: 'total'
+                const rawFunc = this.mapAggregateFunc(agg.func); 
+                if (agg.alias) {
+                    builder.select(this.knex.raw(`${rawFunc}(??) as ??`, [agg.field, agg.alias]));
+                } else {
+                    builder.select(this.knex.raw(`${rawFunc}(??)`, [agg.field]));
+                }
+            }
+        }
+
+        return await builder;
+    }
+
+    private mapAggregateFunc(func: string) {
+        switch(func) {
+            case 'count': return 'count';
+            case 'sum': return 'sum';
+            case 'avg': return 'avg';
+            case 'min': return 'min';
+            case 'max': return 'max';
+            default: throw new Error(`Unsupported aggregate function: ${func}`);
+        }
+    }
     
     // Bulk
     async createMany(objectName: string, data: any[], options?: any): Promise<any> {
