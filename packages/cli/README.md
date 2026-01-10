@@ -33,8 +33,9 @@ objectql serve --dir ./src/schema --port 8080
 ```
 
 The server exposes:
+*   **Web Console (Swagger UI)**: `http://localhost:<port>/swagger` (GET) - Interactive API explorer.
 *   **JSON API Endpoint**: `http://localhost:<port>/` (POST)
-*   **OpenAPI Spec**: `http://localhost:<port>/openapi.json` (GET) - Import this into Postman or Swagger UI.
+*   **OpenAPI Spec**: `http://localhost:<port>/openapi.json` (GET)
 
 ### `repl` (alias: `r`)
 

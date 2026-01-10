@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
+    "serve": "objectql serve",
     "repl": "objectql repl"
   },
   "dependencies": {
