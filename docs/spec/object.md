@@ -187,4 +187,61 @@ fields:
     index: true      # Creates a vector index (IVFFlat / HNSW)
 ```
 
+## 5. Internationalization (i18n)
+
+ObjectQL is built to support creating global applications. The philosophy is to **keep the core schema clean** and manage translations separately.
+
+### 5.1 Metadata Translation (UI)
+
+All user-facing text defined in `*.object.yml` (Object Labels, Field Labels, Help Text, Select Options) should be translated via external JSON files. This separation allows AI agents to translate the entire UI in one go without touching the schema logic.
+
+**Directory Structure:**
+```
+src/
+  objects/
+    project.object.yml  # Source of Truth (Default Language, usually English)
+  i18n/
+    zh-CN/
+      project.json      # Chinese Translation
+    es-ES/
+      project.json      # Spanish Translation
+```
+
+**Translation File Format (`project.json`):**
+The structure mirrors the object definition but only contains translatable strings.
+
+```json
+{
+  "label": "项目",
+  "description": "项目管理核心对象",
+  "fields": {
+    "status": {
+      "label": "状态",
+      "help_text": "项目的当前进展阶段",
+      "options": {
+        "planned": "计划中",
+        "in_progress": "进行中",
+        "completed": "已完成"
+      }
+    }
+  },
+  "actions": {
+    "approve": {
+      "label": "审批",
+      "confirm_text": "确认审批通过吗？"
+    }
+  }
+}
+```
+
+### 5.2 Data Content
+
+ObjectQL does **not** enforce a specific "multi-language column" format (like JSON fields) in the core spec, as this often complicates indexing and reporting.
+
+Recommended strategies for content translation:
+1.  **Separate Record Strategy**: Store different language versions as separate records with a `locale` field and a `master_id`.
+2.  **Translation Tables**: Use a standard relational design (e.g., `Product` -> `ProductTranslation`).
+
+
+
 
