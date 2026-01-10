@@ -1,57 +1,131 @@
+import * as fs from 'fs';
+import * as glob from 'fast-glob';
+import * as path from 'path';
 import { MetadataRegistry } from './registry';
-import { ObjectConfig } from './types';
-import { MetadataLoader as BaseLoader, registerObjectQLPlugins } from '@objectql/metadata';
+import { ObjectConfig } from './metadata';
 import * as yaml from 'js-yaml';
 
-export class MetadataLoader extends BaseLoader {
-    constructor(registry: MetadataRegistry) {
-        super(registry);
-        registerObjectQLPlugins(this);
-        
-        // Register Security Plugins
+export interface LoaderHandlerContext {
+    file: string;
+    content: string;
+    registry: MetadataRegistry;
+    packageName?: string;
+}
+
+export type LoaderHandler = (ctx: LoaderHandlerContext) => void;
+
+export interface LoaderPlugin {
+    name: string;
+    glob: string[];
+    handler: LoaderHandler;
+    options?: any;
+}
+
+export class MetadataLoader {
+    private plugins: LoaderPlugin[] = [];
+
+    constructor(protected registry: MetadataRegistry) {
+        this.registerBuiltinPlugins();
+    }
+
+    private registerBuiltinPlugins() {
+        // Objects
         this.use({
-            name: 'policy',
-            glob: ['**/*.policy.yml', '**/*.policy.yaml'],
+            name: 'object',
+            glob: ['**/*.object.yml', '**/*.object.yaml'],
             handler: (ctx) => {
-                if (ctx.content) {
-                    try {
-                        const content = yaml.load(ctx.content) as any;
-                        if (content && content.name) {
-                            ctx.registry.register('policy', {
-                                type: 'policy',
-                                id: content.name,
-                                content: content
-                            });
+                try {
+                    const doc = yaml.load(ctx.content) as any;
+                    if (!doc) return;
+
+                    if (doc.name && doc.fields) {
+                        registerObject(ctx.registry, doc, ctx.file, ctx.packageName || ctx.registry.getEntry('package-map', ctx.file)?.package);
+                    } else {
+                        for (const [key, value] of Object.entries(doc)) {
+                            if (typeof value === 'object' && (value as any).fields) {
+                                const obj = value as any;
+                                if (!obj.name) obj.name = key;
+                                registerObject(ctx.registry, obj, ctx.file, ctx.packageName);
+                            }
                         }
-                    } catch (e) {
-                            console.error(`Error loading policy ${ctx.file}`, e);
                     }
-                }
-            }
-        });
-        
-        this.use({
-            name: 'role',
-            glob: ['**/*.role.yml', '**/*.role.yaml'],
-            handler: (ctx) => {
-                if (ctx.content) {
-                    try {
-                        const content = yaml.load(ctx.content) as any;
-                        if (content && content.name) {
-                            ctx.registry.register('role', {
-                                type: 'role',
-                                id: content.name,
-                                content: content
-                            });
-                        }
-                    } catch (e) {
-                            console.error(`Error loading role ${ctx.file}`, e);
-                    }
+                } catch (e) {
+                    console.error(`Error loading object from ${ctx.file}:`, e);
                 }
             }
         });
     }
 
+    use(plugin: LoaderPlugin) {
+        this.plugins.push(plugin);
+    }
+
+    load(dir: string, packageName?: string) {
+        for (const plugin of this.plugins) {
+            this.runPlugin(plugin, dir, packageName);
+        }
+    }
+
+    loadPackage(packageName: string) {
+        try {
+            const entryPath = require.resolve(packageName, { paths: [process.cwd()] });
+            // clean cache
+            delete require.cache[entryPath];
+            const packageDir = path.dirname(entryPath);
+            this.load(packageDir, packageName);
+        } catch (e) {
+            // fallback to directory
+            this.load(packageName, packageName);
+        }
+    }
+
+    private runPlugin(plugin: LoaderPlugin, dir: string, packageName?: string) {
+        const files = glob.sync(plugin.glob, {
+            cwd: dir,
+            absolute: true
+        });
+
+        for (const file of files) {
+            try {
+                const ctx: LoaderHandlerContext = {
+                    file,
+                    content: '',
+                    registry: this.registry,
+                    packageName
+                };
+                
+                // Pre-read for convenience
+                if (!file.match(/\.(js|ts|node)$/)) {
+                    ctx.content = fs.readFileSync(file, 'utf8');
+                }
+
+                plugin.handler(ctx);
+
+            } catch (e) {
+                console.error(`Error in loader plugin '${plugin.name}' processing ${file}:`, e);
+            }
+        }
+    }
+}
+
+function registerObject(registry: MetadataRegistry, obj: any, file: string, packageName?: string) {
+    // Normalize fields
+    if (obj.fields) {
+        for (const [key, field] of Object.entries(obj.fields)) {
+            if (typeof field === 'object' && field !== null) {
+                if (!(field as any).name) {
+                    (field as any).name = key;
+                }
+            }
+        }
+    }
+    registry.register('object', {
+        type: 'object',
+        id: obj.name,
+        path: file,
+        package: packageName,
+        content: obj
+    });
 }
 
 export function loadObjectConfigs(dir: string): Record<string, ObjectConfig> {
@@ -64,4 +138,3 @@ export function loadObjectConfigs(dir: string): Record<string, ObjectConfig> {
     }
     return result;
 }
-

@@ -119,73 +119,6 @@ export interface FieldConfig {
     customizable?: boolean;
 }
 
-/**
- * Defines a permission rule for a specific object.
- */
-export interface PolicyStatement {
-    /** Allowed actions. */
-    actions: Array<'read' | 'create' | 'update' | 'delete' | '*'>;
-    
-    /** 
-     * Row Level Security (RLS). 
-     * A set of filters automatically applied to queries.
-     */
-    filters?: any[]; // Using any[] to allow flexible filter structure for now
-
-    /**
-     * Field Level Security (FLS).
-     * List of allowed fields (Visibility). If omitted, implies all fields.
-     */
-    fields?: string[];
-
-    /**
-     * FLS Write Protection.
-     * Specific fields that are visible but NOT editable.
-     */
-    readonly_fields?: string[];
-}
-
-/**
- * A reusable policy definition.
- */
-export interface PolicyConfig {
-    name: string;
-    description?: string;
-    /** Map of Object Name to Permission Rules */
-    permissions: Record<string, PolicyStatement>;
-}
-
-/**
- * A role definition combining managed policies and inline rules.
- */
-export interface RoleConfig {
-    name: string;
-    label?: string;
-    description?: string;
-    /** Inherit permissions from these parent roles. */
-    inherits?: string[];
-    /** List of policy names to include. */
-    policies?: string[];
-    /** Map of inline permissions. */
-    permissions?: Record<string, PolicyStatement>;
-}
-
-export interface ActionConfig {
-    handler?: (ctx: any, params: any) => Promise<any>;
-    [key: string]: any;
-}
-
-export interface ObjectListeners {
-    beforeFind?: (ctx: any) => Promise<void>;
-    afterFind?: (ctx: any) => Promise<void>;
-    beforeCreate?: (ctx: any) => Promise<void>;
-    afterCreate?: (ctx: any) => Promise<void>;
-    beforeUpdate?: (ctx: any) => Promise<void>;
-    afterUpdate?: (ctx: any) => Promise<void>;
-    beforeDelete?: (ctx: any) => Promise<void>;
-    afterDelete?: (ctx: any) => Promise<void>;
-    [key: string]: any;
-}
 
 export interface ObjectConfig {
     name: string;
@@ -196,15 +129,6 @@ export interface ObjectConfig {
     
     fields: Record<string, FieldConfig>;
     
-    /** Custom Actions (RPC) defined on this object. */
-    actions?: Record<string, ActionConfig>;
-
-    /** Lifecycle hooks. */
-    listeners?: ObjectListeners;
-
-    /** Initial data to populate when system starts. */
-    data?: any[];
-    
     /**
      * Whether this object can be modified or deleted.
      * System objects (e.g., user, session, account) should be marked as non-customizable.
@@ -212,3 +136,4 @@ export interface ObjectConfig {
      */
     customizable?: boolean;
 }
+

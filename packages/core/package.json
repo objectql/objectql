@@ -8,7 +8,6 @@
     "test": "jest"
   },
   "dependencies": {
-    "@objectql/metadata": "*",
     "fast-glob": "^3.3.2",
     "js-yaml": "^4.1.1"
   }
