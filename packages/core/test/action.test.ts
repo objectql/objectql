@@ -41,7 +41,7 @@ describe('ObjectQL Actions', () => {
             expect(ctx.objectName).toBe('invoice');
             expect(ctx.actionName).toBe('pay');
             expect(ctx.id).toBe('inv-123');
-            expect(ctx.params.method).toBe('credit_card');
+            expect(ctx.input.method).toBe('credit_card');
             return { success: true, paid: true };
         });
 

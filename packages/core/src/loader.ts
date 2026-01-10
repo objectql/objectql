@@ -92,10 +92,7 @@ export class ObjectLoader {
                 
                 try {
                     const mod = require(ctx.file);
-                    // Action file exports multiple actions
-                    // export const approve = { ... };
-                    // export const reject = { ... };
-                    
+
                     const actions: Record<string, any> = {};
                     
                     for (const [key, value] of Object.entries(mod)) {
@@ -198,6 +195,16 @@ export function loadObjectConfigs(dir: string): Record<string, ObjectConfig> {
     const registry = new ObjectRegistry();
     const loader = new ObjectLoader(registry);
     loader.load(dir);
+
+    // Merge actions into objects
+    const actions = registry.list<any>('action');
+    for (const act of actions) {
+        const obj = registry.get<ObjectConfig>('object', act.id);
+        if (obj) {
+            obj.actions = act.content;
+        }
+    }
+
     const result: Record<string, ObjectConfig> = {};
     for (const obj of registry.list<ObjectConfig>('object')) {
         result[obj.name] = obj;

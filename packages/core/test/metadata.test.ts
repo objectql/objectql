@@ -1,5 +1,5 @@
 import { ObjectQL } from '../src/index';
-import { ObjectConfig } from '../src/metadata';
+import { ObjectConfig } from '@objectql/types';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';

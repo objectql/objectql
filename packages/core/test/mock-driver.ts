@@ -1,4 +1,4 @@
-import { Driver } from '../src/driver';
+import { Driver } from '@objectql/types';
 
 export class MockDriver implements Driver {
     private data: Record<string, any[]> = {};

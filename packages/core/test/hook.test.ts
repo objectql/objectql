@@ -30,7 +30,7 @@ describe('ObjectQL Hooks', () => {
         let hookTriggered = false;
         app.on('beforeFind', 'post', async (ctx) => {
             hookTriggered = true;
-            ctx.query = { ...ctx.query, filters: [['status', '=', 'published']] };
+            (ctx as any).query = { ...(ctx as any).query, filters: [['status', '=', 'published']] };
         });
 
         // Mock driver find to check query
