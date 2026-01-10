@@ -11,42 +11,25 @@ The system provides a rich interception model (AOP) to inject business logic int
 Hooks receive a structured object containing the **Session Context** and the **Operation Payload**.
 
 ```typescript
-import { UnifiedQuery, ObjectQLContext } from './CORE_TYPES';
+import { UnifiedQuery, ObjectQLContext, HookContext } from '@objectql/types';
 
-export interface HookContext<T = any> {
-  // === 1. The Session Context ===
-  // Automatically propagates userId, spaceId, and Transaction.
-  ctx: ObjectQLContext;
-
-  // === 2. Operational Info ===
-  entity: string;
-  op: 'find' | 'create' | 'update' | 'delete' | 'count' | 'aggregate';
-  
-  // === 3. Data Payload (Mutable) ===
-  // - In beforeCreate/Update: The data to be written. 
-  // - In afterCreate/Update: The result record returned from DB.
-  doc?: T;              
-
-  // === 4. Query Context (Mutable, for 'find' only) ===
-  // Complies strictly with the UnifiedQuery JSON-DSL (AST).
-  // Developers can modify 'fields', 'sort', or wrap 'filters'.
-  query?: UnifiedQuery;
-  
-  // === 5. Helpers ===
-  getPreviousDoc: () => Promise<T>;
-  
-  // AST Manipulation Utilities
-  utils: {
-    /**
-     * Safely injects a new filter criterion into the existing AST.
-     * It wraps existing filters in a new group to preserve operator precedence.
-     * * Logic: (Existing_Filters) AND (New_Filter)
-     */
-    restrict: (criterion: [string, string, any]) => void;
-  };
+export interface HookContext extends ObjectQLContext {
+    // === 1. Target Info ===
+    objectName: string;
+    
+    // === 2. Operational Data (Mutable) ===
+    query?: UnifiedQuery; // For find/count
+    doc?: any;            // For create/update
+    id?: string | number; // For update/delete/findOne
+    
+    // === 3. Result (for after* hooks) ===
+    result?: any;
+    
+    // === 4. Shared Meta ===
+    meta?: any;           // To pass data between hooks or from main context
 }
 
-export type HookFunction = (context: HookContext) => Promise<void>;
+export type HookHandler = (ctx: HookContext) => Promise<void> | void;
 ```
 
 ## 3. Registering Hooks

@@ -1,4 +1,4 @@
-import { ObjectQLContext, IObjectQL, ObjectConfig, Driver, UnifiedQuery, HookContext } from '@objectql/types';
+import { ObjectQLContext, IObjectQL, ObjectConfig, Driver, UnifiedQuery, HookContext, ActionContext } from '@objectql/types';
 
 export class ObjectRepository {
     constructor(
@@ -176,5 +176,16 @@ export class ObjectRepository {
         const driver = this.getDriver();
         if (!driver.deleteMany) throw new Error("Driver does not support deleteMany");
         return driver.deleteMany(this.objectName, filters, this.getOptions());
+    }
+
+    async execute(actionName: string, id: string | number | undefined, params: any): Promise<any> {
+        const ctx: ActionContext = {
+            ...this.context,
+            objectName: this.objectName,
+            actionName,
+            id,
+            params
+        };
+        return await this.app.executeAction(this.objectName, actionName, ctx);
     }
 }

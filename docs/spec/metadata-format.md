@@ -69,8 +69,7 @@ Object files are typically defined in YAML (or JSON) and represent a business en
 
 Files should use **Snake Case** filenames (e.g., `project_tasks.object.yml`).
 
-### 3.1 Root Properties
-
+### 3.2 Root Properties
 | Property | Type | Description |
 | :--- | :--- | :--- |
 | `name` | `string` | **Required.** Unique API name of the object. Should match filename. |
@@ -78,7 +77,7 @@ Files should use **Snake Case** filenames (e.g., `project_tasks.object.yml`).
 | `icon` | `string` | SLDS icon string (e.g., `standard:task`). |
 | `description` | `string` | Internal description of the object. |
 | `fields` | `Map` | Dictionary of field definitions. |
-| `actions` | `Map` | Dictionary of custom action definitions. |
+| `actions` | `Map` | Dictionary of custom action definitions. See Section 5. |
 | `customizable` | `boolean` | Whether this object can be modified or deleted. System objects (e.g., `user`, `session`) should be set to `false`. **Default: `true`** (if not specified, the object is customizable). |
 
 ## 4. Field Definitions
@@ -837,5 +836,32 @@ This default behavior ensures:
 1. **Backward Compatibility**: Existing objects and fields without the `customizable` property continue to work as before
 2. **Opt-in Protection**: System objects and fields must explicitly opt-in to protection by setting `customizable: false`
 3. **Safe Defaults**: User-defined metadata is customizable by default, only system metadata needs protection
+
+## 5. Action Definitions
+
+Actions are defined under the `actions` key.
+
+```yaml
+actions:
+  submit_approval:
+    label: Submit for Approval
+    icon: standard:approval
+    confirmText: Are you sure?
+    params:
+      comment:
+        type: text
+        label: Approval Comments
+```
+
+### 5.1 Properties
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `label` | `string` | Display label (e.g., for buttons). |
+| `icon` | `string` | Icon name. |
+| `description` | `string` | Help text. |
+| `confirmText` | `string` | Confirmation message before execution. |
+| `params` | `Map<string, FieldConfig>` | Input parameters schema. Same structure as Object fields. |
+
 
 
