@@ -35,7 +35,7 @@ fields:
 | `unique` | `boolean` | If `true`, enforces unique values in the database. Default: `false`. |
 | `defaultValue` | `any` | Default value if not provided during creation. |
 | `index` | `boolean` | Creates a database index for this field. |
-| `searchable` | `boolean` | Hint to include this field in global search. |
+| `searchable` | `boolean` | Enables traditional keyword-based search (e.g., exact match, SQL LIKE). |
 | `sortable` | `boolean` | Hint that this field can be used for sorting in UI. |
 | `description` | `string` | Help text or documentation for the field. |
 
