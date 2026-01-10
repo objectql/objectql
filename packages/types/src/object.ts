@@ -8,6 +8,22 @@ export interface IndexConfig {
     unique?: boolean;
 }
 
+export interface AiSearchConfig {
+    /** Enable semantic search for this object */
+    enabled: boolean;
+    /** Fields to include in the embedding generation */
+    fields: string[];
+    /** The AI model to use for embedding (e.g. 'openai/text-embedding-3-small') */
+    model?: string;
+    /** Optional: Target vector field name if manually defined */
+    target_field?: string;
+}
+
+export interface ObjectAiConfig {
+    /** Configuration for semantic search / RAG */
+    search?: AiSearchConfig;
+}
+
 export interface ObjectConfig {
     name: string;
     datasource?: string; // The name of the datasource to use
@@ -17,5 +33,7 @@ export interface ObjectConfig {
     
     fields: Record<string, FieldConfig>;
     indexes?: Record<string, IndexConfig>;
+    /** AI capabilities configuration */
+    ai?: ObjectAiConfig;
     actions?: Record<string, ActionConfig>;
 }

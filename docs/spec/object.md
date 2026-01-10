@@ -76,6 +76,7 @@ fields:
 | `auto_number` | Auto-incrementing unique identifier. | `auto_number_format` |
 | `object` | JSON object structure. | |
 | `grid` | Array of objects/rows. | |
+| `vector` | Vector embedding for AI search. | `dimension` |
 
 ### 2.3 Relationship Fields
 
@@ -142,4 +143,48 @@ indexes:
 | :--- | :--- | :--- |
 | `fields` | `string[]` | **Required.** List of field names to include in the index. |
 | `unique` | `boolean` | If `true`, requires values to be unique combination. Default: `false`. |
+
+## 4. AI & Vector Search
+
+ObjectQL supports AI-native features like semantic search and vector embeddings directly in the schema definition.
+
+### 4.1 AI Configuration
+
+You can enable semantic search and other AI capabilities using the `ai` property at the root of the file.
+
+```yaml
+# Enable Semantic Search for this object
+ai:
+  search:
+    enabled: true
+    # Fields to generate embeddings from
+    fields: [title, description, content]
+    # Optional: Specify embedding model
+    model: text-embedding-3-small
+```
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `search.enabled` | `boolean` | Enables semantic search. System will automatically manage vector storage. |
+| `search.fields` | `string[]` | List of text fields to concatenate and embed. |
+| `search.model` | `string` | Model ID (e.g. `openai/text-embedding-3-small`). Defaults to system setting. |
+| `search.target_field` | `string` | Optional. The name of a manual `vector` field to store embeddings in. |
+
+### 4.2 Vector Fields
+
+For more granular control, you can define explicit `vector` fields. This is useful if you want to store embeddings from external sources or multiple embeddings per record.
+
+```yaml
+fields:
+  # Metadata
+  title:
+    type: text
+
+  # Explicit Vector Storage
+  content_embedding:
+    type: vector
+    dimension: 1536  # Required: Dimension of the vector
+    index: true      # Creates a vector index (IVFFlat / HNSW)
+```
+
 

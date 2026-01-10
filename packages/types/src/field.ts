@@ -34,6 +34,7 @@ export type FieldType =
     | 'summary'
     | 'auto_number'
     | 'object'
+    | 'vector'
     | 'grid';
 
 /**
@@ -113,4 +114,8 @@ export interface FieldConfig {
     max_length?: number;
     /** Regular expression pattern for validation. */
     regex?: string;
+
+    // Vector properties
+    /** Dimension of the vector for 'vector' type fields. */
+    dimension?: number;
 }
