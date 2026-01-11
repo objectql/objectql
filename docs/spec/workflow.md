@@ -1,13 +1,13 @@
 # Workflow & Process Metadata
 
-Workflow metadata defines automated business processes, approvals, and state-based orchestration. Workflows coordinate actions across objects, users, and external systems.
+Workflow metadata defines automated business processes, approvals, and state-based orchestration. Workflows coordinate actions across objects, users, and external systems. They are designed to be both executable and AI-understandable with clear business intent.
 
 ## 1. Overview
 
 Workflow features include:
 
 - **Process Automation**: Auto-execute actions based on triggers
-- **Approval Processes**: Multi-step approval chains
+- **Approval Processes**: Multi-step approval chains with SLAs
 - **State Machines**: Control valid state transitions
 - **Scheduled Processes**: Time-based automation
 - **Event-Driven**: React to record changes
@@ -15,7 +15,7 @@ Workflow features include:
 
 **File Naming Convention:** `[workflow_name].workflow.yml`
 
-## 2. Root Structure
+## 2. Root Structure with AI Context
 
 ```yaml
 name: order_approval_workflow
@@ -24,77 +24,202 @@ description: Multi-level approval workflow for orders
 object: orders
 version: 1.0
 
+# AI-friendly context
+ai_context:
+  intent: "Ensure large orders are approved before processing"
+  business_process: "Orders over $1K require manager approval. Orders over $10K require director approval."
+  typical_duration: "2-5 business days"
+  sla: "Must complete within 7 days"
+  
+  # Help AI understand when this triggers
+  triggers_when:
+    - "High-value order created"
+    - "Existing order amount increased above threshold"
+  
+  # Business outcomes
+  outcomes:
+    approved: "Order proceeds to fulfillment"
+    rejected: "Order is cancelled, customer notified"
+
 # Workflow Type
 type: approval  # approval, automation, scheduled
 
-# Trigger Conditions
+# Trigger Conditions with Context
 trigger:
   event: create_or_update
+  
   conditions:
     - field: amount
       operator: ">"
       value: 1000
+      ai_context: "Only high-value orders need approval"
+    
     - field: status
       operator: "="
       value: pending_approval
+      ai_context: "Only orders awaiting approval"
 
-# Workflow Steps
+# Workflow Steps with Decision Criteria
 steps:
   - name: manager_approval
     label: Manager Approval
     type: approval
+    
+    # AI context for this step
+    ai_context:
+      intent: "Direct manager validates order details and customer standing"
+      
+      # Help AI understand approval criteria
+      decision_criteria:
+        - "Customer has good payment history"
+        - "Order amount is reasonable for customer size"
+        - "Inventory is available"
+        - "Pricing is correct"
+      
+      typical_decision_time: "1-2 business days"
+      escalation_if_no_response: "3 days"
+    
+    # SLA tracking
+    sla:
+      response_time: 2 days
+      escalation:
+        after: 3 days
+        escalate_to: role:director
+    
     assignee:
       type: field
       field: manager_id
+      ai_context: "Route to customer's account manager"
     
     actions:
       approve:
+        ai_context:
+          intent: "Manager approves, proceed to director if amount high"
+        
+        # Conditional next step
         next_step: director_approval
+        next_step_condition:
+          field: amount
+          operator: ">"
+          value: 10000
+        
+        next_step_else: complete_workflow
+        
         update_fields:
           approval_level: manager_approved
+          manager_approved_at: $now
+          manager_approved_by: $current_user
+        
+        notifications:
+          - recipient: $record.requester
+            template: manager_approved
       
       reject:
+        ai_context:
+          intent: "Manager denies order"
+          requires_reason: true
+        
         next_step: end
+        
         update_fields:
           status: rejected
           rejection_level: manager
+          rejection_reason: $input.reason
+        
+        required_input:
+          reason:
+            type: textarea
+            min_length: 20
+            label: "Reason for rejection"
+        
+        notifications:
+          - recipient: $record.requester
+            template: order_rejected
   
   - name: director_approval
     label: Director Approval
     type: approval
+    
+    ai_context:
+      intent: "Executive approval for high-value orders"
+      
+      decision_criteria:
+        - "Strategic fit with company goals"
+        - "ROI justification"
+        - "Budget availability"
+        - "Risk assessment"
+      
+      typical_decision_time: "2-3 business days"
+    
+    # Only run this step if condition met
     condition:
       field: amount
       operator: ">"
       value: 10000
+    
+    sla:
+      response_time: 3 days
+      escalation:
+        after: 4 days
+        escalate_to: role:vp
+    
     assignee:
       type: role
       role: director
+      ai_context: "Route to sales director"
     
     actions:
       approve:
-        next_step: end
+        next_step: complete_workflow
+        
         update_fields:
           status: approved
           approval_level: director_approved
+          director_approved_at: $now
       
       reject:
         next_step: end
+        
         update_fields:
           status: rejected
           rejection_level: director
+  
+  - name: complete_workflow
+    type: automated
+    label: Finalize Approval
+    
+    ai_context:
+      intent: "Automatically activate approved order"
+    
+    actions:
+      - update_fields:
+          status: approved
+          approved_at: $now
+      
+      - create_record:
+          object: fulfillment_order
+          fields:
+            order_id: $record.id
+            status: pending
+      
+      - send_notification:
+          recipients: [$record.requester, $record.sales_rep]
+          template: order_approved_ready_to_fulfill
 
-# Notifications
+# Notifications with Context
 notifications:
   - event: step_assigned
     recipients:
       - $assignee
     template: approval_request
+    ai_context: "Notify approver they have a pending decision"
   
   - event: workflow_approved
     recipients:
       - $record.requester
       - $record.manager
     template: order_approved
+    ai_context: "Notify stakeholders of successful approval"
   
   - event: workflow_rejected
     recipients:
