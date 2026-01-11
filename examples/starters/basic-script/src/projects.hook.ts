@@ -47,9 +47,7 @@ const hooks: ObjectHookDefinition<Project> = {
 
         // 5. Check for duplicate names (using API)
         if (data && data.name) {
-            const existing = await api.count('projects', { 
-                filters: [['name', '=', data.name]] 
-            });
+            const existing = await api.count('projects', [['name', '=', data.name]]);
             if (existing > 0) {
                 throw new Error(`A project named "${data.name}" already exists`);
             }

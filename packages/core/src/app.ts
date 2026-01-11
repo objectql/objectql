@@ -355,7 +355,7 @@ export class ObjectQL implements IObjectQL {
                     console.log(`Initialized record for ${objectName}`);
                 } catch (e: any) {
                     // Ignore duplicate key errors silently-ish
-                    // console.warn(`Failed to insert initial data for ${objectName}: ${e.message}`);
+                     console.warn(`Failed to insert initial data for ${objectName}: ${e.message}`);
                 }
             }
         }

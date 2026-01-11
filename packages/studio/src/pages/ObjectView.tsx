@@ -51,9 +51,11 @@ export function ObjectView({ objectName }: ObjectViewProps) {
             }
 
             // 2. Fetch Data
-            const res = await fetch(`/api/objectql/${objectName}`);
-            const data = await res.json();
-            setRowData(Array.isArray(data) ? data : []);
+            const res = await fetch(`/api/data/${objectName}`);
+            const result = await res.json();
+            // Handle both array and { data: [] } formats
+            const rows = Array.isArray(result) ? result : (result.data || []);
+            setRowData(rows);
 
         } catch (e) {
             console.error(e);
