@@ -22,7 +22,7 @@ export interface AIContext {
     intent?: string;
     natural_language?: string;
     use_case?: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 /**
