@@ -144,7 +144,7 @@ actions:
         type: textarea
         required: true
         label: Project IDs
-        help_text: "Comma-separated list of project IDs"
+        help_text: "List of project IDs"
       new_status:
         type: select
         required: true
