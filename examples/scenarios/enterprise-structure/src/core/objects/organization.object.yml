@@ -1,0 +1,78 @@
+name: organization
+label: Organization
+description: Company or organization entity
+icon: building-line
+
+fields:
+  name:
+    type: text
+    required: true
+    label: Organization Name
+    index: true
+  
+  code:
+    type: text
+    label: Organization Code
+    unique: true
+    index: true
+  
+  type:
+    type: select
+    options:
+      - enterprise
+      - department
+      - team
+    defaultValue: enterprise
+    index: true
+  
+  parent:
+    type: lookup
+    reference_to: organization
+    label: Parent Organization
+    index: true
+  
+  manager:
+    type: lookup
+    reference_to: user
+    label: Manager
+  
+  description:
+    type: textarea
+    label: Description
+  
+  logo:
+    type: image
+    label: Organization Logo
+  
+  address:
+    type: textarea
+    label: Address
+  
+  website:
+    type: url
+    label: Website
+  
+  phone:
+    type: text
+    label: Phone Number
+  
+  email:
+    type: text
+    label: Contact Email
+  
+  status:
+    type: select
+    options:
+      - active
+      - inactive
+    defaultValue: active
+    index: true
+
+indexes:
+  # For org tree queries
+  parent_type_idx:
+    fields: [parent, type]
+  
+  # For active org lookup
+  status_name_idx:
+    fields: [status, name]

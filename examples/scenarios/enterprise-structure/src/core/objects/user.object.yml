@@ -1,0 +1,78 @@
+name: user
+label: User
+description: System user with authentication and profile
+icon: user-line
+
+fields:
+  name:
+    type: text
+    required: true
+    label: Full Name
+    index: true
+  
+  email:
+    type: text
+    required: true
+    label: Email Address
+    unique: true
+    index: true
+  
+  username:
+    type: text
+    label: Username
+    unique: true
+    index: true
+  
+  mobile:
+    type: text
+    label: Mobile Phone
+  
+  avatar:
+    type: avatar
+    label: Profile Picture
+  
+  status:
+    type: select
+    options:
+      - active
+      - inactive
+      - suspended
+    defaultValue: active
+    index: true
+  
+  role:
+    type: select
+    options:
+      - admin
+      - user
+      - guest
+    defaultValue: user
+    index: true
+  
+  last_login_at:
+    type: datetime
+    label: Last Login Time
+  
+  locale:
+    type: select
+    options:
+      - en
+      - zh-CN
+      - ja
+      - es
+    defaultValue: en
+    label: Preferred Language
+  
+  timezone:
+    type: text
+    defaultValue: UTC
+    label: Timezone
+
+indexes:
+  # For query: active users sorted by name
+  status_name_idx:
+    fields: [status, name]
+  
+  # For authentication lookup
+  email_status_idx:
+    fields: [email, status]

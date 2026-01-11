@@ -1,0 +1,60 @@
+{
+  "user": {
+    "label": "User",
+    "fields": {
+      "name": "Full Name",
+      "email": "Email Address",
+      "username": "Username",
+      "mobile": "Mobile Phone",
+      "avatar": "Profile Picture",
+      "status": "Status",
+      "role": "Role",
+      "last_login_at": "Last Login Time",
+      "locale": "Preferred Language",
+      "timezone": "Timezone"
+    },
+    "options": {
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "suspended": "Suspended"
+      },
+      "role": {
+        "admin": "Administrator",
+        "user": "User",
+        "guest": "Guest"
+      }
+    }
+  },
+  "organization": {
+    "label": "Organization",
+    "fields": {
+      "name": "Organization Name",
+      "code": "Organization Code",
+      "type": "Type",
+      "parent": "Parent Organization",
+      "manager": "Manager",
+      "description": "Description",
+      "logo": "Logo",
+      "address": "Address",
+      "website": "Website",
+      "phone": "Phone Number",
+      "email": "Contact Email",
+      "status": "Status"
+    }
+  },
+  "attachment": {
+    "label": "Attachment",
+    "fields": {
+      "name": "File Name",
+      "file_url": "File URL",
+      "file_size": "File Size",
+      "file_type": "MIME Type",
+      "related_to": "Related Object",
+      "related_id": "Related Record ID",
+      "uploaded_by": "Uploaded By",
+      "description": "Description",
+      "tags": "Tags"
+    }
+  }
+}

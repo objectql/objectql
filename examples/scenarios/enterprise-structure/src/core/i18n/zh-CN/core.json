@@ -1,0 +1,60 @@
+{
+  "user": {
+    "label": "用户",
+    "fields": {
+      "name": "全名",
+      "email": "电子邮件地址",
+      "username": "用户名",
+      "mobile": "手机号码",
+      "avatar": "头像",
+      "status": "状态",
+      "role": "角色",
+      "last_login_at": "最后登录时间",
+      "locale": "首选语言",
+      "timezone": "时区"
+    },
+    "options": {
+      "status": {
+        "active": "活跃",
+        "inactive": "未活跃",
+        "suspended": "已暂停"
+      },
+      "role": {
+        "admin": "管理员",
+        "user": "用户",
+        "guest": "访客"
+      }
+    }
+  },
+  "organization": {
+    "label": "组织",
+    "fields": {
+      "name": "组织名称",
+      "code": "组织代码",
+      "type": "类型",
+      "parent": "上级组织",
+      "manager": "管理者",
+      "description": "描述",
+      "logo": "标志",
+      "address": "地址",
+      "website": "网站",
+      "phone": "电话号码",
+      "email": "联系邮箱",
+      "status": "状态"
+    }
+  },
+  "attachment": {
+    "label": "附件",
+    "fields": {
+      "name": "文件名",
+      "file_url": "文件URL",
+      "file_size": "文件大小",
+      "file_type": "MIME类型",
+      "related_to": "关联对象",
+      "related_id": "关联记录ID",
+      "uploaded_by": "上传者",
+      "description": "描述",
+      "tags": "标签"
+    }
+  }
+}
