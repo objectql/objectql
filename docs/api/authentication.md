@@ -32,11 +32,13 @@ const server = express();
 
 // Middleware to verify JWT and attach user context
 server.use('/api/objectql', async (req, res, next) => {
-  const token = req.headers.authorization?.replace('Bearer ', '');
+  const authHeader = req.headers.authorization;
   
-  if (!token) {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'No token provided' }});
   }
+  
+  const token = authHeader.substring(7); // Remove 'Bearer ' prefix
   
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -594,7 +596,10 @@ server.all('/api/objectql', createNodeHandler(app));
 server.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
   
-  // Verify credentials (example - use proper password hashing!)
+  // Verify credentials
+  // Use bcrypt or argon2 for password hashing:
+  // const bcrypt = require('bcryptjs');
+  // const match = await bcrypt.compare(password, user.password_hash);
   const user = await verifyCredentials(email, password);
   
   if (!user) {
@@ -612,6 +617,22 @@ server.post('/api/auth/login', async (req, res) => {
   
   res.json({ token, user });
 });
+
+// Example verifyCredentials function using bcrypt
+async function verifyCredentials(email: string, password: string) {
+  const bcrypt = require('bcryptjs');
+  
+  // Find user by email
+  const ctx = app.createContext({});
+  const user = await ctx.object('users').findOne({ filters: [['email', '=', email]] });
+  
+  if (!user) return null;
+  
+  // Compare password with hash
+  const match = await bcrypt.compare(password, user.password_hash);
+  
+  return match ? user : null;
+}
 
 server.listen(3000);
 ```
