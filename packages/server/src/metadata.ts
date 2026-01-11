@@ -83,7 +83,11 @@ export function createMetadataHandler(app: IObjectQL) {
                         defaultValue: field.defaultValue,
                         unique: field.unique,
                         options: field.options,
-                        validations: field.validations
+                        min: field.min,
+                        max: field.max,
+                        min_length: field.min_length,
+                        max_length: field.max_length,
+                        regex: field.regex
                     }))
                     : [];
                 
@@ -135,7 +139,11 @@ export function createMetadataHandler(app: IObjectQL) {
                     unique: field.unique,
                     defaultValue: field.defaultValue,
                     options: field.options,
-                    validations: field.validations
+                    min: field.min,
+                    max: field.max,
+                    min_length: field.min_length,
+                    max_length: field.max_length,
+                    regex: field.regex
                 }));
                 return;
             }
@@ -157,16 +165,14 @@ export function createMetadataHandler(app: IObjectQL) {
                     return;
                 }
 
-                const actions = metadata.actions || [];
-                const formattedActions = Array.isArray(actions) 
-                    ? actions.map(action => ({
-                        name: action.name,
-                        type: action.type || 'record',
-                        label: action.label || action.name,
-                        params: action.params || {},
-                        description: action.description
-                    }))
-                    : [];
+                const actions = metadata.actions || {};
+                const formattedActions = Object.entries(actions).map(([key, action]) => ({
+                    name: key,
+                    type: action.type || 'record',
+                    label: action.label || key,
+                    params: action.params || {},
+                    description: action.description
+                }));
 
                 res.setHeader('Content-Type', 'application/json');
                 res.statusCode = 200;
