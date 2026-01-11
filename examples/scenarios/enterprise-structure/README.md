@@ -1,7 +1,5 @@
 # Enterprise-Scale Metadata Organization
 
-> **English Version** | [中文版本](./README.zh-CN.md)
-
 This example demonstrates **best practices for organizing metadata** in large-scale ObjectQL projects, suitable for enterprise applications with hundreds of objects and complex business domains.
 
 ## 📋 Problem Statement
