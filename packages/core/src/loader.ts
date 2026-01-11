@@ -103,7 +103,7 @@ export class ObjectLoader {
         });
 
         // Generic YAML Metadata Loaders
-        const metaTypes = ['view', 'form', 'menu', 'permission', 'report', 'workflow', 'validation'];
+        const metaTypes = ['view', 'form', 'menu', 'permission', 'report', 'workflow', 'validation', 'data'];
         
         for (const type of metaTypes) {
             this.use({
@@ -116,13 +116,19 @@ export class ObjectLoader {
 
                         // Use 'name' from doc, or filename base (without extension)
                         let id = doc.name;
-                        if (!id) {
+                        if (!id && type !== 'data') {
                             const basename = path.basename(ctx.file); 
                             // e.g. "my-view.view.yml" -> "my-view"
                             // Regex: remove .type.yml or .type.yaml
                             const re = new RegExp(`\\.${type}\\.(yml|yaml)$`);
                             id = basename.replace(re, '');
                         }
+
+                        // Data entries might not need a name, but for registry we need an ID.
+                        // For data, we can use filename if not present.
+                         if (!id && type === 'data') {
+                            id = path.basename(ctx.file);
+                         }
 
                         // Ensure name is in the doc for consistency
                         if (!doc.name) doc.name = id;
