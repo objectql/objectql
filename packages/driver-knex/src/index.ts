@@ -91,7 +91,7 @@ export class KnexDriver implements Driver {
             this.applyFilters(builder, query.filters);
         }
 
-        if (query.sort) {
+        if (query.sort && Array.isArray(query.sort)) {
             for (const [field, dir] of query.sort) {
                 builder.orderBy(this.mapSortField(field), dir);
             }

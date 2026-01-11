@@ -56,7 +56,7 @@ export function generateOpenAPI(app: IObjectQL): OpenAPISchema {
         // GET /name (List)
         paths[`/${name}`] = {
             get: {
-                summary: `List ${name}s`,
+                summary: `List ${name}`,
                 tags: [name],
                 parameters: [
                     { name: 'filter', in: 'query', schema: { type: 'string' }, description: 'JSON filter args' }
