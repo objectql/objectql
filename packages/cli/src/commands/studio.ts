@@ -118,12 +118,13 @@ export async function startStudio(options: { port: number; dir: string, open?: b
         }
 
         if (req.url?.startsWith('/api/schema/files')) {
-            // List all .object.yml files
+            // List all metadata files
             try {
-                // Find all object.yml files relative to rootDir
+                // Find all *.*.yml files relative to rootDir
                 // Note: User might have configured objectql with specific source paths. 
                 // We ignore common build folders to avoid duplicates/editing compiled files.
-                const files = await glob('**/*.object.yml', { 
+                // We broadly match all objectql-like files: *.object.yml, *.view.yml, etc.
+                const files = await glob('**/*.{object,app,view,permission,report,validation,workflow,form,data,hook,action}.yml', { 
                     cwd: rootDir, 
                     ignore: ['node_modules/**', 'dist/**', 'build/**', 'out/**', '.git/**', '.next/**'] 
                 });

@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom';
 import { useMetadata } from '@/hooks/use-metadata';
-import { Database, Home, Loader2, Table2, FileCode, BookOpen } from 'lucide-react';
+import { Database, Home, Loader2, Table2, FileCode, BookOpen, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
 
 export function Sidebar() {
     const { objects, loading, error } = useMetadata();
@@ -32,6 +33,17 @@ export function Sidebar() {
                             Development
                         </h4>
                     </div>
+
+                    <NavLink 
+                        to="/metadata" 
+                        className={({isActive}) => cn(
+                            "flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                            isActive && "bg-accent/50 text-accent-foreground"
+                        )}
+                    >
+                        <Layers className="h-4 w-4" />
+                        <span>Metadata Explorer</span>
+                    </NavLink>
 
                     <NavLink 
                         to="/schema" 

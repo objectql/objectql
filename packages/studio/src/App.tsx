@@ -3,6 +3,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { Dashboard } from '@/pages/Dashboard';
 import { ObjectView } from '@/pages/ObjectView';
 import { SchemaEditor } from '@/pages/SchemaEditor';
+import { MetadataBrowser } from '@/pages/MetadataBrowser';
 import './index.css';
 
 // Wrapper to extract params
@@ -21,6 +22,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/schema" element={<SchemaEditor />} />
+            <Route path="/metadata" element={<MetadataBrowser />} />
             <Route path="/object/:name" element={<ObjectViewWrapper />} />
           </Routes>
         </main>
@@ -30,3 +32,4 @@ function App() {
 }
 
 export default App;
+
