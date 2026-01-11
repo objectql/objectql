@@ -75,8 +75,18 @@ export function createRESTHandler(app: IObjectQL) {
 
     return async (req: IncomingMessage & { body?: any }, res: ServerResponse) => {
         try {
-            // CORS headers for development
-            res.setHeader('Access-Control-Allow-Origin', '*');
+            // CORS headers
+            const requestOrigin = req.headers.origin;
+            const configuredOrigin = process.env.OBJECTQL_CORS_ORIGIN;
+            const isProduction = process.env.NODE_ENV === 'production';
+
+            // In development, allow all origins by default (or use configured override).
+            // In production, require an explicit OBJECTQL_CORS_ORIGIN to be set.
+            if (!isProduction) {
+                res.setHeader('Access-Control-Allow-Origin', configuredOrigin || '*');
+            } else if (configuredOrigin && (!requestOrigin || requestOrigin === configuredOrigin)) {
+                res.setHeader('Access-Control-Allow-Origin', configuredOrigin);
+            }
             res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
             res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
