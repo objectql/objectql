@@ -86,10 +86,10 @@ Define who can do what.
 
 ## 📖 Documentation Statistics
 
-- **Total Specifications**: 12 documents
-- **Total Words**: ~16,000
-- **Total Lines**: ~6,100
-- **Total Size**: ~120 KB
+- **Total Specifications**: 14 documents
+- **Total Words**: ~17,000
+- **Total Lines**: ~7,200
+- **Total Size**: ~168 KB
 - **Language**: 100% English
 - **Format**: Markdown with YAML/JSON examples
 
