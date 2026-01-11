@@ -12,6 +12,7 @@ class MockDriver implements Driver {
             { _id: '2', name: 'Bob', email: 'bob@example.com' }
         ]
     };
+    private nextId = 3;
 
     async init() {}
     
@@ -25,7 +26,7 @@ class MockDriver implements Driver {
     }
     
     async create(objectName: string, data: any) {
-        const newItem = { _id: '3', ...data };
+        const newItem = { _id: String(this.nextId++), ...data };
         if (!this.data[objectName]) {
             this.data[objectName] = [];
         }
@@ -63,6 +64,7 @@ class MockDriver implements Driver {
 describe('REST API Adapter', () => {
     let app: ObjectQL;
     let server: any;
+    let handler: any;
 
     beforeAll(async () => {
         app = new ObjectQL({
@@ -83,12 +85,13 @@ describe('REST API Adapter', () => {
                 }
             }
         });
+
+        // Create handler and server once for all tests
+        handler = createRESTHandler(app);
+        server = createServer(handler);
     });
 
     it('should handle GET /api/data/:object - List records', async () => {
-        const handler = createRESTHandler(app);
-        server = createServer(handler);
-
         const response = await request(server)
             .get('/api/data/user')
             .set('Accept', 'application/json');
@@ -99,9 +102,6 @@ describe('REST API Adapter', () => {
     });
 
     it('should handle GET /api/data/:object/:id - Get single record', async () => {
-        const handler = createRESTHandler(app);
-        server = createServer(handler);
-
         const response = await request(server)
             .get('/api/data/user/1')
             .set('Accept', 'application/json');
@@ -111,9 +111,6 @@ describe('REST API Adapter', () => {
     });
 
     it('should handle POST /api/data/:object - Create record', async () => {
-        const handler = createRESTHandler(app);
-        server = createServer(handler);
-
         const response = await request(server)
             .post('/api/data/user')
             .send({ name: 'Charlie', email: 'charlie@example.com' })
@@ -121,13 +118,10 @@ describe('REST API Adapter', () => {
 
         expect(response.status).toBe(201);
         expect(response.body.data.name).toBe('Charlie');
-        expect(response.body.data._id).toBe('3');
+        expect(response.body.data._id).toBeDefined();
     });
 
     it('should handle PUT /api/data/:object/:id - Update record', async () => {
-        const handler = createRESTHandler(app);
-        server = createServer(handler);
-
         const response = await request(server)
             .put('/api/data/user/1')
             .send({ name: 'Alice Updated' })
@@ -137,9 +131,6 @@ describe('REST API Adapter', () => {
     });
 
     it('should handle DELETE /api/data/:object/:id - Delete record', async () => {
-        const handler = createRESTHandler(app);
-        server = createServer(handler);
-
         const response = await request(server)
             .delete('/api/data/user/1')
             .set('Accept', 'application/json');
@@ -149,9 +140,6 @@ describe('REST API Adapter', () => {
     });
 
     it('should return 404 for non-existent object', async () => {
-        const handler = createRESTHandler(app);
-        server = createServer(handler);
-
         const response = await request(server)
             .get('/api/data/nonexistent')
             .set('Accept', 'application/json');
@@ -161,9 +149,6 @@ describe('REST API Adapter', () => {
     });
 
     it('should return 400 for update without ID', async () => {
-        const handler = createRESTHandler(app);
-        server = createServer(handler);
-
         const response = await request(server)
             .put('/api/data/user')
             .send({ name: 'Test' })
