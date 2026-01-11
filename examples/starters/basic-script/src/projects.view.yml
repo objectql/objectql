@@ -1,0 +1,35 @@
+name: all_projects
+label: "Active Projects"
+type: list
+object: projects
+description: "Standard list view of all active projects"
+
+config:
+  columns:
+    - field: name
+      width: 250
+    - field: status
+      width: 120
+    - field: priority
+      width: 100
+    - field: owner
+      width: 150
+    - field: budget
+      width: 120
+    - field: end_date
+      width: 120
+
+  sort:
+    - field: created_at
+      direction: desc
+
+  filters:
+    - field: status
+      operator: "!="
+      value: "archived"
+
+  actions:
+    - edit
+    - delete
+    - clone
+    - custom: approve

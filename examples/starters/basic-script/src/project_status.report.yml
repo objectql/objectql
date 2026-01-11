@@ -1,0 +1,39 @@
+name: project_status_summary
+label: "Project Status Report"
+type: summary
+object: projects
+description: "Overview of projects grouped by status and priority"
+
+# Columns to display in details
+columns:
+  - field: name
+    label: Project Name
+  - field: owner
+    label: Owner
+  - field: budget
+    label: Budget
+    format: currency
+
+# Grouping Configuration
+groupings:
+  - field: status
+    label: Status
+  
+  - field: priority
+    label: Priority
+
+# Aggregations
+aggregations:
+  - field: budget
+    function: sum
+    label: Total Budget
+  
+  - field: _id
+    function: count
+    label: Project Count
+
+# Default Filters
+filters:
+  - field: created_at
+    operator: ">="
+    value: "2024-01-01"

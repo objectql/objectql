@@ -1,0 +1,34 @@
+name: projects_permission
+object: projects
+description: "Access control rules for Project object"
+
+# Define available roles
+roles:
+  - admin
+  - manager
+  - user
+
+# Object-level permissions (CRUD)
+object_permissions:
+  create: [admin, manager]
+  read: [admin, manager, user]
+  update: [admin, manager]
+  delete: [admin]
+
+# Field-level security
+field_permissions:
+  budget:
+    read: [admin, manager]
+    update: [admin]  # Only admin can change budget
+  
+  approved_by:
+    read: [admin, manager, user]
+    update: [] # Read-only, set by system/workflow
+  
+  approved_at:
+     read: [admin, manager, user]
+     update: []
+  
+  approval_comment:
+     read: [admin, manager, user]
+     update: [admin, manager]
