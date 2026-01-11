@@ -566,7 +566,8 @@ const authenticate = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     // Fetch full user context from database if needed
-    const userContext = await app.getContext().object('users').findOne(decoded.userId);
+    const ctx = app.createContext({ userId: decoded.userId });
+    const userContext = await ctx.object('users').findOne(decoded.userId);
     
     req.user = {
       id: userContext.id,

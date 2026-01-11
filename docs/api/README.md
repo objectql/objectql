@@ -178,24 +178,10 @@ Insert a new record.
   "op": "create",
   "object": "tasks",
   "args": {
-    "data": {
-      "name": "Review PR",
-      "priority": "high",
-      "assignee_id": "user_123",
-      "due_date": "2024-01-20"
-    }
-  }
-}
-```
-
-**Note**: Alternatively, you can pass the document directly as `args` without the `data` wrapper:
-```json
-{
-  "op": "create",
-  "object": "tasks",
-  "args": {
     "name": "Review PR",
-    "priority": "high"
+    "priority": "high",
+    "assignee_id": "user_123",
+    "due_date": "2024-01-20"
   }
 }
 ```
@@ -1215,7 +1201,7 @@ for (const order of orders) {
 - **[Query Language Specification](../spec/query-language.md)** - Deep dive into filter syntax
 - **[Actions Guide](../guide/logic-actions.md)** - Building custom RPC operations
 - **[Server Integration](../guide/server-integration.md)** - Deploying ObjectQL APIs
-- **[Authentication Guide](../guide/authentication.md)** *(Coming Soon)*
+- **[Authentication Guide](./authentication.md)** - Securing your APIs
 - **[GraphQL API](./graphql.md)** *(Planned)*
 
 ---
