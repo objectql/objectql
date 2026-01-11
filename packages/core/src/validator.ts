@@ -22,9 +22,28 @@ import {
 } from '@objectql/types';
 
 /**
+ * Configuration options for the Validator.
+ */
+export interface ValidatorOptions {
+    /** Preferred language for validation messages (default: 'en') */
+    language?: string;
+    /** Fallback languages if preferred language is not available */
+    languageFallback?: string[];
+}
+
+/**
  * Validator class that executes validation rules.
  */
 export class Validator {
+    private options: ValidatorOptions;
+
+    constructor(options: ValidatorOptions = {}) {
+        this.options = {
+            language: options.language || 'en',
+            languageFallback: options.languageFallback || ['en', 'zh-CN'],
+        };
+    }
+
     /**
      * Validate a record against a set of rules.
      */
@@ -126,6 +145,9 @@ export class Validator {
 
             // Email format
             if (validation.format === 'email') {
+                // NOTE: This is a basic email validation regex. For production use,
+                // consider using a more comprehensive email validation library or regex
+                // that handles international domains, quoted strings, etc.
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(value)) {
                     results.push({
@@ -162,9 +184,10 @@ export class Validator {
                 }
             }
 
-            // Pattern validation
-            if (validation.pattern || validation.regex) {
-                const pattern = new RegExp(validation.pattern || validation.regex!);
+            // Pattern validation (supports both pattern and deprecated regex)
+            const patternValue = validation.pattern ?? validation.regex;
+            if (patternValue) {
+                const pattern = new RegExp(patternValue);
                 if (!pattern.test(String(value))) {
                     results.push({
                         rule: `${fieldName}_pattern`,
@@ -467,8 +490,21 @@ export class Validator {
     private formatMessage(message: string | Record<string, string>, context: any): string {
         // Handle i18n messages
         if (typeof message === 'object') {
-            // Default to English
-            message = message.en || message['zh-CN'] || Object.values(message)[0];
+            // Try preferred language first
+            let messageText = message[this.options.language!];
+            
+            // Try fallback languages if preferred not available
+            if (!messageText && this.options.languageFallback) {
+                for (const lang of this.options.languageFallback) {
+                    if (message[lang]) {
+                        messageText = message[lang];
+                        break;
+                    }
+                }
+            }
+            
+            // Fallback to first available message
+            message = messageText || Object.values(message)[0];
         }
 
         // Replace template variables

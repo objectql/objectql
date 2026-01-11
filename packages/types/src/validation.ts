@@ -148,8 +148,9 @@ export interface FieldValidation {
     min_length?: number;
     /** Maximum length for strings */
     max_length?: number;
-    /** Regular expression pattern */
+    /** Regular expression pattern for validation */
     pattern?: string;
+    /** @deprecated Use pattern instead */
     regex?: string;
     /** Custom validation message */
     message?: string;
