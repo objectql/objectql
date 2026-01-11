@@ -22,6 +22,7 @@ Welcome to the ObjectQL examples collection. This directory is organized to help
 
 | Example | Description | Proficiency |
 | :--- | :--- | :--- |
+| **[Enterprise Structure](./scenarios/enterprise-structure)** | **[NEW]** Best practices for organizing metadata in large-scale applications. Shows domain-driven module structure with 20+ objects across CRM, HR, Finance, and Project modules. | 🏢 Advanced |
 | **[Preset Usage](./scenarios/preset-usage)** | Shows how to consume pre-packaged business logic (presets) in an application. | 💡 Intermediate |
 
 ## 🚧 Coming Soon
