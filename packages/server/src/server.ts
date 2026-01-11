@@ -75,10 +75,14 @@ export class ObjectQLServer {
                     break;
                 case 'delete':
                     result = await repo.delete(req.args.id);
-                    if (result) {
-                        // Return standardized delete response
-                        result = { id: req.args.id, deleted: true };
+                    if (!result) {
+                        return this.errorResponse(
+                            ErrorCode.NOT_FOUND,
+                            `Record with id '${req.args.id}' not found for delete`
+                        );
                     }
+                    // Return standardized delete response on success
+                    result = { id: req.args.id, deleted: true };
                     break;
                 case 'count':
                     result = await repo.count(req.args);
