@@ -5,11 +5,6 @@ import { ObjectQL } from '@objectql/core';
 import { register } from 'ts-node';
 import chalk from 'chalk';
 
-interface TableData {
-    headers: string[];
-    rows: any[][];
-}
-
 export async function startConsole(configPath?: string) {
     const cwd = process.cwd();
     
