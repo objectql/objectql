@@ -1,20 +1,38 @@
-export * from './extensions/user';
-export * from './core/objects/attachment';
-export * from './core/objects/organization';
-export * from './core/objects/user';
-export * from './modules/crm/objects/crm_account';
-export * from './modules/crm/objects/crm_contact';
-export * from './modules/crm/objects/crm_lead';
-export * from './modules/crm/objects/crm_opportunity';
-export * from './modules/finance/objects/finance_budget';
-export * from './modules/finance/objects/finance_expense';
-export * from './modules/finance/objects/finance_invoice';
-export * from './modules/finance/objects/finance_payment';
-export * from './modules/hr/objects/hr_department';
-export * from './modules/hr/objects/hr_employee';
-export * from './modules/hr/objects/hr_position';
-export * from './modules/hr/objects/hr_timesheet';
-export * from './modules/project/objects/project_milestone';
-export * from './modules/project/objects/project_project';
-export * from './modules/project/objects/project_task';
-export * from './modules/project/objects/project_timesheet_entry';
+/**
+ * Enterprise Structure Example - Main Entry Point
+ * 
+ * This demonstrates how to organize metadata for large-scale ObjectQL applications
+ * using a modular, domain-driven structure.
+ */
+
+import { ObjectQL } from '@objectql/core';
+import { KnexDriver } from '@objectql/driver-knex';
+import path from 'path';
+
+/**
+ * Initialize ObjectQL with enterprise structure
+ */
+export async function initializeApp() {
+  const app = new ObjectQL({
+    datasources: {
+      default: new KnexDriver({
+        client: 'sqlite3',
+        connection: {
+          filename: ':memory:'
+        }
+      })
+    },
+    // Load metadata from current directory
+    source: __dirname
+  });
+
+  await app.init();
+  return app;
+}
+
+if (require.main === module) {
+  initializeApp().then(async (app) => {
+    console.log('Enterprise structure example started!');
+    console.log('Loaded objects:', Object.keys(app.getConfigs()).length);
+  }).catch(console.error);
+}
