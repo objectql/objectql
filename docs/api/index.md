@@ -85,11 +85,9 @@ curl -X POST http://localhost:3000/api/objectql \
     "op": "create",
     "object": "tasks",
     "args": {
-      "data": {
-        "name": "Complete documentation",
-        "priority": "high",
-        "due_date": "2024-01-20"
-      }
+      "name": "Complete documentation",
+      "priority": "high",
+      "due_date": "2024-01-20"
     }
   }'
 ```
