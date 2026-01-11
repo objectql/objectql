@@ -12,7 +12,7 @@ const db = new ObjectQL({
             useNullAsDefault: true
         })
     },
-    source: ['src'],
+    source: [path.join(__dirname, 'src')],
     presets: []
 });
 

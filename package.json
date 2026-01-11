@@ -4,8 +4,8 @@
   "scripts": {
     "build": "tsc -b && pnpm -r run build",
     "test": "pnpm -r run test",
-    "studio": "pnpm --filter @objectql/cli run studio",
-    "studio:basic": "node packages/cli/dist/index.js studio --dir examples/starters/basic-script",
+    "swagger": "node packages/cli/dist/index.js studio --dir examples/starters/basic-script",
+    "studio": "node packages/cli/dist/index.js studio --dir examples/starters/basic-script",
     "changeset": "changeset",
     "version": "changeset version",
     "release": "pnpm run build && changeset publish",
