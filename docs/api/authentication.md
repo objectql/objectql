@@ -635,8 +635,6 @@ async function verifyCredentials(email: string, password: string) {
 }
 
 server.listen(3000);
-
-server.listen(3000);
 ```
 
 ---
