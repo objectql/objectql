@@ -1,0 +1,61 @@
+{
+  "crm_account": {
+    "label": "Account",
+    "fields": {
+      "name": "Account Name",
+      "account_number": "Account Number",
+      "type": "Account Type",
+      "industry": "Industry",
+      "annual_revenue": "Annual Revenue",
+      "employees": "Number of Employees",
+      "website": "Website",
+      "phone": "Phone",
+      "billing_address": "Billing Address",
+      "shipping_address": "Shipping Address",
+      "owner": "Account Owner",
+      "parent_account": "Parent Account",
+      "description": "Description",
+      "status": "Status"
+    },
+    "options": {
+      "type": {
+        "customer": "Customer",
+        "prospect": "Prospect",
+        "partner": "Partner",
+        "competitor": "Competitor"
+      }
+    }
+  },
+  "crm_contact": {
+    "label": "Contact",
+    "fields": {
+      "first_name": "First Name",
+      "last_name": "Last Name",
+      "full_name": "Full Name",
+      "email": "Email",
+      "phone": "Phone",
+      "mobile": "Mobile",
+      "title": "Job Title",
+      "department": "Department",
+      "account": "Account",
+      "owner": "Contact Owner"
+    }
+  },
+  "crm_opportunity": {
+    "label": "Opportunity",
+    "fields": {
+      "name": "Opportunity Name",
+      "account": "Account",
+      "amount": "Amount",
+      "close_date": "Expected Close Date",
+      "stage": "Stage",
+      "probability": "Probability (%)",
+      "type": "Opportunity Type",
+      "owner": "Opportunity Owner"
+    },
+    "actions": {
+      "mark_won": "Mark as Won",
+      "mark_lost": "Mark as Lost"
+    }
+  }
+}

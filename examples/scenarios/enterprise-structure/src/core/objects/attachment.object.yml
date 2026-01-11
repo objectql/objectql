@@ -1,0 +1,57 @@
+name: attachment
+label: Attachment
+description: File attachment for any object
+icon: attachment-line
+
+fields:
+  name:
+    type: text
+    required: true
+    label: File Name
+    index: true
+  
+  file_url:
+    type: file
+    required: true
+    label: File URL
+  
+  file_size:
+    type: number
+    label: File Size (bytes)
+  
+  file_type:
+    type: text
+    label: MIME Type
+    index: true
+  
+  related_to:
+    type: text
+    label: Related Object Name
+    index: true
+  
+  related_id:
+    type: text
+    label: Related Record ID
+    index: true
+  
+  uploaded_by:
+    type: lookup
+    reference_to: user
+    label: Uploaded By
+  
+  description:
+    type: textarea
+    label: Description
+  
+  tags:
+    type: text
+    label: Tags (comma-separated)
+
+indexes:
+  # For finding attachments of a specific record
+  related_composite_idx:
+    fields: [related_to, related_id]
+  
+  # For file type filtering
+  type_created_idx:
+    fields: [file_type, created_at]

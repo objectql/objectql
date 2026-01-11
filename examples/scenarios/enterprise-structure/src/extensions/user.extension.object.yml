@@ -1,0 +1,42 @@
+name: user
+# This extends the core user object with company-specific fields
+label: System User (Extended)
+
+fields:
+  # Add employee link
+  employee:
+    type: lookup
+    reference_to: hr_employee
+    label: Employee Record
+    unique: true
+  
+  # Override email to make it required and unique
+  email:
+    required: true
+    unique: true
+  
+  # Add custom fields
+  employee_id:
+    type: text
+    label: Employee ID
+    unique: true
+    index: true
+  
+  department:
+    type: lookup
+    reference_to: hr_department
+    label: Department
+  
+  office_location:
+    type: select
+    options:
+      - headquarters
+      - branch_office_a
+      - branch_office_b
+      - remote
+    label: Office Location
+  
+  two_factor_enabled:
+    type: boolean
+    defaultValue: false
+    label: Two-Factor Auth Enabled

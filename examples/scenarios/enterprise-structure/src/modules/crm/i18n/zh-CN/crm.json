@@ -1,0 +1,61 @@
+{
+  "crm_account": {
+    "label": "客户",
+    "fields": {
+      "name": "客户名称",
+      "account_number": "客户编号",
+      "type": "客户类型",
+      "industry": "行业",
+      "annual_revenue": "年收入",
+      "employees": "员工人数",
+      "website": "网站",
+      "phone": "电话",
+      "billing_address": "账单地址",
+      "shipping_address": "送货地址",
+      "owner": "客户负责人",
+      "parent_account": "上级客户",
+      "description": "描述",
+      "status": "状态"
+    },
+    "options": {
+      "type": {
+        "customer": "客户",
+        "prospect": "潜在客户",
+        "partner": "合作伙伴",
+        "competitor": "竞争对手"
+      }
+    }
+  },
+  "crm_contact": {
+    "label": "联系人",
+    "fields": {
+      "first_name": "名字",
+      "last_name": "姓氏",
+      "full_name": "全名",
+      "email": "电子邮件",
+      "phone": "电话",
+      "mobile": "手机",
+      "title": "职位",
+      "department": "部门",
+      "account": "客户",
+      "owner": "联系人负责人"
+    }
+  },
+  "crm_opportunity": {
+    "label": "商机",
+    "fields": {
+      "name": "商机名称",
+      "account": "客户",
+      "amount": "金额",
+      "close_date": "预期成交日期",
+      "stage": "阶段",
+      "probability": "成功概率 (%)",
+      "type": "商机类型",
+      "owner": "商机负责人"
+    },
+    "actions": {
+      "mark_won": "标记为已赢",
+      "mark_lost": "标记为已失"
+    }
+  }
+}

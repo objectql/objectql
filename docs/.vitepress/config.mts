@@ -61,6 +61,7 @@ export default defineConfig({
           text: 'Core Fundamentals',
           items: [
             { text: 'Data Modeling', link: '/guide/data-modeling' },
+            { text: 'Metadata Organization', link: '/guide/metadata-organization' },
             { text: 'Querying Data', link: '/guide/querying' },
             { text: 'Business Logic', link: '/guide/logic-hooks' },
           ]
