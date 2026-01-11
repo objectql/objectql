@@ -48,12 +48,14 @@ Phase 4: Full Migration (Week 7-8)
 
 ### Step 1.1: Install Migration Tools
 
+> **Note**: These packages represent the planned v2.0 implementation. For current installations, use existing @objectql packages.
+
 ```bash
-# Install latest ObjectQL with v2 support
+# Install latest ObjectQL with v2 support (when available)
 pnpm add @objectql/core@latest
 pnpm add @objectql/cli@latest
 
-# Install migration helper
+# Install migration helper (planned for v2.0 release)
 pnpm add -D @objectql/migrate
 ```
 
@@ -204,10 +206,20 @@ Return only a YAML snippet with the ai_context additions.
     ],
   });
 
-  const response = message.content[0].text;
+  // Safely access response content with validation
+  if (!message.content || message.content.length === 0) {
+    console.error('No content in AI response');
+    return null;
+  }
+
+  const responseText = message.content[0]?.text;
+  if (!responseText) {
+    console.error('Invalid response format from AI');
+    return null;
+  }
   
   // Extract YAML from response
-  const yamlMatch = response.match(/```yaml\n([\s\S]*?)\n```/);
+  const yamlMatch = responseText.match(/```yaml\n([\s\S]*?)\n```/);
   if (yamlMatch) {
     return yaml.load(yamlMatch[1]);
   }
@@ -256,6 +268,16 @@ enrichObjectsWithAI();
 
 Run it:
 ```bash
+# ⚠️ Security Warning: Never commit API keys to version control
+# Use a .env file (add to .gitignore) or secure secret management system
+# For production, use environment-specific secret stores (AWS Secrets Manager, Azure Key Vault, etc.)
+
+# Option 1: Using .env file (recommended for development)
+# Create .env file with: ANTHROPIC_API_KEY=your_key_here
+# Then run:
+npx tsx scripts/add-ai-context.ts
+
+# Option 2: Direct environment variable (one-time use)
 export ANTHROPIC_API_KEY=your_key
 npx tsx scripts/add-ai-context.ts
 ```
@@ -508,13 +530,29 @@ import { glob } from 'glob';
 import { readFile } from 'fs/promises';
 import yaml from 'js-yaml';
 import Ajv from 'ajv';
+import { existsSync } from 'fs';
+import { resolve } from 'path';
 
 const ajv = new Ajv();
 
-// Load JSON schemas
-const objectSchema = require('../schemas/v2/object.json');
-const validationSchema = require('../schemas/v2/validation.json');
-const workflowSchema = require('../schemas/v2/workflow.json');
+// Load JSON schemas (with error handling for v2 schemas that may not exist yet)
+let objectSchema, validationSchema, workflowSchema;
+
+try {
+  const schemaPath = resolve(__dirname, '../schemas/v2');
+  
+  if (!existsSync(schemaPath)) {
+    console.warn('⚠️  v2 JSON schemas not found. Skipping schema validation.');
+    console.warn('    These will be available in the v2.0 release.');
+  } else {
+    objectSchema = require('../schemas/v2/object.json');
+    validationSchema = require('../schemas/v2/validation.json');
+    workflowSchema = require('../schemas/v2/workflow.json');
+  }
+} catch (error) {
+  console.warn('⚠️  Could not load v2 schemas:', error.message);
+  console.warn('    Schema validation will be skipped.');
+}
 
 async function validateMetadata() {
   const files = await glob('src/**/*.{object,validation,workflow}.yml');

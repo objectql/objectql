@@ -155,10 +155,20 @@ object:
 
 Every metadata file should use a consistent envelope:
 
+> **Note**: The `$schema` URLs referenced below are placeholders that will be published when v2.0 is released. They represent the intended JSON Schema validation files for each metadata type.
+
 ```yaml
 # Standard header for ALL metadata files
+# Note: Schema URLs are placeholders - actual schemas will be published with v2.0 release
 $schema: "https://objectql.org/schema/v2/object.json"
-metadata_version: "2.0"
+metadata_version: "2.0.0"  # Using semantic versioning for future compatibility
+metadata_type: object  # object, validation, workflow, form, etc.
+
+```yaml
+# Standard header for ALL metadata files
+# Note: Schema URLs are placeholders - actual schemas will be published with v2.0 release
+$schema: "https://objectql.org/schema/v2/object.json"
+metadata_version: "2.0.0"  # Using semantic versioning for future compatibility
 metadata_type: object  # object, validation, workflow, form, etc.
 
 # Metadata provenance
