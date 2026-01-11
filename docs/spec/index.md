@@ -21,7 +21,7 @@ This section contains the complete metadata specifications for the ObjectQL plat
 *   [**Views & Layouts**](./view.md) - Data presentation configurations (list, grid, kanban, calendar)
 *   [**Forms**](./form.md) - Data entry and editing interfaces
 *   [**Reports & Dashboards**](./report.md) - Analytics, visualizations, and business intelligence
-*   [**Menus & Navigation**](./menu.md) - Application structure and navigation hierarchy
+*   [**Applications & Navigation**](./application.md) - Application structure and menu hierarchy
 
 ## Security & Access Control
 
@@ -60,7 +60,7 @@ src/
     *.dashboard.yml    # Dashboard configurations
   
   navigation/         # App structure
-    *.menu.yml         # Menu definitions
+    *.app.yml         # Application definitions
 ```
 
 ## Getting Started

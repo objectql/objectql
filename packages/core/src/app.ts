@@ -12,7 +12,8 @@ import {
     HookContext,
     ActionHandler,
     ActionContext,
-    LoaderPlugin
+    LoaderPlugin,
+    ApplicationConfig
 } from '@objectql/types';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -207,6 +208,10 @@ export class ObjectQL implements IObjectQL {
 
     getObject(name: string): ObjectConfig | undefined {
         return this.metadata.get<ObjectConfig>('object', name);
+    }
+
+    getApp(name: string): ApplicationConfig | undefined {
+        return this.metadata.get<ApplicationConfig>('app', name);
     }
 
     getConfigs(): Record<string, ObjectConfig> {

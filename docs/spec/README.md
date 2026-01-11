@@ -76,7 +76,7 @@ Define how users interact with data.
 | [Views & Layouts](./view.md) | Data presentation | Context-aware displays |
 | [Forms](./form.md) | Data entry interfaces | Smart defaults, auto-complete, validation assistance |
 | [Reports & Dashboards](./report.md) | Analytics & BI | Business metrics with context |
-| [Menus & Navigation](./menu.md) | App structure | Navigation patterns |
+| [Applications & Navigation](./application.md) | Navigation & Identity | User persona matching, task-based routing |
 
 ### Security & Access Control
 Define who can do what.
