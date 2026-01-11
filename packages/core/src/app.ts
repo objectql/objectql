@@ -321,13 +321,18 @@ export class ObjectQL implements IObjectQL {
 
         for (const entry of dataEntries) {
             // Expected format:
-            // object: User
-            // records:
-            //   - name: Admin
-            //     email: admin@example.com
+            // 1. { object: 'User', records: [...] }
+            // 2. [ record1, record2 ] (with name property added by loader inferred from filename)
             
-            const objectName = entry.object;
-            const records = entry.records;
+            let objectName = entry.object;
+            let records = entry.records;
+
+            if (Array.isArray(entry)) {
+                records = entry;
+                if (!objectName && (entry as any).name) {
+                    objectName = (entry as any).name;
+                }
+            }
 
             if (!objectName || !records || !Array.isArray(records)) {
                 console.warn(`Skipping invalid data entry:`, entry);

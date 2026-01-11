@@ -86,6 +86,9 @@ src/
   reports/            # Analytics
     *.report.yml       # Report definitions
     *.dashboard.yml    # Dashboard configurations
+
+  data/               # Initial Seeding
+    *.data.yml         # Seed data
   
   navigation/         # App structure
     *.app.yml         # Application definitions

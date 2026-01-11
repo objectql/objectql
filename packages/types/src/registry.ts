@@ -18,7 +18,10 @@ export class MetadataRegistry {
     }
 
     unregister(type: string, id: string) {
-        this.store.get(type)?.delete(id);
+        const map = this.store.get(type);
+        if (map) {
+            map.delete(id);
+        }
     }
     
     unregisterPackage(packageName: string) {
@@ -39,7 +42,10 @@ export class MetadataRegistry {
     }
 
     get<T = any>(type: string, id: string): T | undefined {
-        return this.store.get(type)?.get(id)?.content as T;
+        const map = this.store.get(type);
+        if (!map) return undefined;
+        const entry = map.get(id);
+        return entry ? entry.content as T : undefined;
     }
 
     list<T = any>(type: string): T[] {
@@ -49,6 +55,7 @@ export class MetadataRegistry {
     }
     
     getEntry(type: string, id: string): Metadata | undefined {
-        return this.store.get(type)?.get(id);
+        const map = this.store.get(type);
+        return map ? map.get(id) : undefined;
     }
 }

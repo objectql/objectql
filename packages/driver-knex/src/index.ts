@@ -92,8 +92,21 @@ export class KnexDriver implements Driver {
         }
 
         if (query.sort && Array.isArray(query.sort)) {
-            for (const [field, dir] of query.sort) {
-                builder.orderBy(this.mapSortField(field), dir);
+            for (const item of query.sort) {
+                let field: string | undefined;
+                let dir: string | undefined;
+
+                if (Array.isArray(item)) {
+                     [field, dir] = item;
+                } else if (typeof item === 'object' && item !== null) {
+                    // Support object format { field: 'name', order: 'asc' }
+                     field = (item as any).field;
+                     dir = (item as any).order || (item as any).direction || (item as any).dir;
+                }
+
+                if (field) {
+                    builder.orderBy(this.mapSortField(field), dir);
+                }
             }
         }
 

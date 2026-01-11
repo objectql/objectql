@@ -22,7 +22,8 @@ export class ObjectLoader {
                     if (!doc) return;
 
                     if (doc.name && doc.fields) {
-                        registerObject(ctx.registry, doc, ctx.file, ctx.packageName || ctx.registry.getEntry('package-map', ctx.file)?.package);
+                        const packageEntry = ctx.registry.getEntry('package-map', ctx.file);
+                        registerObject(ctx.registry, doc, ctx.file, ctx.packageName || (packageEntry && packageEntry.package));
                     } else {
                         for (const [key, value] of Object.entries(doc)) {
                             if (typeof value === 'object' && (value as any).fields) {
@@ -116,19 +117,13 @@ export class ObjectLoader {
 
                         // Use 'name' from doc, or filename base (without extension)
                         let id = doc.name;
-                        if (!id && type !== 'data') {
+                        if (!id) {
                             const basename = path.basename(ctx.file); 
                             // e.g. "my-view.view.yml" -> "my-view"
                             // Regex: remove .type.yml or .type.yaml
                             const re = new RegExp(`\\.${type}\\.(yml|yaml)$`);
                             id = basename.replace(re, '');
                         }
-
-                        // Data entries might not need a name, but for registry we need an ID.
-                        // For data, we can use filename if not present.
-                         if (!id && type === 'data') {
-                            id = path.basename(ctx.file);
-                         }
 
                         // Ensure name is in the doc for consistency
                         if (!doc.name) doc.name = id;
