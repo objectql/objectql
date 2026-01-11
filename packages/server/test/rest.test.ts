@@ -2,7 +2,7 @@ import request from 'supertest';
 import { createServer } from 'http';
 import { ObjectQL } from '@objectql/core';
 import { createRESTHandler } from '../src/adapters/rest';
-import { IObjectQL, Driver } from '@objectql/types';
+import { Driver } from '@objectql/types';
 
 // Simple Mock Driver
 class MockDriver implements Driver {
