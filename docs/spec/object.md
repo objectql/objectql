@@ -1,10 +1,11 @@
 # Object Definition
 
-Object files are typically defined in YAML (or JSON) and represent a business entity or database table.
+Object files are defined in YAML (or JSON) and represent a business entity or database table. They are the foundation of your application's data model and are designed to be both human-readable and AI-friendly for automated code generation.
 
 Files should use **Snake Case** filenames (e.g., `project_tasks.object.yml`).
 
 ## 1. Root Properties
+
 | Property | Type | Description |
 | :--- | :--- | :--- |
 | `name` | `string` | **Required.** Unique API name of the object. Should match filename. |
@@ -13,6 +14,56 @@ Files should use **Snake Case** filenames (e.g., `project_tasks.object.yml`).
 | `description` | `string` | Internal description of the object. |
 | `fields` | `Map` | Dictionary of field definitions. |
 | `actions` | `Map` | Dictionary of custom action definitions. |
+| `ai_context` | `object` | **Optional.** AI-friendly context for code generation and understanding. |
+
+### 1.1 AI Context (Optional)
+
+The `ai_context` block provides semantic information to help AI tools understand the business purpose and usage patterns of your object. This improves code generation accuracy and enables intelligent suggestions.
+
+```yaml
+name: project
+label: Project
+
+# AI-friendly context
+ai_context:
+  # Business intent - helps AI understand the purpose
+  intent: "Manage projects with timeline, budget, and team tracking"
+  
+  # Business domain classification
+  domain: project_management
+  
+  # Natural language aliases for queries
+  aliases:
+    - project
+    - initiative
+    - program
+  
+  # Example records for AI to understand data patterns
+  examples:
+    - name: "Website Redesign 2026"
+      status: active
+      budget: 50000
+    - name: "Q1 Marketing Campaign"
+      status: planning
+      budget: 25000
+  
+  # Common queries users might ask
+  common_queries:
+    - "Find all active projects"
+    - "Show projects over budget"
+    - "List my projects due this week"
+
+fields:
+  # ... field definitions
+```
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `intent` | `string` | Brief description of the object's business purpose. |
+| `domain` | `string` | Business domain (e.g., `sales`, `project_management`, `hr`). |
+| `aliases` | `string[]` | Natural language terms users might use to refer to this object. |
+| `examples` | `object[]` | Sample records showing typical data patterns. |
+| `common_queries` | `string[]` | Typical questions or searches users perform. |
 
 ## 2. Field Definitions
 
@@ -38,6 +89,62 @@ fields:
 | `searchable` | `boolean` | Enables traditional keyword-based search (e.g., exact match, SQL LIKE). |
 | `sortable` | `boolean` | Hint that this field can be used for sorting in UI. |
 | `description` | `string` | Help text or documentation for the field. |
+| `ai_context` | `object` | **Optional.** AI-friendly context for this specific field. |
+
+#### Field-Level AI Context
+
+Each field can include an `ai_context` block to help AI understand its purpose and usage:
+
+```yaml
+fields:
+  name:
+    type: text
+    required: true
+    label: Project Name
+    
+    # AI-friendly context for this field
+    ai_context:
+      intent: "Human-readable project identifier"
+      
+      # Example values help AI generate realistic data
+      examples:
+        - "Website Redesign 2026"
+        - "Q1 Marketing Campaign"
+        - "Mobile App Launch"
+      
+      # Pattern guidance for generation
+      pattern: "[Department/Category] [Description] [Optional: Year/Quarter]"
+      
+      # Validation hints
+      avoid_patterns:
+        - "Untitled"
+        - "Project 1"
+        - "Project 2"
+        - "New Project"  # Too generic
+  
+  status:
+    type: select
+    required: true
+    options:
+      - value: planning
+        label: Planning
+      - value: active
+        label: Active
+      - value: completed
+        label: Completed
+    
+    ai_context:
+      intent: "Current lifecycle stage of the project"
+      
+      # State machine information
+      is_state_machine: true
+      transitions:
+        planning: [active, cancelled]
+        active: [on_hold, completed, cancelled]
+        on_hold: [active, cancelled]
+        completed: []  # Terminal state
+        cancelled: []  # Terminal state
+```
 
 ### 2.2 Supported Field Types
 
@@ -80,9 +187,9 @@ fields:
 
 ### 2.3 Relationship Fields
 
-Key properties for `lookup` or `master_detail`:
+Relationship fields (`lookup`, `master_detail`) connect objects together. For AI-friendly metadata, consider adding semantic context about the relationship's meaning.
 
-*   **reference_to**: The `name` of the target object.
+**Basic Relationship:**
 
 ```yaml
 owner:
@@ -91,23 +198,140 @@ owner:
   label: Owner
 ```
 
+**AI-Enhanced Relationship:**
+
+```yaml
+owner:
+  type: lookup
+  reference_to: users
+  label: Owner
+  
+  ai_context:
+    intent: "The person responsible for project success"
+    semantic_type: ownership  # ownership, hierarchy, association, aggregation
+    
+    # Help AI suggest appropriate values
+    selection_guidance: "Usually a manager or senior team member"
+    
+    # Common filters for selection
+    typical_filters:
+      - field: is_active
+        value: true
+      - field: role
+        operator: in
+        values: [manager, director]
+
+project_manager:
+  type: lookup
+  reference_to: users
+  label: Project Manager
+  
+  ai_context:
+    intent: "Person managing day-to-day project execution"
+    semantic_type: hierarchy
+    differs_from: owner  # Helps AI understand subtle differences
+```
+
+**Master-Detail Relationship:**
+
+```yaml
+account:
+  type: master_detail
+  reference_to: accounts
+  label: Account
+  
+  ai_context:
+    intent: "Parent account owning this opportunity"
+    semantic_type: ownership
+    cascade_behavior: "Deleting account deletes all opportunities"
+```
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `reference_to` | `string` | **Required.** The `name` of the target object. |
+| `multiple` | `boolean` | If `true`, allows multiple selections (one-to-many). Default: `false`. |
+| `ai_context.intent` | `string` | Business purpose of this relationship. |
+| `ai_context.semantic_type` | `string` | Type: `ownership`, `hierarchy`, `association`, `aggregation`. |
+| `ai_context.selection_guidance` | `string` | Hints for selecting appropriate related records. |
+
 ### 2.4 Select Options
 
-Options for `select` can be a simple list or label/value pairs.
+Options for `select` can be a simple list or label/value pairs. For AI-friendly metadata, you can add context to each option to explain its meaning and when it should be used.
 
+**Simple Options:**
+```yaml
+priority:
+  type: select
+  options:
+    - label: Low
+      value: low
+    - label: Medium
+      value: medium
+    - label: High
+      value: high
+```
+
+**AI-Enhanced Options with State Machine:**
 ```yaml
 status:
   type: select
   options:
-    - label: Planned
-      value: planned
-    - label: In Progress
-      value: in_progress
+    - value: planning
+      label: Planning
+      ai_context:
+        intent: "Initial stage - defining scope and requirements"
+        typical_duration_days: 14
+        next_states: [active, cancelled]
+        entry_requirements:
+          - "Project name must be set"
+          - "Owner must be assigned"
+    
+    - value: active
+      label: Active
+      ai_context:
+        intent: "Work is being performed"
+        next_states: [on_hold, completed, cancelled]
+        entry_requirements:
+          - "Start date must be set"
+          - "Budget must be approved"
+    
+    - value: on_hold
+      label: On Hold
+      ai_context:
+        intent: "Temporarily paused"
+        next_states: [active, cancelled]
+        requires_reason: true
+    
+    - value: completed
+      label: Completed
+      ai_context:
+        intent: "All deliverables finished"
+        is_terminal: true  # Cannot transition from this state
+        next_states: []
+    
+    - value: cancelled
+      label: Cancelled
+      ai_context:
+        intent: "Project discontinued"
+        is_terminal: true
+        next_states: []
+  
+  # Overall field AI context
+  ai_context:
+    intent: "Track project through its lifecycle"
+    is_state_machine: true
+    enforce_transitions: true  # Only allow valid state changes
 ```
+
+This state machine information enables:
+- **Validation**: Prevent invalid state transitions
+- **UI**: Show only valid next states in dropdowns
+- **Automation**: Trigger workflows on state changes
+- **AI Generation**: Generate realistic test data following proper state flow
 
 ## 3. Indexes
 
-Indexes can be defined at the field level (for single-field indexes) or at the object level (for composite indexes).
+Indexes improve query performance. You can add AI context to explain the purpose of each index, helping future developers and AI tools understand optimization decisions.
 
 ### 3.1 Field-Level Indexes
 
@@ -119,6 +343,10 @@ fields:
     type: email
     index: true   # Creates a standard index
     unique: true  # Creates a unique index (constraint)
+    
+    ai_context:
+      intent: "User's primary email for login and notifications"
+      index_rationale: "Frequently queried for user lookup and authentication"
 ```
 
 ### 3.2 Object-Level Indexes
@@ -127,22 +355,29 @@ For composite indexes (spanning multiple fields), define them under the `indexes
 
 ```yaml
 indexes:
-  # Index Name: Index Definition
-  
   # Composite Index
   project_status_idx:
     fields: [project_id, status]
+    ai_context:
+      intent: "Optimize queries filtering by project and status"
+      common_query: "SELECT * FROM tasks WHERE project_id = ? AND status = ?"
+      performance_note: "Supports project task lists grouped by status"
   
   # Unique Composite Index
   unique_task_name:
     fields: [project_id, name]
     unique: true
+    ai_context:
+      intent: "Prevent duplicate task names within a project"
+      business_rule: "Task names must be unique per project"
 ```
 
 | Property | Type | Description |
 | :--- | :--- | :--- |
 | `fields` | `string[]` | **Required.** List of field names to include in the index. |
 | `unique` | `boolean` | If `true`, requires values to be unique combination. Default: `false`. |
+| `ai_context.intent` | `string` | Why this index exists. |
+| `ai_context.common_query` | `string` | Typical query this index optimizes. |
 
 ## 4. AI & Vector Search
 
@@ -269,3 +504,141 @@ const myTask: Todo = {
     completed: false
 };
 ```
+
+## 7. Complete AI-Enhanced Example
+
+Here's a complete example showing how to leverage AI context throughout your object definition:
+
+```yaml
+# project.object.yml
+name: project
+label: Project
+icon: standard:project
+description: Core object for project management
+
+# Object-level AI context
+ai_context:
+  intent: "Manage projects with timeline, budget, and team tracking"
+  domain: project_management
+  aliases: [project, initiative, program]
+  
+  examples:
+    - name: "Website Redesign 2026"
+      status: active
+      budget: 50000
+      owner_id: user_001
+    - name: "Q1 Marketing Campaign"
+      status: planning
+      budget: 25000
+      owner_id: user_002
+  
+  common_queries:
+    - "Find all active projects"
+    - "Show projects over budget"
+    - "List my projects due this week"
+
+fields:
+  name:
+    type: text
+    required: true
+    label: Project Name
+    ai_context:
+      intent: "Human-readable project identifier"
+      examples:
+        - "Website Redesign 2026"
+        - "Mobile App Launch Q2"
+      pattern: "[Category] [Description] [Optional: Year/Quarter]"
+  
+  status:
+    type: select
+    required: true
+    default: planning
+    options:
+      - value: planning
+        label: Planning
+        ai_context:
+          intent: "Defining scope and requirements"
+          typical_duration_days: 14
+          next_states: [active, cancelled]
+      
+      - value: active
+        label: Active
+        ai_context:
+          intent: "Work in progress"
+          next_states: [on_hold, completed, cancelled]
+      
+      - value: completed
+        label: Completed
+        ai_context:
+          intent: "All deliverables finished"
+          is_terminal: true
+          next_states: []
+    
+    ai_context:
+      intent: "Track project lifecycle"
+      is_state_machine: true
+      enforce_transitions: true
+  
+  budget:
+    type: currency
+    required: false
+    label: Budget
+    ai_context:
+      intent: "Total approved budget in USD"
+      examples: [25000, 150000, 500000]
+      business_rules:
+        - "Budget > $50K requires manager approval"
+        - "Cannot exceed department annual budget"
+  
+  owner:
+    type: lookup
+    reference_to: users
+    required: true
+    label: Owner
+    ai_context:
+      intent: "Person responsible for project success"
+      semantic_type: ownership
+      selection_guidance: "Usually a manager or team lead"
+      typical_filters:
+        - field: is_active
+          value: true
+        - field: role
+          operator: in
+          values: [manager, director]
+  
+  start_date:
+    type: date
+    label: Start Date
+    ai_context:
+      intent: "When project work begins"
+      validation_hint: "Must be before end_date"
+  
+  end_date:
+    type: date
+    label: End Date
+    ai_context:
+      intent: "Target completion date"
+      validation_hint: "Must be after start_date"
+
+indexes:
+  status_owner_idx:
+    fields: [status, owner_id]
+    ai_context:
+      intent: "Optimize 'my active projects' queries"
+      common_query: "status = 'active' AND owner_id = current_user"
+
+# AI-powered semantic search
+ai:
+  search:
+    enabled: true
+    fields: [name, description]
+    model: text-embedding-3-small
+```
+
+This AI-enhanced metadata enables:
+- **Better Code Generation**: AI tools understand intent and generate correct code
+- **Intelligent Validation**: AI can suggest validation rules based on business rules
+- **Realistic Test Data**: AI generates test data following proper patterns
+- **Documentation**: AI can auto-generate comprehensive documentation
+- **Query Optimization**: AI understands common access patterns for indexing
+

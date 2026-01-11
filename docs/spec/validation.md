@@ -1,6 +1,6 @@
 # Validation Rule Metadata
 
-Validation rules enforce data quality and business rules at the metadata level. They ensure data integrity before it reaches the database.
+Validation rules enforce data quality and business rules at the metadata level. They ensure data integrity before it reaches the database. Rules are designed to be both machine-executable and AI-understandable, with clear business intent.
 
 ## 1. Overview
 
@@ -8,9 +8,10 @@ ObjectQL's validation system provides:
 
 - **Field-level validation**: Built-in type validation (email, URL, range, etc.)
 - **Cross-field validation**: Validate relationships between fields
-- **Custom validation rules**: Complex business logic validation
+- **Business rule validation**: Declarative rules with clear intent
 - **Async validation**: External API validation (uniqueness, external system checks)
 - **Conditional validation**: Rules that apply only in specific contexts
+- **State machine validation**: Enforce valid state transitions
 
 **File Naming Convention:** `[object_name].validation.yml`
 
@@ -21,59 +22,117 @@ name: project_validation
 object: projects
 description: Validation rules for project object
 
+# AI-friendly context (optional)
+ai_context:
+  intent: "Ensure project data integrity and enforce business rules"
+  validation_strategy: "Fail fast with clear error messages"
+
 # Validation Rules
 rules:
-  # Rule 1: Date Range Validation
+  # Rule 1: Cross-Field Validation with AI Context
   - name: valid_date_range
     type: cross_field
-    message: End date must be after start date
-    condition:
+    
+    # AI context explains the business rule
+    ai_context:
+      intent: "Ensure timeline makes logical sense"
+      business_rule: "Projects cannot end before they start"
+      error_impact: high  # high, medium, low
+    
+    # Declarative rule (AI can generate implementations)
+    rule:
       field: end_date
-      operator: ">"
+      operator: ">="
       compare_to: start_date
+    
+    message: "End date must be on or after start date"
+    error_code: "INVALID_DATE_RANGE"
   
-  # Rule 2: Budget Validation
+  # Rule 2: Business Rule with Intent
   - name: budget_limit
-    type: custom
-    message: Budget cannot exceed department limit
+    type: business_rule
+    
+    ai_context:
+      intent: "Prevent projects from exceeding department budget allocation"
+      business_rule: "Each department has a budget limit. Individual projects cannot exceed it."
+      data_dependency: "Requires department.budget_limit field"
+      examples:
+        valid:
+          - project_budget: 50000
+            department_budget_limit: 100000
+        invalid:
+          - project_budget: 150000
+            department_budget_limit: 100000
+    
+    # Declarative constraint (AI can optimize implementation)
+    constraint:
+      expression: "budget <= department.budget_limit"
+      relationships:
+        department:
+          via: department_id
+          field: budget_limit
+    
+    message: "Project budget (${{budget}}) exceeds department limit (${{department.budget_limit}})"
+    error_code: "BUDGET_EXCEEDS_LIMIT"
+    
     trigger:
       - create
       - update
+    
     fields:
       - budget
-    validator: |
-      async function validate(record, context) {
-        const dept = await context.api.findOne('departments', record.department_id);
-        return record.budget <= dept.budget_limit;
-      }
+      - department_id
   
-  # Rule 3: Status Transition
+  # Rule 3: State Machine with Transitions
   - name: status_transition
     type: state_machine
     field: status
-    message: Invalid status transition
+    
+    ai_context:
+      intent: "Control valid status transitions throughout project lifecycle"
+      business_rule: "Projects follow a controlled workflow"
+      visualization: |
+        planning → active → completed
+                ↓           ↓
+             cancelled ← on_hold
+    
     transitions:
-      draft:
-        - planning
       planning:
-        - in_progress
-        - cancelled
-      in_progress:
-        - on_hold
-        - completed
-        - cancelled
+        allowed_next: [active, cancelled]
+        ai_context:
+          rationale: "Can start work or cancel before beginning"
+      
+      active:
+        allowed_next: [on_hold, completed, cancelled]
+        ai_context:
+          rationale: "Can pause, finish, or cancel ongoing work"
+      
       on_hold:
-        - in_progress
-        - cancelled
-      completed: []
-      cancelled: []
+        allowed_next: [active, cancelled]
+        ai_context:
+          rationale: "Can resume or cancel paused projects"
+      
+      completed:
+        allowed_next: []
+        is_terminal: true
+        ai_context:
+          rationale: "Finished projects cannot change state"
+      
+      cancelled:
+        allowed_next: []
+        is_terminal: true
+        ai_context:
+          rationale: "Cancelled projects are final"
+    
+    message: "Invalid status transition from {{old_status}} to {{new_status}}"
+    error_code: "INVALID_STATE_TRANSITION"
 ```
 
 ## 3. Validation Rule Types
 
 ### 3.1 Field Validation (Built-in)
 
-Defined directly in field configuration:
+Field validations are defined directly in the object definition with AI context:
 
 ```yaml
 # In object.yml
@@ -84,6 +143,10 @@ fields:
     validation:
       format: email
       message: Please enter a valid email address
+    
+    ai_context:
+      intent: "User's primary contact email"
+      validation_rationale: "Email format required for notifications"
   
   age:
     type: number
@@ -91,6 +154,11 @@ fields:
       min: 0
       max: 150
       message: Age must be between 0 and 150
+    
+    ai_context:
+      intent: "Person's age in years"
+      validation_rationale: "Realistic human age range"
+      examples: [25, 42, 67]
   
   username:
     type: text
@@ -98,8 +166,17 @@ fields:
     validation:
       min_length: 3
       max_length: 20
+      pattern: "^[a-zA-Z0-9_]+$"
+      message: "Username must be 3-20 alphanumeric characters or underscores"
+    
+    ai_context:
+      intent: "Unique user identifier for login"
+      validation_rationale: "Prevent special characters that cause URL issues"
+      examples: ["john_doe", "alice123", "bob_smith"]
+      avoid: ["user@123", "test!", "a"]  # Too short or invalid chars
+```
       regex: ^[a-zA-Z0-9_]+$
-      message: Username must be 3-20 alphanumeric characters
+      message: Username must be 3-20 alphanumeric characters or underscores
   
   website:
     type: url
@@ -107,6 +184,10 @@ fields:
       format: url
       protocols: [http, https]
       message: Please enter a valid URL
+    
+    ai_context:
+      intent: "Company or personal website"
+      examples: ["https://example.com", "https://www.company.com"]
   
   password:
     type: password
@@ -115,29 +196,46 @@ fields:
       min_length: 8
       regex: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]
       message: Password must contain uppercase, lowercase, number and special character
+    
+    ai_context:
+      intent: "Secure user password"
+      validation_rationale: "Strong password policy for security compliance"
 ```
 
 ### 3.2 Cross-Field Validation
 
-Validate relationships between multiple fields:
+Validate relationships between multiple fields with clear business intent:
 
 ```yaml
 rules:
-  # Date comparison
+  # Date comparison with AI context
   - name: end_after_start
     type: cross_field
-    message: End date must be after start date
-    severity: error
-    condition:
+    
+    ai_context:
+      intent: "Ensure logical timeline"
+      business_rule: "Events/projects cannot end before they start"
+      error_impact: high
+    
+    rule:
       field: end_date
       operator: ">="
       compare_to: start_date
+    
+    message: "End date must be on or after start date"
+    error_code: "INVALID_DATE_RANGE"
+    severity: error
   
-  # Conditional requirement
+  # Conditional requirement with reasoning
   - name: reason_required_for_rejection
     type: cross_field
-    message: Rejection reason is required
-    condition:
+    
+    ai_context:
+      intent: "Require explanation for rejections"
+      business_rule: "Users must document why something was rejected"
+      compliance: "Audit trail requirement"
+    
+    rule:
       if:
         field: status
         operator: "="
@@ -146,31 +244,130 @@ rules:
         field: rejection_reason
         operator: "!="
         value: null
+    
+    message: "Rejection reason is required when status is 'rejected'"
+    error_code: "REJECTION_REASON_REQUIRED"
   
-  # Sum validation
+  # Sum validation with business context
   - name: total_percentage
     type: cross_field
-    message: Total percentage must equal 100
-    condition:
-      expression: discount_percentage + tax_percentage + other_percentage
+    
+    ai_context:
+      intent: "Ensure percentages add up correctly"
+      business_rule: "Distribution must total 100%"
+      examples:
+        valid:
+          - discount: 20, tax: 10, other: 70  # = 100
+        invalid:
+          - discount: 20, tax: 10, other: 60  # = 90
+    
+    rule:
+      expression: "discount_percentage + tax_percentage + other_percentage"
       operator: "="
       value: 100
+    
+    message: "Total percentage must equal 100% (currently: {{sum}}%)"
+    error_code: "INVALID_PERCENTAGE_SUM"
 ```
 
-### 3.3 Custom Validation
+### 3.3 Business Rule Validation
 
-Complex business logic validation:
+Declarative business rules that AI can understand and optimize:
 
 ```yaml
 rules:
-  # JavaScript validation function
+  # Declarative business rule
+  - name: budget_within_limits
+    type: business_rule
+    
+    ai_context:
+      intent: "Prevent budget overruns"
+      business_rule: "Project budgets must be within approved department limits"
+      data_source: "department.annual_budget_limit"
+      
+      decision_logic: |
+        If project.budget > department.budget_limit:
+          - Require executive_approval = true
+          - Or reject with error
+    
+    # AI can generate optimal implementation
+    constraint:
+      expression: "budget <= department.budget_limit OR executive_approval = true"
+      relationships:
+        department:
+          via: department_id
+          fields: [budget_limit]
+    
+    message: "Budget exceeds department limit (${{department.budget_limit}}). Executive approval required - please add executive_approval_id field and route to executive for review."
+    error_code: "BUDGET_LIMIT_EXCEEDED"
+    
+    trigger: [create, update]
+    fields: [budget, department_id, executive_approval]
+  
+  # Multi-condition business rule
+  - name: manager_approval_required
+    type: business_rule
+    
+    ai_context:
+      intent: "Enforce approval policy for high-value transactions"
+      business_rule: |
+        Transactions require manager approval if:
+        - Amount > $10,000 OR
+        - Customer is flagged as high-risk OR
+        - Payment terms exceed 60 days
+      
+      approval_matrix:
+        - amount > 10000: requires manager
+        - amount > 50000: requires director
+        - amount > 200000: requires executive
+    
+    constraint:
+      any_of:
+        - field: amount
+          operator: ">"
+          value: 10000
+        - field: customer.risk_level
+          operator: "="
+          value: high
+        - field: payment_terms_days
+          operator: ">"
+          value: 60
+      
+      then_require:
+        - field: manager_approved_by
+          operator: "!="
+          value: null
+    
+    message: "Manager approval required for this transaction"
+    error_code: "APPROVAL_REQUIRED"
+```
+
+### 3.4 Custom Validation (When Needed)
+
+For complex logic that can't be expressed declaratively, provide implementation with clear intent:
+
+```yaml
+rules:
+  # Custom validation with AI-understandable intent
   - name: credit_check
     type: custom
-    message: Customer credit limit exceeded
+    
+    ai_context:
+      intent: "Verify customer has sufficient credit"
+      business_rule: "Total outstanding + new order cannot exceed credit limit"
+      external_dependency: "Customer credit system"
+      
+      algorithm: |
+        1. Fetch customer's current outstanding balance
+        2. Add proposed order amount
+        3. Compare to customer credit limit
+        4. Reject if would exceed limit
+    
+    message: "Customer credit limit exceeded"
+    error_code: "CREDIT_LIMIT_EXCEEDED"
     severity: error
-    trigger:
-      - create
-      - update
+    
+    trigger: [create, update]
     fields:
       - amount
       - customer_id
