@@ -69,6 +69,41 @@ async function launchVisualConsole(app: ObjectQL) {
     const objects = app.metadata.list('object');
     const objectNames = objects.map((o: any) => o.name);
 
+    if (objectNames.length === 0) {
+        const messageBox = blessed.message({
+            parent: screen,
+            top: 'center',
+            left: 'center',
+            width: '80%',
+            height: 'shrink',
+            border: 'line',
+            label: ' No Objects Registered ',
+            tags: true,
+            keys: true,
+            vi: true,
+            style: {
+                border: {
+                    fg: 'red'
+                }
+            }
+        });
+
+        messageBox.display(
+            'No objects are registered in ObjectQL metadata.\n\nPlease define at least one object and restart the console.',
+            0,
+            () => {
+                screen.destroy();
+                process.exitCode = 1;
+            }
+        );
+
+        screen.key(['q', 'C-c', 'escape'], () => {
+            screen.destroy();
+            process.exitCode = 1;
+        });
+
+        return;
+    }
     // State
     let selectedObjectIndex = 0;
     let selectedObject = objectNames[0];
