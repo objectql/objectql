@@ -20,6 +20,6 @@ Learn how to use ObjectQL as the data engine for your RAG (Retrieval-Augmented G
 Learn how to configure GitHub Copilot, Cursor, or Windsurf to become an expert ObjectQL developer. We provide specialized System Prompts that teach the LLM our protocol.
 
 *   [Standard System Prompt](/ai/coding-assistant#standard-system-prompt-system-prompt)
-*   [IDE Configuration](/ai/coding-assistant#如何在工具中使用)
+*   [IDE Configuration](/ai/coding-assistant#how-to-use-in-tools)
 
 [Get Prompts →](/ai/coding-assistant)

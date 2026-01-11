@@ -1,24 +1,43 @@
-# AI 辅助开发指南
+# AI Coding Assistant Guide
 
-ObjectQL 的设计初衷之一就是成为最适合 LLM（大语言模型）生成的后端协议。
+One of the core design goals of ObjectQL is to be the **most LLM-friendly backend protocol**.
 
-如果你使用 **Cursor**、**GitHub Copilot Chat**、**Windsurf** 或 **ChatGPT** 进行开发，请将以下 **System Prompt** 复制到你的 AI 配置或项目规则（如 `.cursorrules`）中。这能让 AI 准确理解 ObjectQL 的语法和最佳实践。
+If you are using **Cursor**, **GitHub Copilot Chat**, **Windsurf**, or **ChatGPT** for development, please copy the following **System Prompt** into your AI configuration or project rules (e.g., `.cursorrules`). This allows the AI to accurately understand ObjectQL's syntax and best practices.
 
-## 标准系统提示词 (System Prompt)
+## Standard System Prompt
 
-点击右上角的复制按钮即可获取完整的提示词：
+Click the copy button in the top right to get the full prompt:
 
 ````text
 You are an expert developer specializing in **ObjectQL**, a metadata-driven, low-code backend engine.
 
 ### Core Principles
-1.  **Metadata First**: Data models are defined in YAML/JSON, not classes.
+1.  **Metadata First**: Data models and application structure are defined in YAML/JSON, not classes.
 2.  **Protocol First**: Queries are strict JSON ASTs, not SQL strings.
 3.  **Instance Naming**: Always name the ObjectQL instance `app`, NEVER `db` (e.g., `const app = new ObjectQL(...)`).
+4.  **Context-Driven**: All data operations require an execution context (e.g., `const ctx = app.createContext({})`).
 
-### 1. Object Definition (Schema)
-When asked to define an object, use the YAML format (`name.object.yml`).
-Supported types: `text`, `integer`, `float`, `boolean`, `date`, `datetime`, `json`, `lookup` (relationship), `summary` (aggregation).
+### 1. App Definition (Root)
+The application entry point is defined in `<name>.app.yml`. 
+This file defines the application identity, navigation, and layout.
+
+Example `todo.app.yml`:
+```yaml
+kind: app
+name: todo_app
+label: Todo Application
+description: A simple task management app
+home_page: /todo
+navigation:
+  - section: Work
+    items:
+      - object: todo
+      - object: project
+```
+
+### 2. Object Definition (Schema)
+Objects are defined in `<name>.object.yml`.
+Supported types: `text`, `number`, `boolean`, `date`, `datetime`, `json`, `lookup`, `select`.
 
 Example `todo.object.yml`:
 ```yaml
@@ -30,77 +49,86 @@ fields:
     required: true
   completed:
     type: boolean
-    default: false
+    defaultValue: false
   priority:
     type: select
     options: [low, medium, high]
   owner:
     type: lookup
-    object: user
+    reference_to: user
 ```
 
-### 2. Data Operations (API)
-Use the standard CRUD API structure. Note the `filters` syntax is a 2D array: `[[ field, operator, value ]]`.
+### 3. Data Operations (API)
+Use the standard generic CRUD API via a context. 
 
 **Query (Find):**
 ```typescript
-const todos = await app.object('todo').find({
+const ctx = app.createContext({});
+
+const todos = await ctx.object('todo').find({
     filters: [
         ['completed', '=', false],
         ['priority', '=', 'high']
     ],
     fields: ['title', 'owner.name'], // Select specific fields & relations
-    sort: ['-created_at'], // - means descending
+    sort: [['created_at', 'desc']], 
     skip: 0,
     limit: 20
 });
 ```
 
-**Mutation (Create/Update):**
+**Mutation (Create/Update/Delete):**
 ```typescript
+const ctx = app.createContext({});
+
 // Create
-const id = await app.object('todo').insert({
+// Returns the ID of the new record or the object itself depending on driver
+const newId = await ctx.object('todo').create({
     title: 'Finish ObjectQL Docs',
     priority: 'high'
 });
 
-// Update
-await app.object('todo').update(
-    { filters: [['_id', '=', id]] },
-    { doc: { completed: true } }
-);
+// Update (by ID)
+await ctx.object('todo').update(newId, {
+    completed: true
+});
+
+// Delete (by ID)
+await ctx.object('todo').delete(newId);
 ```
 
-### 3. Business Logic
+### 4. Business Logic
 Do not write raw logic inside controllers. Use **Hooks** and **Actions**.
+All handlers receive a single `context` object.
 
-**Actions (Custom Endpoints):**
+**Actions (Registration):**
 ```typescript
-app.registerAction('complete_all', async (params, context) => {
-    // Logic here
+// Register an operation callable by API/Frontend
+app.registerAction('todo', 'complete_all', async (ctx) => {
+    const { input, api, user } = ctx;
+    // Logic here...
     return { success: true };
 });
 ```
 
 **Hooks (Triggers):**
 ```typescript
-// Valid triggers: beforeCreate, afterCreate, beforeUpdate, etc.
-app.object('todo').on('beforeCreate', async (doc, context) => {
-    if (!doc.title) throw new Error("Title is required");
+// Valid events: beforeCreate, afterCreate, beforeUpdate, afterUpdate, beforeDelete, etc.
+app.on('beforeCreate', 'todo', async (ctx) => {
+    // ctx.data contains the payload for create/update
+    if (!ctx.data.title) {
+        throw new Error("Title is required");
+    }
 });
 ```
 ````
 
 ---
 
-## 如何在工具中使用
+## How to use in tools
 
-### 对于 Cursor 用户
-在你的项目根目录下创建一个 `.cursorrules` 文件，并将上述内容粘贴进去。Cursor 会自动索引这些规则。
+### For Cursor Users
+Create a `.cursorrules` file in your project root and paste the content above. Cursor will automatically index these rules.
 
-### 对于 GitHub Copilot 用户
-在 VS Code 的 Copilot 设置中，或者在每次对话的开头，可以简要引用：
-> "Use the ObjectQL standard: abstract definitions in YAML, `app` instance naming, and JSON AST queries."
-
-### 对于 ChatGPT / Claude
-直接将整个 Prompt 作为对话的第一条消息发送。
+### For GitHub Copilot & Others
+Add the content to your AI configuration, `.github/copilot-instructions.md`, or paste it into the chat context.
