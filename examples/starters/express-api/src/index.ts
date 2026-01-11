@@ -64,9 +64,10 @@ async function main() {
     server.listen(port, () => {
         console.log(`\n🚀 ObjectQL Server running on http://localhost:${port}`);
         console.log(`\n📊 Console UI: http://localhost:${port}/console`);
-        console.log(`\n🔌 JSON-RPC API: http://localhost:${port}/api/objectql`);
-        console.log(`\n🔌 REST API: http://localhost:${port}/api/data`);
-        console.log(`\n📚 Metadata API: http://localhost:${port}/api/metadata`);
+        console.log(`\n🔌 APIs:`);
+        console.log(`  - JSON-RPC:  http://localhost:${port}/api/objectql`);
+        console.log(`  - REST:      http://localhost:${port}/api/data`);
+        console.log(`  - Metadata:  http://localhost:${port}/api/metadata`);
         console.log(`\nTest JSON-RPC:`);
         console.log(`curl -X POST http://localhost:${port}/api/objectql -H "Content-Type: application/json" -d '{"op": "find", "object": "User", "args": {}}'`);
         console.log(`\nTest REST API:`);
