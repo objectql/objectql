@@ -75,8 +75,9 @@ export class MongoDriver implements Driver {
                  const [field, op, value] = item;
                  let mongoCondition: any = {};
                  
-                 // Map 'id' to '_id' for MongoDB compatibility
-                 const dbField = field === 'id' ? '_id' : field;
+                 // Map both 'id' and '_id' to '_id' for MongoDB compatibility
+                 // This ensures backward compatibility for queries using '_id'
+                 const dbField = (field === 'id' || field === '_id') ? '_id' : field;
                  
                  if (dbField === '_id') {
                      mongoCondition[dbField] = this.normalizeId(value);
