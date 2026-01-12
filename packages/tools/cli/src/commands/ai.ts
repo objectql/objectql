@@ -1,69 +1,11 @@
-/**
- * AI-powered commands for application generation and validation.
- */
-
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
 import chalk from 'chalk';
 import OpenAI from 'openai';
 import { Validator } from '@objectql/core';
-import { ObjectConfig, AnyValidationRule, ValidationContext } from '@objectql/types';
+import { ObjectQLAgent, createAgent } from '../agent';
 import { glob } from 'fast-glob';
-
-/**
- * System prompt for ObjectQL metadata generation
- */
-const OBJECTQL_SYSTEM_PROMPT = `You are an expert ObjectQL architect. Your role is to generate valid ObjectQL metadata definitions in YAML format.
-
-ObjectQL is a metadata-driven framework for building enterprise applications. Follow these guidelines:
-
-1. **Object Definitions** (*.object.yml):
-   - Use standard field types: text, number, boolean, select, date, datetime, lookup, currency, email, phone, url, textarea, formula
-   - For relationships, use type: lookup with reference_to: <object_name>
-   - Include required: true for mandatory fields
-   - Add validation rules inline for field-level validation
-   - Use clear, business-friendly labels
-
-2. **Validation Rules** (*.validation.yml):
-   - Support types: field, cross_field, business_rule, state_machine, unique, dependency, custom
-   - Include clear error messages
-   - Add ai_context to explain business intent
-   - Use severity levels: error, warning, info
-
-3. **Best Practices**:
-   - Keep names lowercase with underscores (snake_case)
-   - Use descriptive labels for UI display
-   - Add helpful descriptions and help text
-   - Include reasonable validation constraints
-   - Consider user experience in field ordering
-
-4. **File Naming Convention**:
-   - Objects: <object_name>.object.yml (name is inferred from filename)
-   - Validations: <object_name>.validation.yml
-   - Forms: <form_name>.form.yml
-   - Views: <view_name>.view.yml
-   - Pages: <page_name>.page.yml
-
-Generate clean, well-structured YAML that follows ObjectQL metadata standards.`;
-
-/**
- * Validation system prompt
- */
-const VALIDATION_SYSTEM_PROMPT = `You are an expert ObjectQL metadata validator. Your role is to:
-
-1. Validate YAML structure and syntax
-2. Check compliance with ObjectQL metadata specifications
-3. Identify potential business logic issues
-4. Suggest improvements for data modeling
-5. Verify relationships and dependencies
-6. Check for security and performance concerns
-
-Provide constructive feedback with:
-- Severity level (error, warning, info)
-- Specific location in the file
-- Clear explanation of the issue
-- Suggested fix when possible`;
 
 interface GenerateOptions {
     description: string;
@@ -93,75 +35,30 @@ export async function aiGenerate(options: GenerateOptions): Promise<void> {
         process.exit(1);
     }
 
-    const openai = new OpenAI({ apiKey });
     const outputDir = options.output || './src';
 
     console.log(chalk.blue('🤖 ObjectQL AI Generator\n'));
     console.log(chalk.gray(`Description: ${options.description}`));
     console.log(chalk.gray(`Output directory: ${outputDir}\n`));
 
-    // Prepare the prompt based on type
-    let systemPrompt = OBJECTQL_SYSTEM_PROMPT;
-    let userPrompt = '';
-
-    switch (options.type) {
-        case 'basic':
-            userPrompt = `Generate a minimal ObjectQL application for: ${options.description}
-
-Include:
-- 2-3 core objects with essential fields
-- Basic relationships between objects
-- Simple validation rules
-
-Output format: Provide each file separately with clear filename headers.`;
-            break;
-
-        case 'complete':
-            userPrompt = `Generate a complete ObjectQL enterprise application for: ${options.description}
-
-Include:
-- All necessary objects with comprehensive fields
-- Relationships and lookups
-- Validation rules with business logic
-- Forms for data entry
-- Views for data display
-- Initial data (optional)
-
-Output format: Provide each file separately with clear filename headers.`;
-            break;
-
-        default:
-            userPrompt = `Generate ObjectQL metadata for: ${options.description}
-
-Analyze the requirements and create appropriate objects, fields, relationships, and validation rules.
-
-Output format: Provide each file separately with clear filename headers.`;
-    }
-
     console.log(chalk.yellow('⏳ Generating metadata...'));
 
     try {
-        const completion = await openai.chat.completions.create({
-            model: 'gpt-4',
-            messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: userPrompt }
-            ],
-            temperature: 0.7,
-            max_tokens: 4000,
+        const agent = createAgent(apiKey);
+        const result = await agent.generateApp({
+            description: options.description,
+            type: options.type || 'custom',
         });
 
-        const response = completion.choices[0]?.message?.content;
-        if (!response) {
-            throw new Error('No response from AI');
-        }
-
-        // Parse the response and extract YAML files
-        const files = parseAIResponse(response);
-
-        if (files.length === 0) {
-            console.log(chalk.yellow('\n⚠️  No valid metadata files generated. Response:'));
-            console.log(response);
+        if (!result.success || result.files.length === 0) {
+            console.log(chalk.yellow('\n⚠️  No valid metadata files generated.'));
+            if (result.errors) {
+                result.errors.forEach(err => console.error(chalk.red(`  Error: ${err}`)));
+            }
+            if (result.rawResponse) {
+                console.log(chalk.gray('\nResponse:'));
+                console.log(result.rawResponse);
+            }
             return;
         }
 
@@ -172,7 +69,7 @@ Output format: Provide each file separately with clear filename headers.`;
 
         // Write files
         console.log(chalk.green('\n✅ Generated files:'));
-        for (const file of files) {
+        for (const file of result.files) {
             const filePath = path.join(outputDir, file.filename);
             const fileDir = path.dirname(filePath);
             
@@ -181,7 +78,7 @@ Output format: Provide each file separately with clear filename headers.`;
             }
 
             fs.writeFileSync(filePath, file.content);
-            console.log(chalk.green(`  ✓ ${file.filename}`));
+            console.log(chalk.green(`  ✓ ${file.filename} (${file.type})`));
         }
 
         console.log(chalk.blue(`\n📁 Files written to: ${outputDir}`));
@@ -204,6 +101,7 @@ Output format: Provide each file separately with clear filename headers.`;
  */
 export async function aiValidate(options: ValidateOptions): Promise<void> {
     const apiKey = process.env.OPENAI_API_KEY;
+    
     if (!apiKey) {
         console.error(chalk.red('Error: OPENAI_API_KEY environment variable is not set.'));
         console.log(chalk.yellow('\nNote: AI validation requires OpenAI API key.'));
@@ -211,8 +109,6 @@ export async function aiValidate(options: ValidateOptions): Promise<void> {
         await basicValidate(options);
         return;
     }
-
-    const openai = new OpenAI({ apiKey });
 
     console.log(chalk.blue('🔍 ObjectQL AI Validator\n'));
 
@@ -239,6 +135,7 @@ export async function aiValidate(options: ValidateOptions): Promise<void> {
 
     console.log(chalk.gray(`Found ${files.length} metadata file(s)\n`));
 
+    const agent = createAgent(apiKey);
     let errorCount = 0;
     let warningCount = 0;
 
@@ -249,72 +146,43 @@ export async function aiValidate(options: ValidateOptions): Promise<void> {
         try {
             const content = fs.readFileSync(filePath, 'utf-8');
             
-            // First, validate YAML syntax
-            try {
-                yaml.load(content);
-            } catch (yamlError) {
-                console.log(chalk.red(`  ❌ YAML syntax error: ${yamlError instanceof Error ? yamlError.message : 'Unknown error'}`));
-                errorCount++;
-                continue;
-            }
-
-            // Use AI to validate
-            const validationPrompt = `Validate this ObjectQL metadata file:
-
-Filename: ${relativePath}
-
-Content:
-\`\`\`yaml
-${content}
-\`\`\`
-
-Check for:
-1. Compliance with ObjectQL metadata specifications
-2. Business logic consistency
-3. Data model best practices
-4. Potential security issues
-5. Performance considerations
-
-Provide feedback in this format:
-- [SEVERITY] Location: Issue description
-  Fix: Suggested fix
-
-Where SEVERITY is: ERROR, WARNING, or INFO`;
-
-            const completion = await openai.chat.completions.create({
-                model: 'gpt-4',
-                messages: [
-                    { role: 'system', content: VALIDATION_SYSTEM_PROMPT },
-                    { role: 'user', content: validationPrompt }
-                ],
-                temperature: 0.3,
-                max_tokens: 1500,
+            // Validate using AI agent
+            const result = await agent.validateMetadata({
+                metadata: content,
+                filename: relativePath,
+                checkBusinessLogic: true,
+                checkPerformance: true,
+                checkSecurity: true,
             });
 
-            const feedback = completion.choices[0]?.message?.content || 'No feedback provided';
-
-            // Parse and display feedback
-            const lines = feedback.split('\n');
-            let hasIssues = false;
-
-            for (const line of lines) {
-                if (line.includes('[ERROR]')) {
-                    console.log(chalk.red(`  ${line}`));
-                    errorCount++;
-                    hasIssues = true;
-                } else if (line.includes('[WARNING]')) {
-                    console.log(chalk.yellow(`  ${line}`));
-                    warningCount++;
-                    hasIssues = true;
-                } else if (line.includes('[INFO]')) {
-                    console.log(chalk.blue(`  ${line}`));
-                    hasIssues = true;
-                } else if (line.trim() && hasIssues) {
-                    console.log(chalk.gray(`  ${line}`));
-                }
+            // Display results
+            if (result.errors.length > 0) {
+                result.errors.forEach(error => {
+                    console.log(chalk.red(`  ❌ ERROR: ${error.message}`));
+                    if (error.location) {
+                        console.log(chalk.gray(`     Location: ${error.location}`));
+                    }
+                });
+                errorCount += result.errors.length;
             }
 
-            if (!hasIssues) {
+            if (result.warnings.length > 0) {
+                result.warnings.forEach(warning => {
+                    console.log(chalk.yellow(`  ⚠️  WARNING: ${warning.message}`));
+                    if (warning.suggestion) {
+                        console.log(chalk.gray(`     Suggestion: ${warning.suggestion}`));
+                    }
+                });
+                warningCount += result.warnings.length;
+            }
+
+            if (options.verbose && result.info.length > 0) {
+                result.info.forEach(info => {
+                    console.log(chalk.blue(`  ℹ️  INFO: ${info.message}`));
+                });
+            }
+
+            if (result.valid && result.warnings.length === 0) {
                 console.log(chalk.green('  ✓ No issues found'));
             }
 
@@ -437,8 +305,18 @@ export async function aiChat(options: ChatOptions): Promise<void> {
         output: process.stdout,
     });
 
+    const systemPrompt = `You are an expert ObjectQL architect and consultant. Help users with:
+- ObjectQL metadata specifications
+- Data modeling best practices
+- Validation rules and business logic
+- Relationships and field types
+- Application architecture
+- Performance and security considerations
+
+Provide clear, actionable advice with examples when appropriate.`;
+
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-        { role: 'system', content: OBJECTQL_SYSTEM_PROMPT }
+        { role: 'system', content: systemPrompt }
     ];
 
     if (options.initialPrompt) {
@@ -480,43 +358,4 @@ export async function aiChat(options: ChatOptions): Promise<void> {
     };
 
     askQuestion();
-}
-
-/**
- * Parse AI response and extract YAML files
- */
-function parseAIResponse(response: string): Array<{ filename: string; content: string }> {
-    const files: Array<{ filename: string; content: string }> = [];
-    
-    // Pattern 1: Files with explicit headers like "# filename.object.yml" or "File: filename.object.yml"
-    const fileBlockPattern = /(?:^|\n)(?:#|File:)\s*([a-zA-Z0-9_-]+\.[a-z]+\.yml)\s*\n```(?:yaml|yml)?\n([\s\S]*?)```/gi;
-    let match;
-    
-    while ((match = fileBlockPattern.exec(response)) !== null) {
-        files.push({
-            filename: match[1],
-            content: match[2].trim(),
-        });
-    }
-
-    // Pattern 2: Generic code blocks without explicit filenames
-    if (files.length === 0) {
-        const codeBlockPattern = /```(?:yaml|yml)\n([\s\S]*?)```/g;
-        let blockIndex = 0;
-        
-        while ((match = codeBlockPattern.exec(response)) !== null) {
-            const content = match[1].trim();
-            // Try to infer filename from content
-            const nameMatch = content.match(/^#?\s*([a-zA-Z0-9_-]+)\.(?:object|validation|form|view|page)\.yml/m);
-            const filename = nameMatch ? nameMatch[1] : `generated_${blockIndex}.object.yml`;
-            
-            files.push({
-                filename,
-                content,
-            });
-            blockIndex++;
-        }
-    }
-
-    return files;
 }
