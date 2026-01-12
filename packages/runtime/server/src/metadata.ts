@@ -55,24 +55,27 @@ export function createMetadataHandler(app: IObjectQL) {
             // 1. List Entries (GET /api/metadata/:type)
             // ---------------------------------------------------------
             
-            // Legacy/Alias: /api/metadata or /api/metadata/objects -> list objects
-            if (method === 'GET' && (url === '/api/metadata' || url === '/api/metadata/objects')) {
-                const configs = app.getConfigs();
-                const objects = Object.values(configs).map(obj => ({
-                    name: obj.name,
-                    label: obj.label || obj.name,
-                    icon: obj.icon,
-                    description: obj.description,
-                    fields: obj.fields || {}
-                }));
-                return sendJson({ objects });
-            }
-
             // Generic List: /api/metadata/:type
+            // Also handles legacy /api/metadata (defaults to objects)
             const listMatch = url.match(/^\/api\/metadata\/([^\/]+)$/);
-            if (method === 'GET' && listMatch) {
-                let [, type] = listMatch;
-                if (type === 'objects') type = 'object'; // Should not hit due to order, but safe to keep.
+            const isRootMetadata = url === '/api/metadata';
+            
+            if (method === 'GET' && (listMatch || isRootMetadata)) {
+                let type = isRootMetadata ? 'object' : listMatch![1];
+                if (type === 'objects') type = 'object'; // Alias behavior
+
+                if (type === 'object') {
+                    const configs = app.getConfigs();
+                    const objects = Object.values(configs).map(obj => ({
+                        name: obj.name,
+                        label: obj.label || obj.name,
+                        icon: obj.icon,
+                        description: obj.description,
+                        fields: obj.fields || {}
+                    }));
+                    // Return both keys for compatibility during migration
+                    return sendJson({ objects, object: objects });
+                }
                 
                 const entries = app.metadata.list(type);
                 // Return simple list
@@ -89,9 +92,10 @@ export function createMetadataHandler(app: IObjectQL) {
             
             if (method === 'GET' && detailMatch) {
                 let [, type, id] = detailMatch;
+                if (type === 'objects') type = 'object';
 
                 // Handle Object Special Logic (Field Formatting)
-                if (type === 'objects' || type === 'object') {
+                if (type === 'object') {
                     const metadata = app.getObject(id);
                     if (!metadata) {
                         return sendError(ErrorCode.NOT_FOUND, `Object '${id}' not found`, 404);
@@ -150,7 +154,7 @@ export function createMetadataHandler(app: IObjectQL) {
             
             // GET /api/metadata/objects/:name/fields/:field
             // Legacy path support.
-            const fieldMatch = url.match(/^\/api\/metadata\/objects\/([^\/]+)\/fields\/([^\/\?]+)$/);
+            const fieldMatch = url.match(/^\/api\/metadata\/(?:objects|object)\/([^\/]+)\/fields\/([^\/\?]+)$/);
             if (method === 'GET' && fieldMatch) {
                 const [, objectName, fieldName] = fieldMatch;
                 const metadata = app.getObject(objectName);
@@ -177,7 +181,7 @@ export function createMetadataHandler(app: IObjectQL) {
             }
 
             // GET /api/metadata/objects/:name/actions
-            const actionsMatch = url.match(/^\/api\/metadata\/objects\/([^\/]+)\/actions$/);
+            const actionsMatch = url.match(/^\/api\/metadata\/(?:objects|object)\/([^\/]+)\/actions$/);
             if (method === 'GET' && actionsMatch) {
                 const [, objectName] = actionsMatch;
                 const metadata = app.getObject(objectName);
