@@ -10,15 +10,6 @@
   - @objectql/types@1.6.0
   - @objectql/platform-node@1.6.0
 
-## 2.0.0
-
-### Patch Changes
-
-- Updated dependencies
-  - @objectql/core@1.5.0
-  - @objectql/driver-knex@1.5.0
-  - @objectql/types@1.5.0
-
 ## 1.0.0
 
 ### Added
