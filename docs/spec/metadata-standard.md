@@ -31,9 +31,11 @@ In ObjectQL, **metadata** is machine-readable configuration that describes:
 - Indexes for performance
 - AI/Vector search configuration
 
-**Example**:
+**Example** (`project.object.yml`):
 ```yaml
-name: project
+# File: project.object.yml
+# No need for 'name: project' - it's inferred from filename!
+
 label: Project
 fields:
   name:
@@ -86,8 +88,13 @@ fields:
 - State machine transitions
 - Async validations (external API checks)
 
-**Example**:
+**Example** (`project.validation.yml`):
 ```yaml
+# File: project.validation.yml
+# Object is inferred from filename!
+
+description: "Validation rules for Projects"
+
 rules:
   - name: valid_date_range
     type: cross_field
@@ -105,10 +112,11 @@ rules:
 - Target object
 - List of records to insert (auto-created if validation passes)
 
-**Example**:
+**Example** (`initial.data.yml`):
 ```yaml
-# initial.data.yml
-object: User
+# File: users.data.yml
+# Object is inferred from filename!
+
 records:
   - name: Administrator
     email: admin@company.com
@@ -206,11 +214,13 @@ steps:
 - Column configurations
 - Default filters and sorting
 
-**Example**:
+**Example** (`task_list.view.yml`):
 ```yaml
-name: task_list
+# File: task_list.view.yml
+# View name is inferred from filename!
+
 type: list
-object: tasks
+object: tasks  # Still specify which object to display
 config:
   columns:
     - field: name
@@ -235,9 +245,11 @@ config:
 - Wizard forms (multi-step)
 - Quick create forms
 
-**Example**:
+**Example** (`project_form.form.yml`):
 ```yaml
-name: project_form
+# File: project_form.form.yml
+# Form name is inferred from filename!
+
 type: edit
 object: projects
 layout:
@@ -270,9 +282,11 @@ conditional_logic:
 - Scheduled reports
 - Export formats
 
-**Example**:
+**Example** (`sales_by_region.report.yml`):
 ```yaml
-name: sales_by_region
+# File: sales_by_region.report.yml
+# Report name is inferred from filename!
+
 type: summary
 object: orders
 groupings:
@@ -302,9 +316,11 @@ chart:
 - Role-based visibility
 - AI Context (Agent guidance)
 
-**Example**:
+**Example** (`sales_crm.app.yml`):
 ```yaml
-name: sales_crm
+# File: sales_crm.app.yml
+# App name is inferred from filename!
+
 label: Sales Command Center
 icon: briefcase
 navigation:
@@ -332,8 +348,11 @@ navigation:
 - Sharing rules
 - Permission sets and profiles
 
-**Example**:
+**Example** (`employee.permission.yml`):
 ```yaml
+# File: employee.permission.yml
+# Object is inferred from filename!
+
 object_permissions:
   create: [admin, manager]
   read: [admin, manager, user]
@@ -447,19 +466,28 @@ src/
 ObjectQL provides a universal loader and generic API for all metadata types.
 
 ### File Naming Convention
-Metadata files are automatically loaded based on their extension. The `name` property in the file is used as the ID, or it is inferred from the filename (e.g. `my-list.view.yml` -> `my-list`).
 
-| Type | Extension |
-|---|---|
-| Object | `*.object.yml` |
-| View | `*.view.yml` |
-| Form | `*.form.yml` |
-| Application | `*.app.yml` |
-| Report | `*.report.yml` |
-| Workflow | `*.workflow.yml` |
-| Permission | `*.permission.yml` |
-| Validation | `*.validation.yml` |
-| Initial Data | `*.data.yml` |
+**ObjectQL uses filename-based identification** to eliminate redundancy. The filename (without extension) automatically becomes the resource identifier, making the `name` property **optional** in most cases.
+
+**Convention:** `<identifier>.<type>.yml`
+
+| Type | Extension | Identifier Source | Example |
+|---|---|---|---|
+| Object | `*.object.yml` | Filename = Object name | `project.object.yml` → object: `project` |
+| View | `*.view.yml` | Filename = View name | `task_list.view.yml` → view: `task_list` |
+| Form | `*.form.yml` | Filename = Form name | `project_form.form.yml` → form: `project_form` |
+| Application | `*.app.yml` | Filename = App name | `crm.app.yml` → app: `crm` |
+| Report | `*.report.yml` | Filename = Report name | `sales_summary.report.yml` → report: `sales_summary` |
+| Workflow | `*.workflow.yml` | Filename = Workflow name | `approval.workflow.yml` → workflow: `approval` |
+| Permission | `*.permission.yml` | Filename = Object name | `project.permission.yml` → applies to: `project` |
+| Validation | `*.validation.yml` | Filename = Object name | `project.validation.yml` → applies to: `project` |
+| Initial Data | `*.data.yml` | Filename = Object name | `users.data.yml` → applies to: `users` |
+
+**Benefits:**
+- ✅ **Less redundancy** - No need to repeat the name inside the file
+- ✅ **Cleaner files** - Reduced boilerplate by 10-15%
+- ✅ **Easier to maintain** - Rename file = rename resource
+- ✅ **AI-friendly** - Clear, predictable structure
 
 ### Generic Metadata API
 All metadata types can be queried via the REST API:
@@ -496,14 +524,14 @@ function CustomerList() {
 
 ### ObjectQL Metadata Approach
 ```yaml
-# customers.object.yml
-name: customer
+# customer.object.yml
+# Object name comes from filename!
 fields:
   name: { type: text }
   email: { type: email }
 
-# customers.view.yml
-name: customer_list
+# customer_list.view.yml
+# View name comes from filename!
 type: list
 object: customer
 columns:
