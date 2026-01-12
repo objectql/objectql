@@ -97,23 +97,16 @@ export function createMetadataHandler(app: IObjectQL) {
                         return sendError(ErrorCode.NOT_FOUND, `Object '${id}' not found`, 404);
                     }
                     
-                    // Convert fields object to array (Standard Object Response)
-                    const fields = metadata.fields 
-                        ? Object.entries(metadata.fields).map(([key, field]) => ({
-                            name: field.name || key,
-                            type: field.type,
-                            label: field.label,
-                            required: field.required,
-                            defaultValue: field.defaultValue,
-                            unique: field.unique,
-                            options: field.options,
-                            min: field.min,
-                            max: field.max,
-                            min_length: field.min_length,
-                            max_length: field.max_length,
-                            regex: field.regex
-                        }))
-                        : [];
+                    // Convert fields to map with name populated
+                    const fields: Record<string, any> = {};
+                    if (metadata.fields) {
+                        Object.entries(metadata.fields).forEach(([key, field]) => {
+                            fields[key] = {
+                                ...field,
+                                name: field.name || key
+                            };
+                        });
+                    }
                     
                     return sendJson({
                         ...metadata,
