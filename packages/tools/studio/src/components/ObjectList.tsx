@@ -20,12 +20,12 @@ function ObjectList() {
   const fetchObjects = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/metadata/objects');
+      const response = await fetch('/api/metadata/object');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setObjects(data.objects || []);
+      setObjects(data.object || data.objects || []);
     } catch (e: any) {
       console.error('Failed to fetch objects:', e);
       setError(e.message);

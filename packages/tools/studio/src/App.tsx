@@ -23,6 +23,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/schema" element={<SchemaEditor />} />
             <Route path="/metadata" element={<MetadataBrowser />} />
+            <Route path="/metadata/:type" element={<MetadataBrowser />} />
             <Route path="/object/:name" element={<ObjectViewWrapper />} />
           </Routes>
         </main>

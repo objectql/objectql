@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowLeft, FileJson, Layers, Shield, FileText, Activity, Layout, AlertTriangle, Workflow } from 'lucide-react';
@@ -14,19 +15,22 @@ function JsonViewer({ data }: { data: any }) {
 }
 
 const METADATA_TYPES = [
-    { id: 'objects', label: 'Objects', icon: Layers },
+    { id: 'object', label: 'Objects', icon: Layers },
+    { id: 'app', label: 'Apps', icon: FileJson },
     { id: 'view', label: 'Views', icon: Layout },
     { id: 'permission', label: 'Permissions', icon: Shield },
     { id: 'report', label: 'Reports', icon: FileText },
     { id: 'validation', label: 'Validations', icon: AlertTriangle },
     { id: 'workflow', label: 'Workflows', icon: Workflow },
     { id: 'form', label: 'Forms', icon: Activity },
-    { id: 'app', label: 'Apps', icon: FileJson },
 ];
 
 export function MetadataBrowser() {
+    const { type: urlType } = useParams<{ type: string }>();
+    const navigate = useNavigate();
+    
     // State
-    const [selectedType, setSelectedType] = useState<string | null>(null);
+    const [selectedType, setSelectedType] = useState<string | null>(urlType || null);
     const [selectedItem, setSelectedItem] = useState<string | null>(null);
     
     const [items, setItems] = useState<any[]>([]);
@@ -34,6 +38,15 @@ export function MetadataBrowser() {
     
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Sync selectedType with URL
+    useEffect(() => {
+        if (urlType) {
+            setSelectedType(urlType);
+        } else {
+            setSelectedType(null);
+        }
+    }, [urlType]);
 
     // Fetch list when type changes
     useEffect(() => {
@@ -48,8 +61,9 @@ export function MetadataBrowser() {
             .then(async res => {
                 if (!res.ok) throw new Error(`Failed to fetch ${selectedType}`);
                 const data = await res.json();
-                // API returns { [type]: [...] }
-                const list = data[selectedType] || data.objects || []; 
+                // API returns { [type]: [...] } or for object: { object: [...], objects: [...] }
+                // Handle singular/plural mismatch from API response
+                const list = data[selectedType] || data.objects || data.object || []; 
                 setItems(list);
             })
             .catch(err => setError(err.message))
@@ -93,7 +107,7 @@ export function MetadataBrowser() {
                             <Card 
                                 key={type.id} 
                                 className="cursor-pointer hover:bg-accent/50 transition-colors border-2 hover:border-primary/50"
-                                onClick={() => setSelectedType(type.id)}
+                                onClick={() => navigate(`/metadata/${type.id}`)}
                             >
                                 <CardHeader className="flex flex-row items-center space-y-0 space-x-4">
                                     <div className="p-2 bg-primary/10 rounded-full text-primary">
@@ -120,7 +134,7 @@ export function MetadataBrowser() {
             {/* Left Panel: List */}
             <div className="w-1/3 border-r bg-card flex flex-col">
                 <div className="p-4 border-b flex items-center space-x-2">
-                    <Button variant="ghost" size="sm" onClick={() => setSelectedType(null)}>
+                    <Button variant="ghost" size="sm" onClick={() => navigate('/metadata')}>
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
                     <h2 className="font-semibold text-lg capitalize">{selectedType} List</h2>

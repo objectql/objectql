@@ -36,12 +36,12 @@ function SchemaInspector() {
   const fetchObjects = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/metadata/objects');
+      const response = await fetch('/api/metadata/object');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setObjects(data.objects || []);
+      setObjects(data.object || data.objects || []);
     } catch (e: any) {
       console.error('Failed to fetch objects:', e);
       setError(e.message);
@@ -52,7 +52,7 @@ function SchemaInspector() {
 
   const fetchObjectDetails = async (name: string) => {
     try {
-      const response = await fetch(`/api/metadata/objects/${name}`);
+      const response = await fetch(`/api/metadata/object/${name}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

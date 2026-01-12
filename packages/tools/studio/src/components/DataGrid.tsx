@@ -23,7 +23,7 @@ function DataGrid() {
 
   const fetchObjectMetadata = async () => {
     try {
-      const response = await fetch(`/api/metadata/objects/${objectName}`);
+      const response = await fetch(`/api/metadata/object/${objectName}`);
       if (response.ok) {
         const data = await response.json();
         if (data.fields) {

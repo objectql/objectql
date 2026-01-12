@@ -1,8 +1,18 @@
 import { NavLink } from 'react-router-dom';
 import { useMetadata } from '@/hooks/use-metadata';
-import { Database, Home, Loader2, Table2, FileCode, BookOpen, Layers } from 'lucide-react';
+import { Database, Home, Loader2, Table2, FileCode, BookOpen, Layers, Layout, Shield, FileText, AlertTriangle, Workflow, Activity, FileJson } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+const METADATA_TYPES = [
+    { id: 'object', label: 'Objects', icon: Layers },
+    { id: 'app', label: 'Apps', icon: FileJson },
+    { id: 'view', label: 'Views', icon: Layout },
+    { id: 'permission', label: 'Permissions', icon: Shield },
+    { id: 'report', label: 'Reports', icon: FileText },
+    { id: 'validation', label: 'Validations', icon: AlertTriangle },
+    { id: 'workflow', label: 'Workflows', icon: Workflow },
+    { id: 'form', label: 'Forms', icon: Activity },
+];
 
 export function Sidebar() {
     const { objects, loading, error } = useMetadata();
@@ -30,20 +40,29 @@ export function Sidebar() {
 
                     <div className="pt-4 px-4 pb-2">
                         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                            Development
+                            Metadata
                         </h4>
                     </div>
 
-                    <NavLink 
-                        to="/metadata" 
-                        className={({isActive}) => cn(
-                            "flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                            isActive && "bg-accent/50 text-accent-foreground"
-                        )}
-                    >
-                        <Layers className="h-4 w-4" />
-                        <span>Metadata Explorer</span>
-                    </NavLink>
+                    {METADATA_TYPES.map(type => (
+                        <NavLink 
+                            key={type.id}
+                            to={`/metadata/${type.id}`} 
+                            className={({isActive}) => cn(
+                                "flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                                isActive && "bg-accent/50 text-accent-foreground"
+                            )}
+                        >
+                            <type.icon className="h-4 w-4" />
+                            <span>{type.label}</span>
+                        </NavLink>
+                    ))}
+
+                    <div className="pt-4 px-4 pb-2">
+                        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                            Development
+                        </h4>
+                    </div>
 
                     <NavLink 
                         to="/schema" 
@@ -68,7 +87,7 @@ export function Sidebar() {
 
                     <div className="pt-4 px-4 pb-2">
                         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                            Collections
+                            Data
                         </h4>
                     </div>
 
