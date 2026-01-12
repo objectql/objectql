@@ -14,6 +14,7 @@ export default defineConfig({
     logo: '/logo.svg',
     // Top Navigation
     nav: [
+      { text: 'Tutorials', link: '/tutorials/' },
       { text: 'Guide', link: '/guide/' },
       { text: 'AI-Native', link: '/ai/' },
       { text: 'Protocol', link: '/spec/' },
@@ -22,6 +23,19 @@ export default defineConfig({
 
     // Sidebar Configuration
     sidebar: {
+      // Sidebar for Tutorials
+      '/tutorials/': [
+        {
+          text: 'Tutorials',
+          items: [
+            { text: 'Overview', link: '/tutorials/' },
+            { text: '1. Task Manager (Beginner)', link: '/tutorials/task-manager' },
+            { text: '2. Micro-CRM (Intermediate)', link: '/tutorials/crm-system' },
+            { text: '3. Federated Data (Advanced)', link: '/tutorials/federation' },
+          ]
+        }
+      ],
+      
       // Sidebar for API section
       '/api/': [
         {
@@ -53,6 +67,7 @@ export default defineConfig({
           text: 'Start Here',
           items: [
             { text: 'Introduction', link: '/guide/' },
+            { text: 'Why ObjectQL?', link: '/guide/architecture/why-objectql' },
             { text: 'Quick Start', link: '/guide/getting-started' },
             { text: '🤖 AI Coding Setup', link: '/ai/coding-assistant' },
           ]

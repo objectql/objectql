@@ -31,6 +31,77 @@ features:
     details: Seamlessly aggregate data from local databases and remote microservices into a single unified graph. The "GraphQL Federation" for backend logic.
 ---
 
+## Protocol by Example
+
+See how ObjectQL transforms abstract definitions into working software.
+
+### 1. Logic & Filtering
+
+::: code-group
+
+```yaml [1. Input: account.object.yml]
+name: account
+fields:
+  name: text
+  industry: select
+  revenue: currency
+  status: select
+```
+
+```bash [2. Request: Complex Query]
+{
+  "fields": ["name", "revenue"],
+  "filters": [
+    ["industry", "=", "tech"], 
+    "and", 
+    [["revenue", ">", 1000000], "or", ["status", "=", "vip"]]
+  ]
+}
+```
+
+```sql [3. Output: Optimized SQL]
+SELECT name, revenue 
+FROM account 
+WHERE industry = 'tech' 
+  AND (revenue > 1000000 OR status = 'vip')
+LIMIT 20
+:::
+
+### 2. Auto-Joins & Aggregations
+
+ObjectQL automatically handles `JOIN` operations when you group by related fields.
+
+::: code-group
+
+```yaml [1. Input: payment.object.yml]
+name: payment
+fields:
+  amount: currency
+  account: 
+    type: lookup
+    reference_to: account
+```
+
+```json [2. Request: JSON Protocol]
+{
+  "op": "aggregate",
+  "from": "payment",
+  "group": ["account.industry"],
+  "sum": ["amount"]
+}
+```
+
+```sql [3. Output: SQL Generation]
+SELECT t2.industry, SUM(t1.amount)
+FROM payment AS t1
+LEFT JOIN account AS t2 ON t1.account = t2.id
+GROUP BY t2.industry
+```
+
+:::
+
+## The Shift to AI Programming
+
 ## The Shift to AI Programming
 
 We believe the future of software development isn't about humans writing better code—it's about **Humans architecting systems that AI can implement**.
