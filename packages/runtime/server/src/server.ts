@@ -61,11 +61,7 @@ export class ObjectQLServer {
                     break;
                 case 'findOne':
                     // Support both string ID and query object
-                    if (typeof req.args === 'string') {
-                        result = await repo.findOne({ filters: [['_id', '=', req.args]] });
-                    } else {
-                        result = await repo.findOne(req.args);
-                    }
+                    result = await repo.findOne(req.args);
                     break;
                 case 'create':
                     result = await repo.create(req.args);

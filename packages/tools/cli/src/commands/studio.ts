@@ -118,7 +118,30 @@ export async function startStudio(options: { port: number; dir: string, open?: b
         
         // Load Schema
         const loader = new ObjectLoader(app.metadata);
-        loader.load(rootDir);
+
+        // Load Presets
+        if (Array.isArray(config.presets)) {
+            console.log(chalk.gray(`Loading ${config.presets.length} presets...`));
+            for (const preset of config.presets) {
+                try {
+                    loader.loadPackage(preset);
+                } catch (e: any) {
+                    console.warn(chalk.yellow(`Failed to load preset ${preset}:`), e.message);
+                }
+            }
+        }
+
+        // Load Schema from Directory
+        // In a monorepo root with presets, scanning everything is dangerous.
+        // We check if we are in a monorepo-like environment.
+        const isMonorepoRoot = fs.existsSync(path.join(rootDir, 'pnpm-workspace.yaml')) || fs.existsSync(path.join(rootDir, 'pnpm-lock.yaml'));
+        
+        // If we are in a likely monorepo root AND have presets, skip recursive scan
+        if (isMonorepoRoot && config.presets && config.presets.length > 0) {
+             console.log(chalk.yellow('Monorepo root detected with presets. Skipping recursive file scan of root directory to avoid conflicts.'));
+        } else {
+             loader.load(rootDir);
+        }
     }
 
     // 2. Load Schema & Init

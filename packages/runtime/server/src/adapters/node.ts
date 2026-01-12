@@ -105,7 +105,7 @@ export function createNodeHandler(app: IObjectQL) {
                     await handleRequest({
                         op: 'findOne',
                         object: objectName,
-                        args: { filters: [['_id', '=', id]] } // Assuming _id or id mapping
+                        args: id
                     });
                 } 
                 // GET /api/data/:object -> find (List)
