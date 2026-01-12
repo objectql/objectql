@@ -416,7 +416,7 @@ export class Validator {
         }
 
         // Build query filter
-        const filters: any = {};
+        const filters: Record<string, any> = {};
 
         // Add field conditions
         for (const field of fieldsToCheck) {
@@ -432,8 +432,9 @@ export class Validator {
 
             // Handle case sensitivity for string values
             if (typeof fieldValue === 'string' && rule.case_sensitive === false) {
-                // For case-insensitive, we would need regex or toLowerCase comparison
-                // This is a simplified implementation - driver-specific logic may be needed
+                // NOTE: Case-insensitive comparison requires driver-specific implementation
+                // Some drivers support regex (MongoDB), others use LOWER() function (SQL)
+                // For now, we use exact match - driver adapters should implement case-insensitive logic
                 filters[field] = fieldValue;
             } else {
                 filters[field] = fieldValue;
