@@ -467,5 +467,9 @@ export class KnexDriver implements Driver {
         }
         return data;
     }
+
+    async disconnect() {
+        await this.knex.destroy();
+    }
 }
 

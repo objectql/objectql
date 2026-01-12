@@ -40,6 +40,10 @@ describe('MongoDriver Integration Tests', () => {
     afterEach(async () => {
         if (skipTests) return;
         
+        if (driver) {
+            await driver.disconnect();
+        }
+
         try {
             // Clean up test database
             const client = new MongoClient(MONGO_URL, { serverSelectionTimeoutMS: 2000 });
@@ -64,7 +68,7 @@ describe('MongoDriver Integration Tests', () => {
             const result = await driver.create('users', data);
             
             expect(result).toBeDefined();
-            expect(result._id).toBeDefined();
+            expect(result.id).toBeDefined();
             expect(result.name).toBe('Alice');
             expect(result.age).toBe(25);
         });
@@ -79,7 +83,7 @@ describe('MongoDriver Integration Tests', () => {
 
             const result = await driver.create('users', data);
             
-            expect(result._id).toBe('custom-id-123');
+            expect(result.id).toBe('custom-id-123');
             expect(result.name).toBe('Bob');
         });
 
@@ -159,7 +163,7 @@ describe('MongoDriver Integration Tests', () => {
             if (skipTests) return;
             const created = await driver.create('users', { name: 'Alice', age: 25 });
             
-            const found = await driver.findOne('users', created._id);
+            const found = await driver.findOne('users', created.id);
             
             expect(found).toBeDefined();
             expect(found.name).toBe('Alice');
@@ -183,9 +187,9 @@ describe('MongoDriver Integration Tests', () => {
             if (skipTests) return;
             const created = await driver.create('users', { name: 'Alice', age: 25 });
             
-            await driver.update('users', created._id, { age: 26 });
+            await driver.update('users', created.id, { age: 26 });
             
-            const updated = await driver.findOne('users', created._id);
+            const updated = await driver.findOne('users', created.id);
             expect(updated.age).toBe(26);
             expect(updated.name).toBe('Alice'); // Should not be removed
         });
@@ -194,9 +198,9 @@ describe('MongoDriver Integration Tests', () => {
             if (skipTests) return;
             const created = await driver.create('users', { name: 'Alice', age: 25, score: 10 });
             
-            await driver.update('users', created._id, { $inc: { score: 5 } });
+            await driver.update('users', created.id, { $inc: { score: 5 } });
             
-            const updated = await driver.findOne('users', created._id);
+            const updated = await driver.findOne('users', created.id);
             expect(updated.score).toBe(15);
         });
 
@@ -204,10 +208,10 @@ describe('MongoDriver Integration Tests', () => {
             if (skipTests) return;
             const created = await driver.create('users', { name: 'Alice', age: 25 });
             
-            const deleteCount = await driver.delete('users', created._id);
+            const deleteCount = await driver.delete('users', created.id);
             expect(deleteCount).toBe(1);
             
-            const found = await driver.findOne('users', created._id);
+            const found = await driver.findOne('users', created.id);
             expect(found).toBeNull();
         });
 
@@ -371,7 +375,7 @@ describe('MongoDriver Integration Tests', () => {
             });
 
             expect(results.length).toBe(3);
-            expect(results[0]._id).toBe('3');
+            expect(results[0].id).toBe('3');
         });
 
         test('should combine skip and limit for pagination', async () => {
@@ -383,7 +387,7 @@ describe('MongoDriver Integration Tests', () => {
             });
 
             expect(page1.length).toBe(2);
-            expect(page1[0]._id).toBe('1');
+            expect(page1[0].id).toBe('1');
 
             const page2 = await driver.find('products', {
                 sort: [['_id', 'asc']],
@@ -392,7 +396,7 @@ describe('MongoDriver Integration Tests', () => {
             });
 
             expect(page2.length).toBe(2);
-            expect(page2[0]._id).toBe('3');
+            expect(page2[0].id).toBe('3');
         });
 
         test('should select specific fields', async () => {
@@ -442,10 +446,10 @@ describe('MongoDriver Integration Tests', () => {
             
             expect(results.length).toBe(2);
             
-            const alice = results.find(r => r._id === 'Alice');
+            const alice = results.find(r => r.id === 'Alice');
             expect(alice.total).toBe(300);
 
-            const bob = results.find(r => r._id === 'Bob');
+            const bob = results.find(r => r.id === 'Bob');
             expect(bob.total).toBe(150);
         });
 
@@ -459,10 +463,10 @@ describe('MongoDriver Integration Tests', () => {
             
             expect(results.length).toBe(2);
             
-            const completed = results.find(r => r._id === 'completed');
+            const completed = results.find(r => r.id === 'completed');
             expect(completed.count).toBe(3);
 
-            const pending = results.find(r => r._id === 'pending');
+            const pending = results.find(r => r.id === 'pending');
             expect(pending.count).toBe(1);
         });
 
@@ -515,7 +519,7 @@ describe('MongoDriver Integration Tests', () => {
 
             const created = await driver.create('users', data);
             
-            const found = await driver.findOne('users', created._id);
+            const found = await driver.findOne('users', created.id);
             expect(found.address).toEqual(data.address);
         });
 
@@ -529,7 +533,7 @@ describe('MongoDriver Integration Tests', () => {
 
             const created = await driver.create('users', data);
             
-            const found = await driver.findOne('users', created._id);
+            const found = await driver.findOne('users', created.id);
             expect(found.tags).toEqual(['developer', 'designer']);
             expect(found.scores).toEqual([10, 20, 30]);
         });
