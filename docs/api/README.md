@@ -38,6 +38,48 @@ ObjectQL provides a **unified query protocol** that can be exposed through multi
 4. **Secure**: Built-in validation, permission checks, SQL injection prevention
 5. **Universal**: Same query works across MongoDB, PostgreSQL, SQLite
 
+### Unified ID Field
+
+ObjectQL uses a **unified `id` field** as the primary key across all database drivers:
+
+- **Consistent Naming**: Always use `id` in API requests and responses
+- **Database Agnostic**: Works seamlessly with both MongoDB (which uses `_id` internally) and SQL databases
+- **Automatic Mapping**: MongoDB driver transparently converts between `id` (API) and `_id` (database)
+
+**Example:**
+```json
+// Create with custom ID - works with any driver
+{
+  "op": "create",
+  "object": "users",
+  "args": {
+    "id": "user-123",
+    "name": "Alice"
+  }
+}
+
+// Query by ID - works with any driver
+{
+  "op": "find",
+  "object": "users",
+  "args": {
+    "filters": [["id", "=", "user-123"]]
+  }
+}
+
+// Response always uses 'id'
+{
+  "data": [
+    {
+      "id": "user-123",
+      "name": "Alice"
+    }
+  ]
+}
+```
+
+See the [Driver Documentation](../guide/drivers/index.md) for more details.
+
 ---
 
 ## JSON-RPC Style API
