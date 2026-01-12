@@ -6,7 +6,7 @@ This document describes the comprehensive test coverage for ObjectQL database dr
 
 The test suite ensures all database drivers implement the `Driver` interface correctly and handle edge cases properly.
 
-## SQL Driver (KnexDriver)
+## SQL Driver (SqlDriver)
 
 Location: `packages/drivers/sql/test/`
 
@@ -181,7 +181,7 @@ pnpm test
 
 | Driver | Files | Tests | Status |
 |--------|-------|-------|--------|
-| SQL (KnexDriver) | 3 | 54 | ✅ All Passing |
+| SQL (SqlDriver) | 3 | 54 | ✅ All Passing |
 | MongoDB (MongoDriver) | 2 | 42 | ✅ All Passing (39 skip without MongoDB) |
 | **Total** | **5** | **96** | **✅** |
 

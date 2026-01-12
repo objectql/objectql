@@ -1,11 +1,11 @@
-import { KnexDriver } from '../src';
+import { SqlDriver } from '../src';
 
-describe('KnexDriver Advanced Operations (SQLite)', () => {
-    let driver: KnexDriver;
+describe('SqlDriver Advanced Operations (SQLite)', () => {
+    let driver: SqlDriver;
     let knexInstance: any;
 
     beforeEach(async () => {
-        driver = new KnexDriver({
+        driver = new SqlDriver({
             client: 'sqlite3',
             connection: {
                 filename: ':memory:'
