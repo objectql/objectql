@@ -5,8 +5,7 @@ import { MongoClient } from 'mongodb';
  * Integration tests for MongoDriver with real MongoDB operations.
  * Note: These tests connect to a local MongoDB instance (default: mongodb://localhost:27017)
  * or a custom instance via the MONGO_URL environment variable.
- * If MongoDB is not available, the setup/cleanup hooks return early; the tests themselves
- * are not automatically skipped and are intended to be run only when MongoDB is available.
+ * Tests automatically skip when MongoDB is not available.
  */
 
 // Skip tests if MongoDB is not available
@@ -53,7 +52,9 @@ describe('MongoDriver Integration Tests', () => {
     });
 
     describe('Basic CRUD Operations', () => {
-        test.skip('should create a document', async () => {
+        test('should create a document', async () => {
+            if (skipTests) return;
+            
             const data = {
                 name: 'Alice',
                 age: 25,
@@ -68,7 +69,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(result.age).toBe(25);
         });
 
-        test.skip('should create document with custom _id', async () => {
+        test('should create document with custom _id', async () => {
+            if (skipTests) return;
             const data = {
                 _id: 'custom-id-123',
                 name: 'Bob',
@@ -81,7 +83,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(result.name).toBe('Bob');
         });
 
-        test.skip('should find documents with filters', async () => {
+        test('should find documents with filters', async () => {
+            if (skipTests) return;
             // Insert test data
             await driver.create('users', { name: 'Alice', age: 25, status: 'active' });
             await driver.create('users', { name: 'Bob', age: 30, status: 'active' });
@@ -95,7 +98,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(results.every(r => r.status === 'active')).toBe(true);
         });
 
-        test.skip('should find documents with comparison operators', async () => {
+        test('should find documents with comparison operators', async () => {
+            if (skipTests) return;
             await driver.create('users', { name: 'Alice', age: 25 });
             await driver.create('users', { name: 'Bob', age: 30 });
             await driver.create('users', { name: 'Charlie', age: 20 });
@@ -108,7 +112,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(results.every(r => r.age > 22)).toBe(true);
         });
 
-        test.skip('should find documents with OR filters', async () => {
+        test('should find documents with OR filters', async () => {
+            if (skipTests) return;
             await driver.create('users', { name: 'Alice', age: 25 });
             await driver.create('users', { name: 'Bob', age: 30 });
             await driver.create('users', { name: 'Charlie', age: 20 });
@@ -124,7 +129,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(results.length).toBe(2);
         });
 
-        test.skip('should find documents with in filter', async () => {
+        test('should find documents with in filter', async () => {
+            if (skipTests) return;
             await driver.create('users', { name: 'Alice', status: 'active' });
             await driver.create('users', { name: 'Bob', status: 'pending' });
             await driver.create('users', { name: 'Charlie', status: 'inactive' });
@@ -136,7 +142,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(results.length).toBe(2);
         });
 
-        test.skip('should find documents with contains filter', async () => {
+        test('should find documents with contains filter', async () => {
+            if (skipTests) return;
             await driver.create('users', { name: 'Alice Johnson' });
             await driver.create('users', { name: 'Bob Smith' });
             await driver.create('users', { name: 'Charlie Johnson' });
@@ -148,7 +155,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(results.length).toBe(2);
         });
 
-        test.skip('should find one document by id', async () => {
+        test('should find one document by id', async () => {
+            if (skipTests) return;
             const created = await driver.create('users', { name: 'Alice', age: 25 });
             
             const found = await driver.findOne('users', created._id);
@@ -158,7 +166,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(found.age).toBe(25);
         });
 
-        test.skip('should find one document by query', async () => {
+        test('should find one document by query', async () => {
+            if (skipTests) return;
             await driver.create('users', { name: 'Alice', age: 25 });
             await driver.create('users', { name: 'Bob', age: 30 });
 
@@ -170,7 +179,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(found.name).toBe('Bob');
         });
 
-        test.skip('should update a document', async () => {
+        test('should update a document', async () => {
+            if (skipTests) return;
             const created = await driver.create('users', { name: 'Alice', age: 25 });
             
             await driver.update('users', created._id, { age: 26 });
@@ -180,7 +190,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(updated.name).toBe('Alice'); // Should not be removed
         });
 
-        test.skip('should update with atomic operators', async () => {
+        test('should update with atomic operators', async () => {
+            if (skipTests) return;
             const created = await driver.create('users', { name: 'Alice', age: 25, score: 10 });
             
             await driver.update('users', created._id, { $inc: { score: 5 } });
@@ -189,7 +200,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(updated.score).toBe(15);
         });
 
-        test.skip('should delete a document', async () => {
+        test('should delete a document', async () => {
+            if (skipTests) return;
             const created = await driver.create('users', { name: 'Alice', age: 25 });
             
             const deleteCount = await driver.delete('users', created._id);
@@ -199,7 +211,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(found).toBeNull();
         });
 
-        test.skip('should count documents', async () => {
+        test('should count documents', async () => {
+            if (skipTests) return;
             await driver.create('users', { name: 'Alice', status: 'active' });
             await driver.create('users', { name: 'Bob', status: 'active' });
             await driver.create('users', { name: 'Charlie', status: 'inactive' });
@@ -208,7 +221,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(count).toBe(2);
         });
 
-        test.skip('should count all documents', async () => {
+        test('should count all documents', async () => {
+            if (skipTests) return;
             await driver.create('users', { name: 'Alice' });
             await driver.create('users', { name: 'Bob' });
             await driver.create('users', { name: 'Charlie' });
@@ -219,7 +233,8 @@ describe('MongoDriver Integration Tests', () => {
     });
 
     describe('Bulk Operations', () => {
-        test.skip('should create many documents', async () => {
+        test('should create many documents', async () => {
+            if (skipTests) return;
             const data = [
                 { name: 'Alice', age: 25 },
                 { name: 'Bob', age: 30 },
@@ -235,7 +250,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(count).toBe(3);
         });
 
-        test.skip('should update many documents', async () => {
+        test('should update many documents', async () => {
+            if (skipTests) return;
             await driver.create('users', { name: 'Alice', status: 'pending' });
             await driver.create('users', { name: 'Bob', status: 'pending' });
             await driver.create('users', { name: 'Charlie', status: 'active' });
@@ -253,7 +269,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(results.length).toBe(3);
         });
 
-        test.skip('should update many with atomic operators', async () => {
+        test('should update many with atomic operators', async () => {
+            if (skipTests) return;
             await driver.create('users', { name: 'Alice', score: 10, active: true });
             await driver.create('users', { name: 'Bob', score: 20, active: true });
             await driver.create('users', { name: 'Charlie', score: 30, active: false });
@@ -271,7 +288,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(alice.score).toBe(15);
         });
 
-        test.skip('should delete many documents', async () => {
+        test('should delete many documents', async () => {
+            if (skipTests) return;
             await driver.create('users', { name: 'Alice', status: 'inactive' });
             await driver.create('users', { name: 'Bob', status: 'inactive' });
             await driver.create('users', { name: 'Charlie', status: 'active' });
@@ -286,7 +304,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(remaining).toBe(1);
         });
 
-        test.skip('should handle empty bulk operations', async () => {
+        test('should handle empty bulk operations', async () => {
+            if (skipTests) return;
             const result = await driver.createMany('users', []);
             expect(result).toBeDefined();
 
@@ -315,7 +334,8 @@ describe('MongoDriver Integration Tests', () => {
             await driver.create('products', { _id: '5', name: 'Monitor', price: 400, category: 'electronics' });
         });
 
-        test.skip('should sort results ascending', async () => {
+        test('should sort results ascending', async () => {
+            if (skipTests) return;
             const results = await driver.find('products', {
                 sort: [['price', 'asc']]
             });
@@ -324,7 +344,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(results[results.length - 1].price).toBe(1200);
         });
 
-        test.skip('should sort results descending', async () => {
+        test('should sort results descending', async () => {
+            if (skipTests) return;
             const results = await driver.find('products', {
                 sort: [['price', 'desc']]
             });
@@ -333,7 +354,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(results[results.length - 1].price).toBe(25);
         });
 
-        test.skip('should limit results', async () => {
+        test('should limit results', async () => {
+            if (skipTests) return;
             const results = await driver.find('products', {
                 limit: 2
             });
@@ -341,7 +363,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(results.length).toBe(2);
         });
 
-        test.skip('should skip results', async () => {
+        test('should skip results', async () => {
+            if (skipTests) return;
             const results = await driver.find('products', {
                 sort: [['_id', 'asc']],
                 skip: 2
@@ -351,7 +374,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(results[0]._id).toBe('3');
         });
 
-        test.skip('should combine skip and limit for pagination', async () => {
+        test('should combine skip and limit for pagination', async () => {
+            if (skipTests) return;
             const page1 = await driver.find('products', {
                 sort: [['_id', 'asc']],
                 skip: 0,
@@ -371,7 +395,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(page2[0]._id).toBe('3');
         });
 
-        test.skip('should select specific fields', async () => {
+        test('should select specific fields', async () => {
+            if (skipTests) return;
             const results = await driver.find('products', {
                 fields: ['name', 'price']
             });
@@ -382,7 +407,8 @@ describe('MongoDriver Integration Tests', () => {
             // _id is always included by MongoDB unless explicitly excluded
         });
 
-        test.skip('should combine filters, sort, skip, and limit', async () => {
+        test('should combine filters, sort, skip, and limit', async () => {
+            if (skipTests) return;
             const results = await driver.find('products', {
                 filters: [['category', '=', 'electronics']],
                 sort: [['price', 'desc']],
@@ -405,7 +431,8 @@ describe('MongoDriver Integration Tests', () => {
             await driver.create('orders', { customer: 'Bob', amount: 50, status: 'pending' });
         });
 
-        test.skip('should execute simple aggregation pipeline', async () => {
+        test('should execute simple aggregation pipeline', async () => {
+            if (skipTests) return;
             const pipeline = [
                 { $match: { status: 'completed' } },
                 { $group: { _id: '$customer', total: { $sum: '$amount' } } }
@@ -422,7 +449,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(bob.total).toBe(150);
         });
 
-        test.skip('should count with aggregation', async () => {
+        test('should count with aggregation', async () => {
+            if (skipTests) return;
             const pipeline = [
                 { $group: { _id: '$status', count: { $sum: 1 } } }
             ];
@@ -438,7 +466,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(pending.count).toBe(1);
         });
 
-        test.skip('should calculate average with aggregation', async () => {
+        test('should calculate average with aggregation', async () => {
+            if (skipTests) return;
             const pipeline = [
                 { $group: { _id: null, avgAmount: { $avg: '$amount' } } }
             ];
@@ -451,7 +480,8 @@ describe('MongoDriver Integration Tests', () => {
     });
 
     describe('Edge Cases', () => {
-        test.skip('should handle empty collection', async () => {
+        test('should handle empty collection', async () => {
+            if (skipTests) return;
             const results = await driver.find('empty_collection', {});
             expect(results.length).toBe(0);
 
@@ -459,7 +489,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(count).toBe(0);
         });
 
-        test.skip('should handle null values', async () => {
+        test('should handle null values', async () => {
+            if (skipTests) return;
             await driver.create('users', { name: 'Alice', email: null, age: null });
 
             const result = await driver.findOne('users', null as any, {
@@ -471,7 +502,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(result.age).toBeNull();
         });
 
-        test.skip('should handle nested objects', async () => {
+        test('should handle nested objects', async () => {
+            if (skipTests) return;
             const data = {
                 name: 'Alice',
                 address: {
@@ -487,7 +519,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(found.address).toEqual(data.address);
         });
 
-        test.skip('should handle arrays', async () => {
+        test('should handle arrays', async () => {
+            if (skipTests) return;
             const data = {
                 name: 'Alice',
                 tags: ['developer', 'designer'],
@@ -501,12 +534,14 @@ describe('MongoDriver Integration Tests', () => {
             expect(found.scores).toEqual([10, 20, 30]);
         });
 
-        test.skip('should return null for non-existent document', async () => {
+        test('should return null for non-existent document', async () => {
+            if (skipTests) return;
             const found = await driver.findOne('users', 'nonexistent-id');
             expect(found).toBeNull();
         });
 
-        test.skip('should handle skip beyond total count', async () => {
+        test('should handle skip beyond total count', async () => {
+            if (skipTests) return;
             await driver.create('users', { name: 'Alice' });
             
             const results = await driver.find('users', {
@@ -517,7 +552,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(results.length).toBe(0);
         });
 
-        test.skip('should handle complex filter combinations', async () => {
+        test('should handle complex filter combinations', async () => {
+            if (skipTests) return;
             await driver.create('users', { name: 'Alice', age: 25, status: 'active' });
             await driver.create('users', { name: 'Bob', age: 30, status: 'active' });
             await driver.create('users', { name: 'Charlie', age: 20, status: 'inactive' });
@@ -533,7 +569,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(results.length).toBe(2);
         });
 
-        test.skip('should handle nin (not in) filter', async () => {
+        test('should handle nin (not in) filter', async () => {
+            if (skipTests) return;
             await driver.create('users', { name: 'Alice', status: 'active' });
             await driver.create('users', { name: 'Bob', status: 'inactive' });
             await driver.create('users', { name: 'Charlie', status: 'pending' });
@@ -546,7 +583,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(results[0].name).toBe('Alice');
         });
 
-        test.skip('should handle != operator', async () => {
+        test('should handle != operator', async () => {
+            if (skipTests) return;
             await driver.create('users', { name: 'Alice', status: 'active' });
             await driver.create('users', { name: 'Bob', status: 'inactive' });
 
@@ -558,7 +596,8 @@ describe('MongoDriver Integration Tests', () => {
             expect(results[0].name).toBe('Alice');
         });
 
-        test.skip('should handle >= and <= operators', async () => {
+        test('should handle >= and <= operators', async () => {
+            if (skipTests) return;
             await driver.create('users', { name: 'Alice', age: 25 });
             await driver.create('users', { name: 'Bob', age: 30 });
             await driver.create('users', { name: 'Charlie', age: 35 });
