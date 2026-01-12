@@ -16,9 +16,14 @@ export default defineConfig({
     nav: [
       { text: 'Tutorials', link: '/tutorials/' },
       { text: 'Guide', link: '/guide/' },
-      { text: 'AI-Native', link: '/ai/' },
-      { text: 'Protocol', link: '/spec/' },
-      { text: 'API Reference', link: '/api/' },
+      { text: 'AI Agents', link: '/ai/' },
+      { 
+        text: 'Reference', 
+        items: [
+          { text: 'Protocol Spec (YAML)', link: '/spec/' },
+          { text: 'Node.js SDK', link: '/api/' },
+        ]
+      },
     ],
 
     // Sidebar Configuration
