@@ -7,6 +7,14 @@ ObjectQL resides at the intersection of Data and Artificial Intelligence. It is 
 
 ## Overview
 
+### ✨ Generating Apps
+Turn natural language into full backend systems instantly. Because ObjectQL uses declarative YAML/JSON, LLMs can "write" software by simply generating configuration files.
+
+*   [Zero-Shot Generation](/ai/generating-apps)
+*   [Prompt Templates](/ai/generating-apps#prompting-guide)
+
+[Start Generating →](/ai/generating-apps)
+
 ### 🏗️ Building AI Apps
 Learn how to use ObjectQL as the data engine for your RAG (Retrieval-Augmented Generation) applications, semantic search, and AI agents.
 

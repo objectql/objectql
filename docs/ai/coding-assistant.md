@@ -2,13 +2,47 @@
 
 One of the core design goals of ObjectQL is to be the **most LLM-friendly backend protocol**.
 
-If you are using **Cursor**, **GitHub Copilot Chat**, **Windsurf**, or **ChatGPT** for development, please copy the following **System Prompt** into your AI configuration or project rules (e.g., `.cursorrules`). This allows the AI to accurately understand ObjectQL's syntax and best practices.
+If you are using **Cursor**, **GitHub Copilot Chat**, **Windsurf**, or **ChatGPT** for development, please copy the following **System Prompt** into your AI configuration or project rules (e.g., `.cursorrules`). 
+This allows the AI to accurately understand ObjectQL's syntax and best practices.
+
+## How to Use Effectively
+
+### 1. "Before" vs "After"
+
+Without this prompt, Copilot assumes you are using a generic ORM (like TypeORM) and might hallucinate classes:
+
+> ❌ **Bad AI Output:**
+> `await getConnection().manager.find(Todo, { where: { priority: 'high' } })`
+> *(ObjectQL doesn't use classes or `getConnection`)*
+
+With the System Prompt, it understands the **Context + Repository** pattern:
+
+> ✅ **Good AI Output:**
+> `await ctx.object('todo').find({ filters: [['priority', '=', 'high']] })`
+
+### 2. Prompting Strategy
+
+When asking the AI to write code, be explicit about the schema you have defined.
+
+**User Prompt:**
+> "Write an API route to complete a todo item. The object is named 'todo' and has a 'completed' boolean field."
+
+**AI Response (with System Prompt):**
+```typescript
+app.post('/api/todo/:id/complete', async (req, res) => {
+    const { id } = req.params;
+    // Creates a context for the current user (if auth is handled)
+    const ctx = app.createContext({ userId: req.user?.id });
+    
+    await ctx.object('todo').update(id, { completed: true });
+    res.json({ success: true });
+});
+```
 
 ## Standard System Prompt
 
 Click the copy button in the top right to get the full prompt:
-
-````text
+`text
 You are an expert developer specializing in **ObjectQL**, a metadata-driven, low-code backend engine.
 
 ### Core Principles

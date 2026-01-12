@@ -37,6 +37,7 @@ export default defineConfig({
             { text: '1. Task Manager (Beginner)', link: '/tutorials/task-manager' },
             { text: '2. Micro-CRM (Intermediate)', link: '/tutorials/crm-system' },
             { text: '3. Federated Data (Advanced)', link: '/tutorials/federation' },
+            { text: '4. AI Data Agent (AI-Native)', link: '/tutorials/ai-agent' },
           ]
         }
       ],
@@ -60,7 +61,8 @@ export default defineConfig({
            text: 'AI-Native Ecosystem',
            items: [
              { text: 'Overview', link: '/ai/' },
-             { text: 'Building AI Apps', link: '/ai/building-apps' },
+             { text: 'Generating Apps (Zero-Shot)', link: '/ai/generating-apps' },
+             { text: 'Building AI Agents', link: '/ai/building-apps' },
              { text: 'AI Coding Assistant', link: '/ai/coding-assistant' },
            ]
          }
@@ -69,34 +71,39 @@ export default defineConfig({
       // Sidebar for Guide section
       '/guide/': [
         {
-          text: 'Start Here',
+          text: 'Getting Started',
           items: [
             { text: 'Introduction', link: '/guide/' },
             { text: 'Why ObjectQL?', link: '/guide/architecture/why-objectql' },
             { text: 'Quick Start', link: '/guide/getting-started' },
-            { text: '🤖 AI Coding Setup', link: '/ai/coding-assistant' },
+            { text: 'IDE Setup', link: '/guide/ide-setup' },
           ]
         },
         {
-          text: 'Core Fundamentals',
+          text: 'Data & Logic Layers',
           items: [
             { text: 'Data Modeling', link: '/guide/data-modeling' },
-            { text: 'Page Metadata', link: '/guide/page-metadata' },
-            { text: 'Metadata Organization', link: '/guide/metadata-organization' },
             { text: 'Querying Data', link: '/guide/querying' },
-            { text: 'Business Logic', link: '/guide/logic-hooks' },
+            { text: 'Business Logic (Hooks)', link: '/guide/logic-hooks' },
+            { text: 'Custom Actions (RPC)', link: '/guide/logic-actions' },
           ]
         },
         {
-          text: 'Advanced Features',
+          text: 'System Architecture',
           items: [
+            { text: 'File Organization', link: '/guide/metadata-organization' },
             { text: 'Microservices & Federation', link: '/guide/microservices' },
-            { text: 'Custom Actions (RPC)', link: '/guide/logic-actions' },
             { text: 'Plugin System', link: '/guide/plugins' },
           ]
         },
         {
-          text: 'Integration & Deployment',
+          text: 'Low-Code UI',
+          items: [
+            { text: 'Page & Layouts', link: '/guide/page-metadata' },
+          ]
+        },
+        {
+          text: 'Operations & Deployment',
           items: [
             { text: 'Server Integration', link: '/guide/server-integration' },
             { text: 'Database Drivers', link: '/guide/drivers/' },
