@@ -7,7 +7,7 @@ import { initProject } from './commands/init';
 import { newMetadata } from './commands/new';
 import { i18nExtract, i18nInit, i18nValidate } from './commands/i18n';
 import { migrate, migrateCreate, migrateStatus } from './commands/migrate';
-import { aiGenerate, aiValidate, aiChat } from './commands/ai';
+import { aiGenerate, aiValidate, aiChat, aiConversational } from './commands/ai';
 
 const program = new Command();
 
@@ -232,6 +232,20 @@ aiCmd
     .action(async (options) => {
         try {
             await aiChat({ initialPrompt: options.prompt });
+        } catch (error) {
+            console.error(error);
+            process.exit(1);
+        }
+    });
+
+aiCmd
+    .command('conversational')
+    .alias('convo')
+    .description('Build application through step-by-step conversation')
+    .option('-o, --output <path>', 'Output directory for generated files', './src')
+    .action(async (options) => {
+        try {
+            await aiConversational(options);
         } catch (error) {
             console.error(error);
             process.exit(1);

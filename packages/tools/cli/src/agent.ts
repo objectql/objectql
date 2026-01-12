@@ -51,12 +51,42 @@ export interface GenerateAppResult {
     files: Array<{
         filename: string;
         content: string;
-        type: 'object' | 'validation' | 'form' | 'view' | 'page' | 'other';
+        type: 'object' | 'validation' | 'form' | 'view' | 'page' | 'menu' | 'action' | 'hook' | 'permission' | 'workflow' | 'report' | 'data' | 'application' | 'other';
     }>;
     /** Any errors encountered */
     errors?: string[];
     /** AI model response (raw) */
     rawResponse?: string;
+}
+
+/**
+ * Conversation message for step-by-step generation
+ */
+export interface ConversationMessage {
+    role: 'system' | 'user' | 'assistant';
+    content: string;
+}
+
+/**
+ * Options for conversational generation
+ */
+export interface ConversationalGenerateOptions {
+    /** Initial description or follow-up request */
+    message: string;
+    /** Previous conversation history */
+    conversationHistory?: ConversationMessage[];
+    /** Current application state (already generated files) */
+    currentApp?: GenerateAppResult;
+}
+
+/**
+ * Result of conversational generation
+ */
+export interface ConversationalGenerateResult extends GenerateAppResult {
+    /** Updated conversation history */
+    conversationHistory: ConversationMessage[];
+    /** Suggested next steps or questions */
+    suggestions?: string[];
 }
 
 /**
@@ -318,20 +348,172 @@ export class ObjectQLAgent {
     }
 
     /**
+     * Conversational generation with step-by-step refinement
+     * This allows users to iteratively improve the application through dialogue
+     */
+    async generateConversational(
+        options: ConversationalGenerateOptions
+    ): Promise<ConversationalGenerateResult> {
+        const systemPrompt = this.getSystemPrompt();
+        
+        // Initialize or continue conversation
+        const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+            { role: 'system', content: systemPrompt }
+        ];
+
+        // Add conversation history if provided
+        if (options.conversationHistory) {
+            messages.push(...options.conversationHistory.filter(m => m.role !== 'system'));
+        }
+
+        // Build the user message
+        let userMessage = options.message;
+        
+        // If there's a current app state, include it in context
+        if (options.currentApp && options.currentApp.files.length > 0) {
+            const currentState = options.currentApp.files
+                .map(f => `# ${f.filename}\n${f.content}`)
+                .join('\n\n---\n\n');
+            
+            userMessage = `Current application state:\n\n${currentState}\n\n---\n\nUser request: ${options.message}\n\nPlease update the application according to the user's request. Provide the complete updated files.`;
+        }
+
+        messages.push({ role: 'user', content: userMessage });
+
+        try {
+            const completion = await this.openai.chat.completions.create({
+                model: this.config.model,
+                messages,
+                temperature: this.config.temperature,
+                max_tokens: 4000,
+            });
+
+            const response = completion.choices[0]?.message?.content;
+            if (!response) {
+                return {
+                    success: false,
+                    files: [],
+                    conversationHistory: [...(options.conversationHistory || []), 
+                        { role: 'user', content: options.message }],
+                    errors: ['No response from AI model'],
+                };
+            }
+
+            // Parse the response
+            const files = this.parseGenerationResponse(response);
+
+            // Update conversation history
+            const updatedHistory: ConversationMessage[] = [
+                ...(options.conversationHistory || []),
+                { role: 'user', content: options.message },
+                { role: 'assistant', content: response }
+            ];
+
+            // Generate suggestions for next steps
+            const suggestions = this.generateSuggestions(files, options.currentApp);
+
+            return {
+                success: files.length > 0,
+                files,
+                rawResponse: response,
+                conversationHistory: updatedHistory,
+                suggestions,
+                errors: files.length === 0 ? ['Failed to extract metadata files from response'] : undefined,
+            };
+
+        } catch (error) {
+            return {
+                success: false,
+                files: [],
+                conversationHistory: [...(options.conversationHistory || []), 
+                    { role: 'user', content: options.message }],
+                errors: [error instanceof Error ? error.message : 'Unknown error'],
+            };
+        }
+    }
+
+    /**
+     * Generate suggestions for next steps based on current application state
+     */
+    private generateSuggestions(
+        currentFiles: GenerateAppResult['files'],
+        previousApp?: GenerateAppResult
+    ): string[] {
+        const suggestions: string[] = [];
+        
+        // Check what metadata types are missing
+        const fileTypes = new Set(currentFiles.map(f => f.type));
+        
+        const allTypes = [
+            'object', 'validation', 'form', 'view', 'page', 
+            'menu', 'action', 'hook', 'permission', 'workflow', 'report', 'data'
+        ];
+        
+        const missingTypes = allTypes.filter(t => !fileTypes.has(t as any));
+        
+        if (missingTypes.length > 0) {
+            suggestions.push(`Consider adding: ${missingTypes.join(', ')}`);
+        }
+        
+        if (!fileTypes.has('permission')) {
+            suggestions.push('Add permissions to control access');
+        }
+        
+        if (!fileTypes.has('menu')) {
+            suggestions.push('Create a menu for navigation');
+        }
+        
+        if (!fileTypes.has('workflow') && fileTypes.has('object')) {
+            suggestions.push('Add workflows for approval processes');
+        }
+        
+        if (!fileTypes.has('report') && fileTypes.has('object')) {
+            suggestions.push('Generate reports for analytics');
+        }
+
+        return suggestions;
+    }
+
+    /**
      * Get system prompt for metadata generation
      */
     private getSystemPrompt(): string {
         return `You are an expert ObjectQL architect. Generate valid ObjectQL metadata in YAML format.
 
-Follow ObjectQL metadata standards:
-- Use standard field types: text, number, boolean, select, date, datetime, lookup, currency, email, phone, url, textarea, formula
-- For relationships, use type: lookup with reference_to: <object_name>
-- Include required: true for mandatory fields
-- Add validation rules for data quality
-- Use clear, business-friendly labels
-- Follow naming convention: lowercase with underscores (snake_case)
+Follow ObjectQL metadata standards for ALL metadata types:
 
-Output format: Provide each file in a YAML code block with a clear filename header.`;
+**1. Core Data Layer:**
+- Objects (*.object.yml): entities, fields, relationships, indexes
+- Validations (*.validation.yml): validation rules, business constraints
+- Data (*.data.yml): seed data and initial records
+
+**2. Business Logic Layer:**
+- Actions (*.action.yml): custom RPC operations
+- Hooks (*.hook.yml): lifecycle triggers (beforeCreate, afterUpdate, etc.)
+- Workflows (*.workflow.yml): approval processes, automation
+
+**3. Presentation Layer:**
+- Pages (*.page.yml): composable UI pages with layouts
+- Views (*.view.yml): list views, kanban, calendar displays
+- Forms (*.form.yml): data entry forms with field layouts
+- Reports (*.report.yml): tabular, summary, matrix reports
+- Menus (*.menu.yml): navigation structure
+
+**4. Security Layer:**
+- Permissions (*.permission.yml): access control rules
+- Application (*.application.yml): app-level configuration
+
+**Field Types:** text, number, boolean, select, date, datetime, lookup, currency, email, phone, url, textarea, formula, file, image
+
+**Best Practices:**
+- Use snake_case for names
+- Clear, business-friendly labels
+- Include validation rules
+- Add help text for clarity
+- Define proper relationships
+- Consider security from the start
+
+Output format: Provide each file in a YAML code block with filename header (e.g., "# filename.object.yml").`;
     }
 
     /**
@@ -366,24 +548,39 @@ Include:
 - 2-3 core objects with essential fields
 - Basic relationships between objects
 - Simple validation rules
+- At least one form and view per object
 
 Output: Provide each file separately with clear filename headers (e.g., "# filename.object.yml").`;
 
             case 'complete':
                 return `Generate a complete ObjectQL enterprise application for: ${description}
 
-Include:
-- All necessary objects with comprehensive fields
-- Relationships and lookups
-- Validation rules with business logic
-- Consider security and data integrity
+Include ALL necessary metadata types:
+1. **Objects**: All entities with comprehensive fields
+2. **Validations**: Business rules and constraints
+3. **Forms**: Create and edit forms for each object
+4. **Views**: List views for browsing data
+5. **Pages**: Dashboard and detail pages
+6. **Menus**: Navigation structure
+7. **Actions**: Common operations (approve, export, etc.)
+8. **Permissions**: Basic access control
+9. **Data**: Sample seed data (optional)
+10. **Workflows**: Approval processes if applicable
+11. **Reports**: Key reports for analytics
+
+Consider:
+- Security and permissions from the start
+- User experience in form/view design
+- Business processes and workflows
+- Data integrity and validation
 
 Output: Provide each file separately with clear filename headers (e.g., "# filename.object.yml").`;
 
             default:
                 return `Generate ObjectQL metadata for: ${description}
 
-Analyze the requirements and create appropriate objects, fields, relationships, and validation rules.
+Analyze the requirements and create appropriate metadata across ALL relevant types:
+- Objects, Validations, Forms, Views, Pages, Menus, Actions, Hooks, Permissions, Workflows, Reports, Data, Application
 
 Output: Provide each file separately with clear filename headers (e.g., "# filename.object.yml").`;
         }
@@ -493,6 +690,14 @@ Provide feedback in the specified format.`;
         if (filename.includes('.form.yml')) return 'form';
         if (filename.includes('.view.yml')) return 'view';
         if (filename.includes('.page.yml')) return 'page';
+        if (filename.includes('.menu.yml')) return 'menu';
+        if (filename.includes('.action.yml')) return 'action';
+        if (filename.includes('.hook.yml')) return 'hook';
+        if (filename.includes('.permission.yml')) return 'permission';
+        if (filename.includes('.workflow.yml')) return 'workflow';
+        if (filename.includes('.report.yml')) return 'report';
+        if (filename.includes('.data.yml')) return 'data';
+        if (filename.includes('.application.yml') || filename.includes('.app.yml')) return 'application';
         return 'other';
     }
 }

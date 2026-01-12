@@ -24,6 +24,146 @@ interface ChatOptions {
     initialPrompt?: string;
 }
 
+interface ConversationalOptions {
+    output?: string;
+}
+
+/**
+ * Conversational generation with step-by-step refinement
+ */
+export async function aiConversational(options: ConversationalOptions): Promise<void> {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+        console.error(chalk.red('Error: OPENAI_API_KEY environment variable is not set.'));
+        console.log(chalk.yellow('\nPlease set your OpenAI API key:'));
+        console.log(chalk.cyan('  export OPENAI_API_KEY=your-api-key-here'));
+        process.exit(1);
+    }
+
+    const outputDir = options.output || './src';
+    const agent = createAgent(apiKey);
+
+    console.log(chalk.blue('💬 ObjectQL Conversational Generator\n'));
+    console.log(chalk.gray('Build your application step by step through conversation.'));
+    console.log(chalk.gray('Type "done" to finish and save, "exit" to quit without saving.\n'));
+
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+
+    let conversationHistory: any[] = [];
+    let currentApp: any = null;
+    let fileCount = 0;
+
+    const askQuestion = () => {
+        const prompt = currentApp 
+            ? chalk.cyan('\nWhat would you like to change or add? ') 
+            : chalk.cyan('Describe your application: ');
+            
+        rl.question(prompt, async (input: string) => {
+            if (input.toLowerCase() === 'exit') {
+                console.log(chalk.blue('\n👋 Goodbye! No files were saved.'));
+                rl.close();
+                return;
+            }
+
+            if (input.toLowerCase() === 'done') {
+                if (!currentApp || !currentApp.files || currentApp.files.length === 0) {
+                    console.log(chalk.yellow('\n⚠️  No application generated yet. Continue the conversation or type "exit" to quit.'));
+                    askQuestion();
+                    return;
+                }
+
+                // Save files
+                console.log(chalk.yellow('\n💾 Saving files...'));
+                
+                if (!fs.existsSync(outputDir)) {
+                    fs.mkdirSync(outputDir, { recursive: true });
+                }
+
+                for (const file of currentApp.files) {
+                    const filePath = path.join(outputDir, file.filename);
+                    const fileDir = path.dirname(filePath);
+                    
+                    if (!fs.existsSync(fileDir)) {
+                        fs.mkdirSync(fileDir, { recursive: true });
+                    }
+
+                    fs.writeFileSync(filePath, file.content);
+                    console.log(chalk.green(`  ✓ ${file.filename}`));
+                }
+
+                console.log(chalk.blue(`\n✅ Application saved to: ${outputDir}`));
+                console.log(chalk.gray('\nNext steps:'));
+                console.log(chalk.cyan('  1. Review the generated files'));
+                console.log(chalk.cyan('  2. Run: objectql ai validate ' + outputDir));
+                console.log(chalk.cyan('  3. Test with: objectql serve --dir ' + outputDir));
+                
+                rl.close();
+                return;
+            }
+
+            if (!input.trim()) {
+                askQuestion();
+                return;
+            }
+
+            console.log(chalk.yellow('\n⏳ Generating...'));
+
+            try {
+                const result = await agent.generateConversational({
+                    message: input,
+                    conversationHistory,
+                    currentApp,
+                });
+
+                if (!result.success) {
+                    console.error(chalk.red('\n❌ Error:'), result.errors?.join(', ') || 'Unknown error');
+                    askQuestion();
+                    return;
+                }
+
+                conversationHistory = result.conversationHistory;
+                currentApp = result;
+                fileCount = result.files.length;
+
+                console.log(chalk.green(`\n✅ Generated/Updated ${fileCount} file(s):`));
+                
+                // Group files by type
+                const filesByType: Record<string, string[]> = {};
+                result.files.forEach(f => {
+                    if (!filesByType[f.type]) filesByType[f.type] = [];
+                    filesByType[f.type].push(f.filename);
+                });
+
+                Object.entries(filesByType).forEach(([type, files]) => {
+                    console.log(chalk.cyan(`  ${type}:`), files.join(', '));
+                });
+
+                // Show suggestions
+                if (result.suggestions && result.suggestions.length > 0) {
+                    console.log(chalk.blue('\n💡 Suggestions:'));
+                    result.suggestions.forEach(s => console.log(chalk.gray(`  • ${s}`)));
+                }
+
+                console.log(chalk.gray('\nYou can now:'));
+                console.log(chalk.gray('  • Request changes (e.g., "Add email validation to user")'));
+                console.log(chalk.gray('  • Add features (e.g., "Add a workflow for approval")'));
+                console.log(chalk.gray('  • Type "done" to save files'));
+                console.log(chalk.gray('  • Type "exit" to quit without saving'));
+
+            } catch (error) {
+                console.error(chalk.red('\n❌ Error:'), error instanceof Error ? error.message : 'Unknown error');
+            }
+
+            askQuestion();
+        });
+    };
+
+    askQuestion();
+}
+
 /**
  * Generate application metadata using AI
  */
