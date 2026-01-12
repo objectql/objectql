@@ -82,19 +82,19 @@ export class MongoDriver implements Driver {
                      mongoCondition[dbField] = this.normalizeId(value);
                  } else {
                      switch (op) {
-                        case '=': mongoCondition[field] = { $eq: value }; break;
-                        case '!=': mongoCondition[field] = { $ne: value }; break;
-                        case '>': mongoCondition[field] = { $gt: value }; break;
-                        case '>=': mongoCondition[field] = { $gte: value }; break;
-                        case '<': mongoCondition[field] = { $lt: value }; break;
-                        case '<=': mongoCondition[field] = { $lte: value }; break;
-                        case 'in': mongoCondition[field] = { $in: value }; break;
-                        case 'nin': mongoCondition[field] = { $nin: value }; break;
+                        case '=': mongoCondition[dbField] = { $eq: value }; break;
+                        case '!=': mongoCondition[dbField] = { $ne: value }; break;
+                        case '>': mongoCondition[dbField] = { $gt: value }; break;
+                        case '>=': mongoCondition[dbField] = { $gte: value }; break;
+                        case '<': mongoCondition[dbField] = { $lt: value }; break;
+                        case '<=': mongoCondition[dbField] = { $lte: value }; break;
+                        case 'in': mongoCondition[dbField] = { $in: value }; break;
+                        case 'nin': mongoCondition[dbField] = { $nin: value }; break;
                         case 'contains': 
                              // Basic regex escape should be added for safety
-                             mongoCondition[field] = { $regex: value, $options: 'i' }; 
+                             mongoCondition[dbField] = { $regex: value, $options: 'i' }; 
                              break;
-                        default: mongoCondition[field] = { $eq: value };
+                        default: mongoCondition[dbField] = { $eq: value };
                      }
                  }
                  conditions.push(mongoCondition);
