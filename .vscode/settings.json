@@ -1,0 +1,8 @@
+{
+    "yaml.schemas": {
+        "./packages/foundation/types/schemas/object.schema.json": "*.object.yml",
+        "./packages/foundation/types/schemas/app.schema.json": "*.app.yml",
+        "./packages/foundation/types/schemas/page.schema.json": "*.page.yml",
+        "./packages/foundation/types/schemas/menu.schema.json": "*.menu.yml"
+    }
+}

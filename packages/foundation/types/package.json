@@ -3,9 +3,16 @@
   "version": "1.6.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "schemas"
+  ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run generate:schemas",
+    "generate:schemas": "node scripts/generate-schemas.js",
     "test": "jest --passWithNoTests"
   },
-  "dependencies": {}
+  "devDependencies": {
+    "ts-json-schema-generator": "^2.4.0"
+  }
 }
