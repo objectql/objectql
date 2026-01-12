@@ -1,4 +1,4 @@
-import { ObjectQLContext, IObjectQL, ObjectConfig, Driver, UnifiedQuery, ActionContext, HookAPI, RetrievalHookContext, MutationHookContext, UpdateHookContext, ValidationContext, ValidationError } from '@objectql/types';
+import { ObjectQLContext, IObjectQL, ObjectConfig, Driver, UnifiedQuery, ActionContext, HookAPI, RetrievalHookContext, MutationHookContext, UpdateHookContext, ValidationContext, ValidationError, ValidationRuleResult } from '@objectql/types';
 import { Validator } from './validator';
 
 export class ObjectRepository {
@@ -63,10 +63,16 @@ export class ObjectRepository {
         previousRecord?: any
     ): Promise<void> {
         const schema = this.getSchema();
-        const allResults: any[] = [];
+        const allResults: ValidationRuleResult[] = [];
 
         // 1. Validate field-level rules
+        // For updates, only validate fields that are present in the update payload
         for (const [fieldName, fieldConfig] of Object.entries(schema.fields)) {
+            // Skip field validation for updates if the field is not in the update payload
+            if (operation === 'update' && !(fieldName in record)) {
+                continue;
+            }
+            
             const value = record[fieldName];
             const fieldResults = await this.validator.validateField(
                 fieldName,
@@ -85,6 +91,11 @@ export class ObjectRepository {
 
         // 2. Validate object-level validation rules
         if (schema.validation?.rules && schema.validation.rules.length > 0) {
+            // For updates, merge the update data with previous record to get the complete final state
+            const mergedRecord = operation === 'update' && previousRecord
+                ? { ...previousRecord, ...record }
+                : record;
+
             // Track which fields changed (using shallow comparison for performance)
             // IMPORTANT: Shallow comparison does not detect changes in nested objects/arrays.
             // If your validation rules rely on detecting changes in complex nested structures,
@@ -94,7 +105,7 @@ export class ObjectRepository {
                 : undefined;
 
             const validationContext: ValidationContext = {
-                record,
+                record: mergedRecord,
                 previousRecord,
                 operation,
                 user: this.getUserFromContext(),

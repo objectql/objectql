@@ -207,6 +207,23 @@ describe('ObjectQL Repository Validation Integration', () => {
             const updated = await repo.update(created._id, { age: 35 });
             expect(updated.age).toBe(35);
         });
+
+        it('should allow partial update without validating unmodified required fields', async () => {
+            const ctx = app.createContext({ userId: 'u1', isSystem: true });
+            const repo = ctx.object('user');
+
+            const created = await repo.create({ 
+                name: 'John Doe', 
+                email: 'john@example.com',
+                age: 30
+            });
+
+            // Update only age - should not require name and email to be in the update payload
+            const updated = await repo.update(created._id, { age: 35 });
+            expect(updated.age).toBe(35);
+            expect(updated.name).toBe('John Doe');
+            expect(updated.email).toBe('john@example.com');
+        });
     });
 
     describe('Object-level validation rules', () => {
@@ -275,6 +292,25 @@ describe('ObjectQL Repository Validation Integration', () => {
             const updated = await repo.update(created._id, { name: 'Updated Project' });
             expect(updated.name).toBe('Updated Project');
             expect(updated.status).toBe('completed');
+        });
+
+        it('should validate cross-field rules when updating unrelated fields', async () => {
+            const ctx = app.createContext({ userId: 'u1', isSystem: true });
+            const repo = ctx.object('project');
+
+            // Create a project with valid date range
+            const created = await repo.create({ 
+                name: 'Test Project',
+                start_date: '2024-01-01',
+                end_date: '2024-12-31',
+            });
+
+            // Update only the name - should still pass cross-field validation
+            // because the merged record has valid dates
+            const updated = await repo.update(created._id, { name: 'Updated Project' });
+            expect(updated.name).toBe('Updated Project');
+            expect(updated.start_date).toBe('2024-01-01');
+            expect(updated.end_date).toBe('2024-12-31');
         });
     });
 
