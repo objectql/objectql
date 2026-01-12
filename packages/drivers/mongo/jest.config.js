@@ -3,7 +3,8 @@ module.exports = {
   testEnvironment: 'node',
   testMatch: ['**/test/**/*.test.ts'],
   moduleNameMapper: {
-    '^@objectql/(.*)$': '<rootDir>/../$1/src',
+    '^@objectql/types$': '<rootDir>/../../foundation/types/src',
+    '^@objectql/core$': '<rootDir>/../../foundation/core/src',
   },
   transform: {
     '^.+\\.ts$': ['ts-jest', {

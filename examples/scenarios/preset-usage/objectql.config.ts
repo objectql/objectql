@@ -8,7 +8,7 @@ const db = new ObjectQL({
         default: createDriverFromConnection(`sqlite://${path.join(__dirname, 'preset.sqlite3')}`) 
     },
     // Load the project-management capabilities as a preset
-    presets: ['@example/basic-script'],
+    presets: ['@objectql/starter-basic-script'],
     plugins: ['@example/audit-log']
 });
 
