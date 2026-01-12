@@ -1,11 +1,16 @@
-import { ObjectQLContext, IObjectQL, ObjectConfig, Driver, UnifiedQuery, HookContext, ActionContext, HookAPI, RetrievalHookContext, MutationHookContext, UpdateHookContext } from '@objectql/types';
+import { ObjectQLContext, IObjectQL, ObjectConfig, Driver, UnifiedQuery, HookContext, ActionContext, HookAPI, RetrievalHookContext, MutationHookContext, UpdateHookContext, ValidationContext, ValidationError } from '@objectql/types';
+import { Validator } from './validator';
 
 export class ObjectRepository {
+    private validator: Validator;
+
     constructor(
         private objectName: string,
         private context: ObjectQLContext,
         private app: IObjectQL
-    ) {}
+    ) {
+        this.validator = new Validator();
+    }
 
     private getDriver(): Driver {
         const obj = this.getSchema();
@@ -50,6 +55,63 @@ export class ObjectRepository {
             roles: this.context.roles,
             isSystem: this.context.isSystem
         };
+    }
+
+    private async validateRecord(
+        operation: 'create' | 'update',
+        record: any,
+        previousRecord?: any
+    ): Promise<void> {
+        const schema = this.getSchema();
+        const allResults: any[] = [];
+
+        // 1. Validate field-level rules
+        for (const [fieldName, fieldConfig] of Object.entries(schema.fields)) {
+            const value = record[fieldName];
+            const fieldResults = await this.validator.validateField(
+                fieldName,
+                fieldConfig,
+                value,
+                {
+                    record,
+                    previousRecord,
+                    operation,
+                    user: this.getUserFromContext(),
+                    api: this.getHookAPI(),
+                }
+            );
+            allResults.push(...fieldResults);
+        }
+
+        // 2. Validate object-level validation rules
+        if (schema.validation?.rules && schema.validation.rules.length > 0) {
+            const changedFields = previousRecord 
+                ? Object.keys(record).filter(key => record[key] !== previousRecord[key])
+                : undefined;
+
+            const validationContext: ValidationContext = {
+                record,
+                previousRecord,
+                operation,
+                user: this.getUserFromContext(),
+                api: this.getHookAPI(),
+                changedFields,
+                metadata: {
+                    objectName: this.objectName,
+                    ruleName: '',
+                }
+            };
+
+            const result = await this.validator.validate(schema.validation.rules, validationContext);
+            allResults.push(...result.results);
+        }
+
+        // 3. Collect errors and throw if any
+        const errors = allResults.filter(r => !r.valid && r.severity === 'error');
+        if (errors.length > 0) {
+            const errorMessage = errors.map(e => e.message).join('; ');
+            throw new ValidationError(errorMessage, errors);
+        }
     }
 
     async find(query: UnifiedQuery = {}): Promise<any[]> {
@@ -133,6 +195,9 @@ export class ObjectRepository {
         if (this.context.userId) finalDoc.created_by = this.context.userId;
         if (this.context.spaceId) finalDoc.space_id = this.context.spaceId;
         
+        // Validate the record before creating
+        await this.validateRecord('create', finalDoc);
+        
         const result = await this.getDriver().create(this.objectName, finalDoc, this.getOptions());
         
         hookCtx.result = result;
@@ -155,6 +220,9 @@ export class ObjectRepository {
             isModified: (field) => hookCtx.data ? Object.prototype.hasOwnProperty.call(hookCtx.data, field) : false
         };
         await this.app.triggerHook('beforeUpdate', this.objectName, hookCtx);
+
+        // Validate the update
+        await this.validateRecord('update', hookCtx.data, previousData);
 
         const result = await this.getDriver().update(this.objectName, id, hookCtx.data, this.getOptions(options));
 
