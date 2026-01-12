@@ -70,12 +70,10 @@ describe('Data API', () => {
                         op: 'create',
                         object: 'user',
                         args: {
-                            data: {
-                                name: 'John Doe',
-                                email: 'john@example.com',
-                                age: 30,
-                                status: 'active'
-                            }
+                            name: 'John Doe',
+                            email: 'john@example.com',
+                            age: 30,
+                            status: 'active'
                         }
                     })
                     .set('Accept', 'application/json');
@@ -84,9 +82,9 @@ describe('Data API', () => {
                 expect(response.body.data).toBeDefined();
                 expect(response.body.data.name).toBe('John Doe');
                 expect(response.body.data.email).toBe('john@example.com');
-                expect(response.body.data._id).toBeDefined();
+                expect(response.body.data.id).toBeDefined();
                 
-                createdUserId = response.body.data._id;
+                createdUserId = response.body.data.id;
             });
 
             it('should find all users', async () => {
@@ -111,15 +109,13 @@ describe('Data API', () => {
                     .send({
                         op: 'findOne',
                         object: 'user',
-                        args: {
-                            id: createdUserId
-                        }
+                        args: createdUserId
                     })
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
                 expect(response.body.data).toBeDefined();
-                expect(response.body.data._id).toBe(createdUserId);
+                expect(response.body.data.id).toBe(createdUserId);
                 expect(response.body.data.name).toBe('John Doe');
             });
 
@@ -185,13 +181,11 @@ describe('Data API', () => {
                         op: 'create',
                         object: 'task',
                         args: {
-                            data: {
-                                title: 'Test Task',
-                                description: 'This is a test task',
-                                status: 'pending',
-                                priority: 'high',
-                                completed: false
-                            }
+                            title: 'Test Task',
+                            description: 'This is a test task',
+                            status: 'pending',
+                            priority: 'high',
+                            completed: false
                         }
                     })
                     .set('Accept', 'application/json');
@@ -199,9 +193,9 @@ describe('Data API', () => {
                 expect(response.status).toBe(200);
                 expect(response.body.data).toBeDefined();
                 expect(response.body.data.title).toBe('Test Task');
-                expect(response.body.data._id).toBeDefined();
+                expect(response.body.data.id).toBeDefined();
                 
-                createdTaskId = response.body.data._id;
+                createdTaskId = response.body.data.id;
             });
 
             it('should find tasks with filters', async () => {
@@ -211,9 +205,7 @@ describe('Data API', () => {
                         op: 'find',
                         object: 'task',
                         args: {
-                            filters: {
-                                status: 'pending'
-                            }
+                            filters: [['status', '=', 'pending']]
                         }
                     })
                     .set('Accept', 'application/json');
@@ -276,10 +268,11 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(201);
-                expect(response.body._id).toBeDefined();
-                expect(response.body.name).toBe('Jane Smith');
+                expect(response.body.data).toBeDefined();
+                expect(response.body.data.id).toBeDefined();
+                expect(response.body.data.name).toBe('Jane Smith');
                 
-                userId = response.body._id;
+                userId = response.body.data.id;
             });
 
             it('should list users via GET /api/data/user', async () => {
@@ -288,8 +281,9 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
-                expect(Array.isArray(response.body)).toBe(true);
-                expect(response.body.length).toBeGreaterThanOrEqual(1);
+                expect(response.body.data).toBeDefined();
+                expect(Array.isArray(response.body.data)).toBe(true);
+                expect(response.body.data.length).toBeGreaterThanOrEqual(1);
             });
 
             it('should get user by id via GET /api/data/user/:id', async () => {
@@ -298,8 +292,9 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
-                expect(response.body._id).toBe(userId);
-                expect(response.body.name).toBe('Jane Smith');
+                expect(response.body.data).toBeDefined();
+                expect(response.body.data.id).toBe(userId);
+                expect(response.body.data.name).toBe('Jane Smith');
             });
 
             it('should update user via PUT /api/data/user/:id', async () => {
@@ -311,6 +306,7 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
+                expect(response.body.data).toBeDefined();
             });
 
             it('should delete user via DELETE /api/data/user/:id', async () => {
@@ -318,7 +314,8 @@ describe('Data API', () => {
                     .delete(`/api/data/user/${userId}`)
                     .set('Accept', 'application/json');
 
-                expect(response.status).toBe(204);
+                expect(response.status).toBe(200);
+                expect(response.body.data).toBeDefined();
             });
         });
 
@@ -337,9 +334,10 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(201);
-                expect(response.body.title).toBe('REST API Task');
+                expect(response.body.data).toBeDefined();
+                expect(response.body.data.title).toBe('REST API Task');
                 
-                taskId = response.body._id;
+                taskId = response.body.data.id;
             });
 
             it('should list tasks via GET /api/data/task', async () => {
@@ -348,7 +346,8 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
-                expect(Array.isArray(response.body)).toBe(true);
+                expect(response.body.data).toBeDefined();
+                expect(Array.isArray(response.body.data)).toBe(true);
             });
 
             it('should update task via PUT /api/data/task/:id', async () => {
@@ -360,6 +359,7 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
+                expect(response.body.data).toBeDefined();
             });
 
             it('should delete task via DELETE /api/data/task/:id', async () => {
@@ -367,7 +367,8 @@ describe('Data API', () => {
                     .delete(`/api/data/task/${taskId}`)
                     .set('Accept', 'application/json');
 
-                expect(response.status).toBe(204);
+                expect(response.status).toBe(200);
+                expect(response.body.data).toBeDefined();
             });
         });
     });
