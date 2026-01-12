@@ -1,5 +1,5 @@
 import { ActionDefinition } from '@objectql/types';
-import { Project } from './types';
+import { Projects } from '../../types';
 
 /**
  * Project Actions - Comprehensive Examples
@@ -29,7 +29,7 @@ interface CompleteInput {
  * - Returning structured results
  * - Input parameter usage
  */
-export const complete: ActionDefinition<Project, CompleteInput> = {
+export const complete: ActionDefinition<Projects, CompleteInput> = {
     handler: async ({ id, input, api, user }) => {
         const { comment, completion_date } = input;
         
@@ -103,7 +103,7 @@ interface ApproveInput {
  * - Required input parameters
  * - Business logic enforcement
  */
-export const approve: ActionDefinition<Project, ApproveInput> = {
+export const approve: ActionDefinition<Projects, ApproveInput> = {
     handler: async ({ id, input, api, user }) => {
         const { comment } = input;
         
@@ -163,7 +163,7 @@ interface CloneInput {
  * - Copying related data
  * - Complex multi-step operations
  */
-export const clone: ActionDefinition<Project, CloneInput> = {
+export const clone: ActionDefinition<Projects, CloneInput> = {
     handler: async ({ id, input, api, user }) => {
         const { new_name, copy_tasks = false } = input;
         
@@ -242,7 +242,7 @@ interface ImportProjectsInput {
  * - Error collection
  * - Progress reporting
  */
-export const import_projects: ActionDefinition<Project, ImportProjectsInput> = {
+export const import_projects: ActionDefinition<Projects, ImportProjectsInput> = {
     handler: async ({ input, api, user }) => {
         const { source, data, file_url } = input;
         
@@ -332,7 +332,7 @@ interface BulkUpdateStatusInput {
  * - Validation across multiple items
  * - Transactional operations (if supported)
  */
-export const bulk_update_status: ActionDefinition<Project, BulkUpdateStatusInput> = {
+export const bulk_update_status: ActionDefinition<Projects, BulkUpdateStatusInput> = {
     handler: async ({ input, api, user }) => {
         const { project_ids, new_status } = input;
         
@@ -412,7 +412,7 @@ export const bulk_update_status: ActionDefinition<Project, BulkUpdateStatusInput
  * - Data collection across records
  * - Computed results
  */
-export const generate_report: ActionDefinition<Project, {}> = {
+export const generate_report: ActionDefinition<Projects, {}> = {
     handler: async ({ api, user }) => {
         console.log(`[Action] Generating project report for ${user?.id}`);
         

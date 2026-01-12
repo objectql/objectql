@@ -4,11 +4,9 @@ fields:
   name:
     type: text
     required: true
-    label: Name
     index: true # Field-level index
 
   status:
-    type: select
     options:
       - planned
       - in_progress
@@ -17,7 +15,6 @@ fields:
     index: true
 
   priority:
-    type: select
     options:
       - low
       - normal
@@ -29,31 +26,24 @@ fields:
 
   owner:
     type: text
-    label: Project Owner
 
   budget:
     type: currency
-    label: Total Budget
 
   start_date:
     type: date
-    label: Start Date
 
   end_date:
     type: date
-    label: End Date
   
   approved_by:
     type: text
-    label: Approved By
   
   approved_at:
     type: datetime
-    label: Approved At
   
   approval_comment:
     type: textarea
-    label: Approval Comment
 
 indexes:
   # Composite index for reporting
@@ -117,7 +107,6 @@ actions:
     description: Import multiple projects from various sources
     params:
       source:
-        type: select
         required: true
         label: Import Source
         options:
@@ -145,7 +134,6 @@ actions:
         label: Project IDs
         help_text: "List of project IDs"
       new_status:
-        type: select
         required: true
         label: New Status
         options:

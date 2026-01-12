@@ -1,5 +1,5 @@
 import { ObjectHookDefinition } from '@objectql/types';
-import { Project } from './types';
+import { Projects } from '../../types';
 
 /**
  * Project Hooks - Comprehensive Example
@@ -12,7 +12,7 @@ import { Project } from './types';
  * 5. Dependency checking (beforeDelete)
  * 6. Side effects and cleanup (afterDelete)
  */
-const hooks: ObjectHookDefinition<Project> = {
+const hooks: ObjectHookDefinition<Projects> = {
     
     /**
      * beforeCreate - Data Validation & Defaulting

@@ -19,11 +19,11 @@ export interface Projects extends ObjectDoc {
      */
     description?: string;
     /**
-     * Project Owner
+     * Owner
      */
     owner?: string;
     /**
-     * Total Budget
+     * Budget
      */
     budget?: number;
     /**
