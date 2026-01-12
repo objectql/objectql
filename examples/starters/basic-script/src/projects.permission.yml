@@ -2,7 +2,8 @@ name: projects_permission
 object: projects
 description: "Comprehensive access control rules for Project object"
 
-# Define available roles
+# Roles (defined in demo.app.yml, referenced here)
+# This list documents which system roles have permissions on this object
 roles:
   - admin
   - manager

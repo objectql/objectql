@@ -2,7 +2,8 @@ name: tasks_permission
 object: tasks
 description: "Advanced permission rules for Task object demonstrating complex scenarios"
 
-# Define available roles
+# Roles (defined in demo.app.yml, referenced here)
+# This list documents which system roles have permissions on this object
 roles:
   - admin
   - project_manager

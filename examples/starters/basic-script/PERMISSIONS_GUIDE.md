@@ -20,11 +20,39 @@ Permission metadata is defined in `.permission.yml` files:
 
 ```
 src/
+  main.app.yml              # Application definition with system roles
   projects.object.yml       # Object definition
   projects.permission.yml   # Permission rules for projects
   tasks.object.yml         # Object definition
   tasks.permission.yml     # Permission rules for tasks
 ```
+
+## Role Definition Strategy
+
+**Recommended Approach**: Define roles centrally in your application config:
+
+```yaml
+# main.app.yml
+name: my_app
+label: My Application
+permissions:
+  roles: [admin, manager, developer, user, viewer]
+```
+
+Then reference these roles in permission files:
+
+```yaml
+# projects.permission.yml
+roles:
+  - admin    # References role defined in main.app.yml
+  - manager
+  - user
+```
+
+This ensures consistency across all objects. The `roles` field in permission files serves as:
+1. Documentation of which roles apply to this object
+2. Validation that only defined roles are used
+3. Backward compatibility for standalone usage
 
 ## Basic Example: Object-Level Permissions
 
@@ -36,6 +64,7 @@ name: projects_permission
 object: projects
 description: "Access control rules for Project object"
 
+# Reference system roles (defined in main.app.yml)
 roles:
   - admin
   - manager
@@ -167,7 +196,90 @@ sharing_rules:
       update: false
 ```
 
-## Permission Profiles
+## Permission Profiles vs Permission Sets
+
+**Understanding the Difference** (following Salesforce industry standard):
+
+### Permission Profiles
+- **Base permission template** assigned to each user (1:1 relationship)
+- Every user must have exactly one profile
+- Defines the default access level for the user
+- Think of it as the user's "job role template"
+
+```yaml
+profiles:
+  - name: standard_user
+    label: Standard User
+    description: Regular employee access
+    object_permissions:
+      projects: [create, read, update]
+      tasks: [create, read, update, delete]
+    field_permissions:
+      "projects.budget": [read]
+  
+  - name: system_admin
+    label: System Administrator
+    description: Full system access
+    object_permissions:
+      "*": [create, read, update, delete, view_all, modify_all]
+    field_permissions:
+      "*": [read, update]
+```
+
+### Permission Sets
+- **Additional permissions** on top of the profile (1:many relationship)
+- Grant extra capabilities without changing the user's profile
+- Can be assigned to multiple users
+- Use for temporary or specialized access needs
+
+```yaml
+permission_sets:
+  - name: finance_access
+    label: Financial Data Access
+    description: Grant access to financial fields
+    field_permissions:
+      "*.budget": [read, update]
+      "*.cost": [read, update]
+      "*.revenue": [read, update]
+  
+  - name: api_access
+    label: API Access
+    description: Allow API integration capabilities
+    api_permissions:
+      enabled: true
+      rate_limit: 1000
+      allowed_operations: [create, read, update]
+```
+
+### Usage Example
+
+```yaml
+# User Assignment (conceptual)
+user: john_smith
+profile: standard_user              # Base permissions
+permission_sets:                    # Additional permissions
+  - finance_access
+  - api_access
+
+# Effective permissions = profile + all permission sets
+# John can do everything a standard_user can do,
+# PLUS access financial data and use the API
+```
+
+### When to Use Each
+
+**Use Profiles for:**
+- Job role definitions (Admin, Manager, User, Viewer)
+- Default access levels
+- Core permissions that define user capabilities
+
+**Use Permission Sets for:**
+- Specialized access (Finance Data, API Access)
+- Temporary additional permissions
+- Cross-team capabilities
+- Feature flags/beta access
+
+## Permission Profiles (Detailed)
 
 Organize permissions into reusable profiles:
 

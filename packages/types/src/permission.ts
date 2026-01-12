@@ -435,7 +435,19 @@ export interface PermissionConfig {
     /** Description */
     description?: string;
     
-    /** Available roles in the system */
+    /** 
+     * Roles referenced in this permission configuration.
+     * 
+     * Best Practice: Define roles centrally in ApplicationConfig and reference them here.
+     * This field serves to:
+     * 1. Document which roles apply to this object
+     * 2. Validate that only defined roles are used
+     * 3. Support standalone usage without application context
+     * 
+     * Example:
+     * - Define in app: permissions.roles: [admin, manager, user]
+     * - Reference here: roles: [admin, manager, user]
+     */
     roles?: string[];
     
     /** Object-level permissions */
