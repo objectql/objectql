@@ -84,6 +84,7 @@ export default defineConfig({
           items: [
             { text: 'Data Modeling', link: '/guide/data-modeling' },
             { text: 'Querying Data', link: '/guide/querying' },
+            { text: 'Formulas & Rules Syntax', link: '/guide/formulas-and-rules' },
             { text: 'Business Logic (Hooks)', link: '/guide/logic-hooks' },
             { text: 'Custom Actions (RPC)', link: '/guide/logic-actions' },
           ]
