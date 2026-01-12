@@ -135,18 +135,19 @@ const resultsSql = await app.datasource('runtime').find(query);
 
 Both queries return the same results, but the underlying native query is optimized for MongoDB or PostgreSQL.
 
-### 3. Validation
+### 3. Formulas & Validation
 
-Define validation rules declaratively in your object metadata:
+ObjectQL supports powerful formulas and validation rules. Define calculated fields and business rules declaratively:
 
 ```typescript
 import { ObjectConfig, Validator } from '@objectql/core';
 import { ValidationContext } from '@objectql/types';
 
-// Define object with validation rules
+// Define object with formulas and validation rules
 const projectObject: ObjectConfig = {
     name: 'project',
     fields: {
+        // Regular field
         name: { 
             type: 'text', 
             required: true,
@@ -155,6 +156,12 @@ const projectObject: ObjectConfig = {
                 max_length: 100,
                 pattern: '^[a-zA-Z0-9\\s]+$'
             }
+        },
+        // Calculated field (formula)
+        profit: {
+            type: 'formula',
+            expression: 'revenue - cost',
+            data_type: 'currency'
         },
         email: {
             type: 'email',
@@ -224,8 +231,11 @@ if (!result.valid) {
 - **Field-level**: required, email, URL, min/max, length, pattern
 - **Cross-field**: compare fields with operators (=, !=, >, >=, <, <=, in, contains, etc.)
 - **State machine**: enforce valid state transitions
+- **Formulas**: JavaScript-style expressions for calculated fields
 - **Severity levels**: error, warning, info
 - **I18n**: multi-language error messages with fallback
+
+**Learn more:** [Formulas & Rules Syntax Guide](./docs/guide/formulas-and-rules.md)
 
 ## 🎨 Web Console
 
