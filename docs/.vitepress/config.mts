@@ -118,7 +118,7 @@ export default defineConfig({
             { text: 'Views & Layouts', link: '/spec/view' },
             { text: 'Forms', link: '/spec/form' },
             { text: 'Reports & Dashboards', link: '/spec/report' },
-            { text: 'Applications & Navigation', link: '/spec/application' },
+            { text: 'Menus & Navigation', link: '/spec/menu' },
           ]
         },
         {
