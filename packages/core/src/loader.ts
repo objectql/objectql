@@ -21,16 +21,33 @@ export class ObjectLoader {
                     const doc = yaml.load(ctx.content) as any;
                     if (!doc) return;
 
-                    if (doc.name && doc.fields) {
+                    // Calculate ID from filename
+                    const basename = path.basename(ctx.file);
+                    const filenameId = basename.replace(/\.object\.(yml|yaml)$/, '');
+
+                    // 1. Single Object definition (Standard)
+                    // If fields are present, we treat it as a single object definition
+                    if (doc.fields) {
+                        if (!doc.name) {
+                            // If name is missing, infer from filename
+                            doc.name = filenameId;
+                        } else if (doc.name !== filenameId) {
+                            // warn if mismatch
+                            console.warn(`[ObjectQL] Warning: Object name '${doc.name}' in ${basename} does not match filename. Using '${doc.name}'.`);
+                        }
+
                         const packageEntry = ctx.registry.getEntry('package-map', ctx.file);
                         registerObject(ctx.registry, doc, ctx.file, ctx.packageName || (packageEntry && packageEntry.package));
-                    } else {
-                        for (const [key, value] of Object.entries(doc)) {
-                            if (typeof value === 'object' && (value as any).fields) {
-                                const obj = value as any;
-                                if (!obj.name) obj.name = key;
-                                registerObject(ctx.registry, obj, ctx.file, ctx.packageName);
-                            }
+                        return;
+                    }
+
+                     // 2. Multi-object map (Legacy/Bundle mode) 
+                    // e.g. { object1: { fields... }, object2: { fields... } }
+                    for (const [key, value] of Object.entries(doc)) {
+                        if (typeof value === 'object' && (value as any).fields) {
+                            const obj = value as any;
+                            if (!obj.name) obj.name = key;
+                            registerObject(ctx.registry, obj, ctx.file, ctx.packageName);
                         }
                     }
                 } catch (e) {
