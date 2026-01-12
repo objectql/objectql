@@ -1,6 +1,6 @@
 {
-  "name": "@example/enterprise-structure",
-  "version": "2.0.0",
+  "name": "@objectql/starter-enterprise",
+  "version": "1.0.0",
   "license": "MIT",
   "author": "ObjectQL Contributors",
   "repository": {
@@ -8,7 +8,7 @@
     "url": "https://github.com/objectql/objectql.git",
     "directory": "examples/scenarios/enterprise-structure"
   },
-  "private": true,
+  "private": false,
   "description": "Enterprise-scale metadata organization example for ObjectQL",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

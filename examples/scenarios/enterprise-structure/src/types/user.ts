@@ -3,33 +3,13 @@ import { ObjectDoc } from '@objectql/types';
 
 export interface User extends ObjectDoc {
     /**
-     * Employee Record
-     */
-    employee?: string | number;
-    /**
-     * Email Address
-     */
-    email: string;
-    /**
-     * Employee ID
-     */
-    employee_id?: string;
-    /**
-     * Department
-     */
-    department?: string | number;
-    /**
-     * Office Location
-     */
-    office_location?: string;
-    /**
-     * Two-Factor Auth Enabled
-     */
-    two_factor_enabled?: boolean;
-    /**
      * Full Name
      */
     name: string;
+    /**
+     * Email
+     */
+    email: any;
     /**
      * Username
      */
@@ -62,4 +42,24 @@ export interface User extends ObjectDoc {
      * Timezone
      */
     timezone?: string;
+    /**
+     * Employee Record
+     */
+    employee?: string | number;
+    /**
+     * Employee ID
+     */
+    employee_id?: string;
+    /**
+     * Department
+     */
+    department?: string | number;
+    /**
+     * Office Location
+     */
+    office_location?: string;
+    /**
+     * Two-Factor Auth Enabled
+     */
+    two_factor_enabled?: boolean;
 }

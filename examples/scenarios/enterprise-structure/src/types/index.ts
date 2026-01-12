@@ -1,6 +1,6 @@
-export * from './user';
 export * from './attachment';
 export * from './organization';
+export * from './user';
 export * from './crm_account';
 export * from './crm_contact';
 export * from './crm_lead';
