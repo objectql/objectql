@@ -1,55 +1,59 @@
 import { MongoDriver } from '../src';
 import { MongoClient } from 'mongodb';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 /**
  * Integration tests for MongoDriver with real MongoDB operations.
- * Note: These tests connect to a local MongoDB instance (default: mongodb://localhost:27017)
- * or a custom instance via the MONGO_URL environment variable.
- * Tests automatically skip when MongoDB is not available.
+ * Uses mongodb-memory-server for isolated testing without external dependencies.
  */
-
-// Skip tests if MongoDB is not available
-const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017';
-const TEST_DB = 'objectql_test_' + Date.now();
 
 describe('MongoDriver Integration Tests', () => {
     let driver: MongoDriver;
     let client: MongoClient;
-    let skipTests = false;
+    let mongod: MongoMemoryServer;
+    let mongoUrl: string;
+    let dbName: string;
 
     beforeAll(async () => {
-        // Try to connect to MongoDB, skip tests if unavailable
-        try {
-            client = new MongoClient(MONGO_URL, { serverSelectionTimeoutMS: 2000 });
-            await client.connect();
-            await client.close();
-        } catch (e) {
-            console.warn('MongoDB not available, skipping integration tests');
-            skipTests = true;
+        // Use existing MONGO_URL if provided (e.g. implementation in CI services)
+        // Otherwise start an in-memory instance
+        if (process.env.MONGO_URL) {
+            mongoUrl = process.env.MONGO_URL;
+        } else {
+            mongod = await MongoMemoryServer.create();
+            mongoUrl = mongod.getUri();
         }
-    }, 10000); // Increase timeout
+        
+        dbName = 'objectql_test_' + Date.now();
+        
+        // ensure connection works
+        client = new MongoClient(mongoUrl);
+        await client.connect();
+    }, 60000); // startup can take time
+
+    afterAll(async () => {
+        if (client) await client.close();
+        if (mongod) await mongod.stop();
+    });
 
     beforeEach(async () => {
-        if (skipTests) return;
-        
-        driver = new MongoDriver({ url: MONGO_URL, dbName: TEST_DB });
+        driver = new MongoDriver({ url: mongoUrl, dbName: dbName });
         // Wait for connection
         await new Promise(resolve => setTimeout(resolve, 100));
     });
 
     afterEach(async () => {
-        if (skipTests) return;
-        
         if (driver) {
             await driver.disconnect();
         }
 
         try {
             // Clean up test database
-            const client = new MongoClient(MONGO_URL, { serverSelectionTimeoutMS: 2000 });
-            await client.connect();
-            await client.db(TEST_DB).dropDatabase();
-            await client.close();
+            // Reuse the client connected in beforeAll instead of creating a new one every time if possible,
+            // but for safety let's use the one we established or just use the driver?
+            // Driver doesn't have dropDatabase.
+            // Use the client we created in beforeAll
+            await client.db(dbName).dropDatabase();
         } catch (e) {
             // Ignore cleanup errors
         }
@@ -57,7 +61,6 @@ describe('MongoDriver Integration Tests', () => {
 
     describe('Basic CRUD Operations', () => {
         test('should create a document', async () => {
-            if (skipTests) return;
             
             const data = {
                 name: 'Alice',
@@ -74,7 +77,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should create document with custom _id', async () => {
-            if (skipTests) return;
             const data = {
                 _id: 'custom-id-123',
                 name: 'Bob',
@@ -88,7 +90,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should find documents with filters', async () => {
-            if (skipTests) return;
             // Insert test data
             await driver.create('users', { name: 'Alice', age: 25, status: 'active' });
             await driver.create('users', { name: 'Bob', age: 30, status: 'active' });
@@ -103,7 +104,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should find documents with comparison operators', async () => {
-            if (skipTests) return;
             await driver.create('users', { name: 'Alice', age: 25 });
             await driver.create('users', { name: 'Bob', age: 30 });
             await driver.create('users', { name: 'Charlie', age: 20 });
@@ -117,7 +117,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should find documents with OR filters', async () => {
-            if (skipTests) return;
             await driver.create('users', { name: 'Alice', age: 25 });
             await driver.create('users', { name: 'Bob', age: 30 });
             await driver.create('users', { name: 'Charlie', age: 20 });
@@ -134,7 +133,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should find documents with in filter', async () => {
-            if (skipTests) return;
             await driver.create('users', { name: 'Alice', status: 'active' });
             await driver.create('users', { name: 'Bob', status: 'pending' });
             await driver.create('users', { name: 'Charlie', status: 'inactive' });
@@ -147,7 +145,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should find documents with contains filter', async () => {
-            if (skipTests) return;
             await driver.create('users', { name: 'Alice Johnson' });
             await driver.create('users', { name: 'Bob Smith' });
             await driver.create('users', { name: 'Charlie Johnson' });
@@ -160,7 +157,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should find one document by id', async () => {
-            if (skipTests) return;
             const created = await driver.create('users', { name: 'Alice', age: 25 });
             
             const found = await driver.findOne('users', created.id);
@@ -171,7 +167,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should find one document by query', async () => {
-            if (skipTests) return;
             await driver.create('users', { name: 'Alice', age: 25 });
             await driver.create('users', { name: 'Bob', age: 30 });
 
@@ -184,7 +179,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should update a document', async () => {
-            if (skipTests) return;
             const created = await driver.create('users', { name: 'Alice', age: 25 });
             
             await driver.update('users', created.id, { age: 26 });
@@ -195,7 +189,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should update with atomic operators', async () => {
-            if (skipTests) return;
             const created = await driver.create('users', { name: 'Alice', age: 25, score: 10 });
             
             await driver.update('users', created.id, { $inc: { score: 5 } });
@@ -205,7 +198,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should delete a document', async () => {
-            if (skipTests) return;
             const created = await driver.create('users', { name: 'Alice', age: 25 });
             
             const deleteCount = await driver.delete('users', created.id);
@@ -216,7 +208,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should count documents', async () => {
-            if (skipTests) return;
             await driver.create('users', { name: 'Alice', status: 'active' });
             await driver.create('users', { name: 'Bob', status: 'active' });
             await driver.create('users', { name: 'Charlie', status: 'inactive' });
@@ -226,7 +217,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should count all documents', async () => {
-            if (skipTests) return;
             await driver.create('users', { name: 'Alice' });
             await driver.create('users', { name: 'Bob' });
             await driver.create('users', { name: 'Charlie' });
@@ -238,7 +228,6 @@ describe('MongoDriver Integration Tests', () => {
 
     describe('Bulk Operations', () => {
         test('should create many documents', async () => {
-            if (skipTests) return;
             const data = [
                 { name: 'Alice', age: 25 },
                 { name: 'Bob', age: 30 },
@@ -255,7 +244,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should update many documents', async () => {
-            if (skipTests) return;
             await driver.create('users', { name: 'Alice', status: 'pending' });
             await driver.create('users', { name: 'Bob', status: 'pending' });
             await driver.create('users', { name: 'Charlie', status: 'active' });
@@ -274,7 +262,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should update many with atomic operators', async () => {
-            if (skipTests) return;
             await driver.create('users', { name: 'Alice', score: 10, active: true });
             await driver.create('users', { name: 'Bob', score: 20, active: true });
             await driver.create('users', { name: 'Charlie', score: 30, active: false });
@@ -293,7 +280,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should delete many documents', async () => {
-            if (skipTests) return;
             await driver.create('users', { name: 'Alice', status: 'inactive' });
             await driver.create('users', { name: 'Bob', status: 'inactive' });
             await driver.create('users', { name: 'Charlie', status: 'active' });
@@ -309,7 +295,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should handle empty bulk operations', async () => {
-            if (skipTests) return;
             const result = await driver.createMany('users', []);
             expect(result).toBeDefined();
 
@@ -328,7 +313,6 @@ describe('MongoDriver Integration Tests', () => {
 
     describe('Query Options', () => {
         beforeEach(async () => {
-            if (skipTests) return;
             
             // Insert ordered test data
             await driver.create('products', { _id: '1', name: 'Laptop', price: 1200, category: 'electronics' });
@@ -339,7 +323,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should sort results ascending', async () => {
-            if (skipTests) return;
             const results = await driver.find('products', {
                 sort: [['price', 'asc']]
             });
@@ -349,7 +332,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should sort results descending', async () => {
-            if (skipTests) return;
             const results = await driver.find('products', {
                 sort: [['price', 'desc']]
             });
@@ -359,7 +341,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should limit results', async () => {
-            if (skipTests) return;
             const results = await driver.find('products', {
                 limit: 2
             });
@@ -368,7 +349,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should skip results', async () => {
-            if (skipTests) return;
             const results = await driver.find('products', {
                 sort: [['_id', 'asc']],
                 skip: 2
@@ -379,7 +359,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should combine skip and limit for pagination', async () => {
-            if (skipTests) return;
             const page1 = await driver.find('products', {
                 sort: [['_id', 'asc']],
                 skip: 0,
@@ -400,7 +379,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should select specific fields', async () => {
-            if (skipTests) return;
             const results = await driver.find('products', {
                 fields: ['name', 'price']
             });
@@ -412,7 +390,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should combine filters, sort, skip, and limit', async () => {
-            if (skipTests) return;
             const results = await driver.find('products', {
                 filters: [['category', '=', 'electronics']],
                 sort: [['price', 'desc']],
@@ -427,7 +404,6 @@ describe('MongoDriver Integration Tests', () => {
 
     describe('Aggregate Operations', () => {
         beforeEach(async () => {
-            if (skipTests) return;
             
             await driver.create('orders', { customer: 'Alice', amount: 100, status: 'completed' });
             await driver.create('orders', { customer: 'Alice', amount: 200, status: 'completed' });
@@ -436,7 +412,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should execute simple aggregation pipeline', async () => {
-            if (skipTests) return;
             const pipeline = [
                 { $match: { status: 'completed' } },
                 { $group: { _id: '$customer', total: { $sum: '$amount' } } }
@@ -454,7 +429,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should count with aggregation', async () => {
-            if (skipTests) return;
             const pipeline = [
                 { $group: { _id: '$status', count: { $sum: 1 } } }
             ];
@@ -471,7 +445,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should calculate average with aggregation', async () => {
-            if (skipTests) return;
             const pipeline = [
                 { $group: { _id: null, avgAmount: { $avg: '$amount' } } }
             ];
@@ -485,7 +458,6 @@ describe('MongoDriver Integration Tests', () => {
 
     describe('Edge Cases', () => {
         test('should handle empty collection', async () => {
-            if (skipTests) return;
             const results = await driver.find('empty_collection', {});
             expect(results.length).toBe(0);
 
@@ -494,7 +466,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should handle null values', async () => {
-            if (skipTests) return;
             await driver.create('users', { name: 'Alice', email: null, age: null });
 
             const result = await driver.findOne('users', null as any, {
@@ -507,7 +478,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should handle nested objects', async () => {
-            if (skipTests) return;
             const data = {
                 name: 'Alice',
                 address: {
@@ -524,7 +494,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should handle arrays', async () => {
-            if (skipTests) return;
             const data = {
                 name: 'Alice',
                 tags: ['developer', 'designer'],
@@ -539,13 +508,11 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should return null for non-existent document', async () => {
-            if (skipTests) return;
             const found = await driver.findOne('users', 'nonexistent-id');
             expect(found).toBeNull();
         });
 
         test('should handle skip beyond total count', async () => {
-            if (skipTests) return;
             await driver.create('users', { name: 'Alice' });
             
             const results = await driver.find('users', {
@@ -557,7 +524,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should handle complex filter combinations', async () => {
-            if (skipTests) return;
             await driver.create('users', { name: 'Alice', age: 25, status: 'active' });
             await driver.create('users', { name: 'Bob', age: 30, status: 'active' });
             await driver.create('users', { name: 'Charlie', age: 20, status: 'inactive' });
@@ -574,7 +540,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should handle nin (not in) filter', async () => {
-            if (skipTests) return;
             await driver.create('users', { name: 'Alice', status: 'active' });
             await driver.create('users', { name: 'Bob', status: 'inactive' });
             await driver.create('users', { name: 'Charlie', status: 'pending' });
@@ -588,7 +553,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should handle != operator', async () => {
-            if (skipTests) return;
             await driver.create('users', { name: 'Alice', status: 'active' });
             await driver.create('users', { name: 'Bob', status: 'inactive' });
 
@@ -601,7 +565,6 @@ describe('MongoDriver Integration Tests', () => {
         });
 
         test('should handle >= and <= operators', async () => {
-            if (skipTests) return;
             await driver.create('users', { name: 'Alice', age: 25 });
             await driver.create('users', { name: 'Bob', age: 30 });
             await driver.create('users', { name: 'Charlie', age: 35 });
