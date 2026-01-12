@@ -22,7 +22,8 @@
   },
   "peerDependencies": {
     "@objectql/core": "workspace:*",
-    "@objectql/driver-knex": "workspace:*",
+    "@objectql/driver-sql": "workspace:*",
+    "@objectql/platform-node": "workspace:*",
     "@objectql/types": "workspace:*",
     "sqlite3": "^5.1.7"
   },

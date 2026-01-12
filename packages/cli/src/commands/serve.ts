@@ -1,5 +1,6 @@
 import { ObjectQL } from '@objectql/core';
-import { KnexDriver } from '@objectql/driver-knex';
+import { KnexDriver } from '@objectql/driver-sql';
+import { ObjectLoader } from '@objectql/platform-node';
 import { createNodeHandler } from '@objectql/server';
 import { createServer } from 'http';
 import * as path from 'path';
@@ -53,7 +54,8 @@ export async function serve(options: { port: number; dir: string }) {
 
     // 2. Load Schema
     try {
-        app.loadFromDirectory(rootDir);
+        const loader = new ObjectLoader(app.metadata);
+        loader.load(rootDir);
         await app.init();
         console.log(chalk.green('✅ Schema loaded successfully.'));
     } catch (e: any) {

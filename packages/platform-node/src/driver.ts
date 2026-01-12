@@ -11,7 +11,7 @@ export function createDriverFromConnection(connection: string): Driver {
         driverConfig = { url: connection };
     } 
     else if (connection.startsWith('sqlite://')) {
-        driverPackage = '@objectql/driver-knex';
+        driverPackage = '@objectql/driver-sql';
         driverClass = 'KnexDriver';
         const filename = connection.replace('sqlite://', '');
         driverConfig = {
@@ -21,7 +21,7 @@ export function createDriverFromConnection(connection: string): Driver {
         };
     }
     else if (connection.startsWith('postgres://') || connection.startsWith('postgresql://')) {
-        driverPackage = '@objectql/driver-knex';
+        driverPackage = '@objectql/driver-sql';
         driverClass = 'KnexDriver';
         driverConfig = {
             client: 'pg',
@@ -29,7 +29,7 @@ export function createDriverFromConnection(connection: string): Driver {
         };
     }
     else if (connection.startsWith('mysql://')) {
-        driverPackage = '@objectql/driver-knex';
+        driverPackage = '@objectql/driver-sql';
         driverClass = 'KnexDriver';
         driverConfig = {
             client: 'mysql2',

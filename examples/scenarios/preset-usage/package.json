@@ -23,7 +23,8 @@
     "@objectql/core": "workspace:*",
     "@objectql/types": "workspace:*",
     "@objectql/cli": "workspace:*",
-    "@objectql/driver-knex": "workspace:*",
+    "@objectql/driver-sql": "workspace:*",
+    "@objectql/platform-node": "workspace:*",
     "sqlite3": "^5.1.7",
     "typescript": "^5.3.0"
   }

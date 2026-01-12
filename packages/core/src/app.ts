@@ -14,21 +14,16 @@ import {
     ActionContext,
     LoaderPlugin
 } from '@objectql/types';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as yaml from 'js-yaml';
-import { ObjectLoader } from './loader';
 import { ObjectRepository } from './repository';
-import { loadPlugin } from './plugin';
-import { createDriverFromConnection } from './driver';
-import { loadRemoteFromUrl } from './remote';
+// import { createDriverFromConnection } from './driver'; // REMOVE THIS
+
+// import { loadRemoteFromUrl } from './remote';
 import { executeActionHelper, registerActionHelper, ActionEntry } from './action';
 import { registerHookHelper, triggerHookHelper, HookEntry } from './hook';
 import { registerObjectHelper, getConfigsHelper } from './object';
 
 export class ObjectQL implements IObjectQL {
     public metadata: MetadataRegistry;
-    private loader: ObjectLoader;
     private datasources: Record<string, Driver> = {};
     private remotes: string[] = [];
     private hooks: Record<string, HookEntry[]> = {};
@@ -41,30 +36,24 @@ export class ObjectQL implements IObjectQL {
     constructor(config: ObjectQLConfig) {
         this.config = config;
         this.metadata = config.registry || new MetadataRegistry();
-        this.loader = new ObjectLoader(this.metadata);
         this.datasources = config.datasources || {};
-        this.remotes = config.remotes || [];
+        // this.remotes = config.remotes || [];
         
         if (config.connection) {
-            this.datasources['default'] = createDriverFromConnection(config.connection);
+             throw new Error("Connection strings are not supported in core directly. Use @objectql/platform-node's createDriverFromConnection or pass a driver instance to 'datasources'.");
         }
 
         // Initialize Plugin List (but don't setup yet)
         if (config.plugins) {
             for (const plugin of config.plugins) {
                 if (typeof plugin === 'string') {
-                    this.use(loadPlugin(plugin));
+                    throw new Error("String plugins are not supported in core. Use @objectql/platform-node or pass plugin instance.");
                 } else {
                     this.use(plugin);
                 }
             }
         }
     }
-
-    addPackage(name: string) {
-        this.loader.loadPackage(name);
-    }
-
     use(plugin: ObjectQLPlugin) {
         this.pluginsList.push(plugin);
     }
@@ -99,58 +88,6 @@ export class ObjectQL implements IObjectQL {
 
     async executeAction(objectName: string, actionName: string, ctx: ActionContext) {
         return await executeActionHelper(this.metadata, this.actions, objectName, actionName, ctx);
-    }
-
-    loadFromDirectory(dir: string, packageName?: string) {
-        this.loader.load(dir, packageName);
-    }
-
-    addLoader(plugin: LoaderPlugin) {
-        this.loader.use(plugin);
-    }
-
-    async updateMetadata(type: string, id: string, content: any): Promise<void> {
-        // Use registry to find the entry so we can get the file path
-        const entry = this.metadata.getEntry(type, id);
-        if (!entry) {
-            throw new Error(`Metadata ${type}:${id} not found`);
-        }
-
-        if (!entry.path) {
-            throw new Error('Cannot update: Metadata source file not found (in-memory only?)');
-        }
-
-        // Safety Check: Prevent writing to node_modules
-        if (entry.path.includes('node_modules')) {
-            throw new Error(`Cannot update metadata ${type}:${id}: File is inside node_modules (read-only package).`);
-        }
-
-        // Check file extension
-        const ext = path.extname(entry.path).toLowerCase();
-        let newContent = '';
-
-        if (ext === '.yml' || ext === '.yaml') {
-            newContent = yaml.dump(content);
-        } else if (ext === '.json') {
-            newContent = JSON.stringify(content, null, 2);
-        } else {
-            throw new Error(`Cannot update: Unsupported file format ${ext} (only .yml, .yaml, .json supported)`);
-        }
-
-        // Write file
-        try {
-            await fs.promises.chmod(entry.path, 0o666).catch(() => {}); // Try to ensure writable
-            await fs.promises.writeFile(entry.path, newContent, 'utf8');
-        } catch (e: any) {
-            throw new Error(`Failed to write file ${entry.path}: ${e.message}`);
-        }
-
-        // Update registry in-memory
-        entry.content = content;
-        
-        // If it's an object update, we might need some re-processing? 
-        // For now, assume a restart or reload is needed for deep schema changes, 
-        // but simple property updates are reflected immediately in registry.
     }
 
     createContext(options: ObjectQLContextOptions): ObjectQLContext {
@@ -249,26 +186,9 @@ export class ObjectQL implements IObjectQL {
             await plugin.setup(app);
         }
 
-        // 1. Load Presets/Packages (Base Layer) - AFTER plugins, so they can use new loaders
-        if (this.config.packages) {
-            for (const name of this.config.packages) {
-                this.addPackage(name);
-            }
-        }
-        if (this.config.presets) {
-            for (const name of this.config.presets) {
-                this.addPackage(name);
-            }
-        }
-
-        // 2. Load Local Sources (Application Layer)
-        if (this.config.source) {
-            const sources = Array.isArray(this.config.source) ? this.config.source : [this.config.source];
-            for (const src of sources) {
-                this.loader.load(src);
-            }
-        }
-
+        // Packages, Presets, Source, Objects loading logic removed from Core.
+        // Use @objectql/platform-node's ObjectLoader or platform-specific loaders.
+        
         // 3. Load In-Memory Objects (Dynamic Layer)
         if (this.config.objects) {
             for (const [key, obj] of Object.entries(this.config.objects)) {
@@ -276,23 +196,9 @@ export class ObjectQL implements IObjectQL {
             }
         }
 
-        // 4. Load Remotes
-        if (this.remotes.length > 0) {
-            console.log(`Loading ${this.remotes.length} remotes...`);
-            const results = await Promise.all(this.remotes.map(url => loadRemoteFromUrl(url)));
-            for (const res of results) {
-                if (res) {
-                    this.datasources[res.driverName] = res.driver;
-                    for (const obj of res.objects) {
-                        this.registerObject(obj);
-                    }
-                }
-            }
-        }
-
         const objects = this.metadata.list<ObjectConfig>('object');
         
-        // 5. Init Drivers (e.g. Sync Schema)
+        // 5. Init Datasources
         // Let's pass all objects to all configured drivers.
         for (const [name, driver] of Object.entries(this.datasources)) {
             if (driver.init) {

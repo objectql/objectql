@@ -1,4 +1,4 @@
-import { ObjectQL } from '../src/index';
+import { ObjectQL } from '@objectql/core';
 import { ObjectConfig } from '@objectql/types';
 import * as fs from 'fs';
 import * as path from 'path';

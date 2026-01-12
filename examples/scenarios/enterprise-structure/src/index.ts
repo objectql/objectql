@@ -6,7 +6,8 @@
  */
 
 import { ObjectQL } from '@objectql/core';
-import { KnexDriver } from '@objectql/driver-knex';
+import { KnexDriver } from '@objectql/driver-sql';
+import { ObjectLoader } from '@objectql/platform-node';
 import path from 'path';
 
 /**
@@ -21,10 +22,12 @@ export async function initializeApp() {
           filename: ':memory:'
         }
       })
-    },
-    // Load metadata from current directory
-    source: __dirname
+    }
   });
+
+  // Load metadata from current directory
+  const loader = new ObjectLoader(app.metadata);
+  loader.load(__dirname);
 
   await app.init();
   return app;

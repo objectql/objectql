@@ -17,7 +17,8 @@
     "@objectql/core": "workspace:*",
     "@objectql/server": "workspace:*",
     "@objectql/types": "workspace:*",
-    "@objectql/driver-knex": "workspace:*",
+    "@objectql/driver-sql": "workspace:*",
+    "@objectql/platform-node": "workspace:*",
     "express": "^4.18.2",
     "sqlite3": "^5.1.7"
   },

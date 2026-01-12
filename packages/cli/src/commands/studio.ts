@@ -1,4 +1,5 @@
 import { ObjectQL } from '@objectql/core';
+import { ObjectLoader, createDriverFromConnection } from '@objectql/platform-node';
 import { createNodeHandler, createStudioHandler, createMetadataHandler } from '@objectql/server';
 import { createServer } from 'http';
 import * as path from 'path';

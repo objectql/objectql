@@ -3,9 +3,9 @@
   "references": [
     { "path": "./packages/types" },
     { "path": "./packages/core" },
-    { "path": "./packages/driver-mongo" },
-    { "path": "./packages/driver-knex" },
-    { "path": "./packages/driver-remote" },
+    { "path": "./packages/driver-sql" },
+    { "path": "./packages/sdk" },
+    { "path": "./packages/platform-node" },
     { "path": "./packages/server" },
     { "path": "./packages/cli" }
   ]

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { loadObjectConfigs } from '@objectql/core';
+import { loadObjectConfigs } from '@objectql/platform-node';
 import { ObjectConfig, FieldConfig } from '@objectql/types';
 
 export async function generateTypes(sourceDir: string, outputDir: string) {

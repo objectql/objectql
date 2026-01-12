@@ -1,5 +1,5 @@
 {
-  "name": "@objectql/driver-remote",
+  "name": "@objectql/sdk",
   "version": "1.5.0",
   "description": "Remote/HTTP Driver for ObjectQL",
   "main": "dist/index.js",

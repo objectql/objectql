@@ -1,6 +1,7 @@
 import express from 'express';
 import { ObjectQL } from '@objectql/core';
-import { KnexDriver } from '@objectql/driver-knex';
+import { KnexDriver } from '@objectql/driver-sql';
+import { ObjectLoader } from '@objectql/platform-node';
 import { createNodeHandler, createMetadataHandler, createStudioHandler, createRESTHandler } from '@objectql/server';
 import * as path from 'path';
 
@@ -18,11 +19,13 @@ async function main() {
         }
     });
 
-    // 2. Register Schema
-    app.loadFromDirectory(path.join(__dirname));
-    await app.init();
+    // 2. Load Schema
+const rootDir = path.resolve(__dirname, '..');
+const loader = new ObjectLoader(app.metadata);
+loader.load(rootDir);
 
-    // 3. Create Handlers
+// 3. Init
+app.init().then(async () => {
     const objectQLHandler = createNodeHandler(app);
     const restHandler = createRESTHandler(app);
     const metadataHandler = createMetadataHandler(app);
@@ -75,6 +78,7 @@ async function main() {
         console.log(`\nTest Metadata API:`);
         console.log(`curl http://localhost:${port}/api/metadata/objects`);
     });
+  });
 }
 
 main().catch(console.error);

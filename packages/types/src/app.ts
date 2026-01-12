@@ -10,18 +10,10 @@ export interface IObjectQL {
     getConfigs(): Record<string, ObjectConfig>;
     datasource(name: string): Driver;
     init(): Promise<void>;
-    addPackage(name: string): void;
     removePackage(name: string): void;
     metadata: MetadataRegistry; 
 
     registerObject(object: ObjectConfig): void;
-    loadFromDirectory(dir: string): void;
-    addLoader(plugin: LoaderPlugin): void;
-    /**
-     * Updates and persists metadata content.
-     * Only works if the metadata was loaded from a writable file source (e.g. local disk).
-     */
-    updateMetadata(type: string, id: string, content: any): Promise<void>;
 
     on(event: HookName, objectName: string, handler: HookHandler): void;
     triggerHook(event: HookName, objectName: string, ctx: HookContext): Promise<void>;

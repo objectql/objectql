@@ -1,5 +1,6 @@
 import { ObjectQL } from '@objectql/core';
-import { KnexDriver } from '@objectql/driver-knex';
+import { KnexDriver } from '@objectql/driver-sql';
+import { ObjectLoader } from '@objectql/platform-node';
 import * as path from 'path';
 
 const db = new ObjectQL({
@@ -12,7 +13,10 @@ const db = new ObjectQL({
             useNullAsDefault: true
         })
     },
-    source: [path.join(__dirname, 'src')],
+    const loader = new ObjectLoader(app.metadata);
+loader.load(path.join(__dirname, 'src'));
+
+export default app;,
     presets: []
 });
 

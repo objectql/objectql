@@ -138,8 +138,9 @@ export function createMetadataHandler(app: IObjectQL) {
 
                 const body = await readBody(req);
                 try {
-                    await app.updateMetadata(type, id, body);
-                    return sendJson({ success: true });
+                    // await app.updateMetadata(type, id, body);
+                    // return sendJson({ success: true });
+                    return sendError(ErrorCode.INTERNAL_ERROR, 'Metadata updates via API are temporarily disabled in this architectural version.', 501);
                 } catch (e: any) {
                     const isUserError = e.message.startsWith('Cannot update') || e.message.includes('not found');
                     return sendError(
