@@ -250,45 +250,6 @@ export interface TeamSharingRule extends BaseSharingRule {
 export type SharingRule = ManualSharingRule | CriteriaSharingRule | TeamSharingRule;
 
 /**
- * Profile-based permissions for easier management
- */
-export interface PermissionProfile {
-    /** Profile name (unique identifier) */
-    name: string;
-    /** Display label */
-    label: string;
-    /** Description */
-    description?: string;
-    /** Object-level permissions (use "*" for all objects) */
-    object_permissions?: Record<string, ObjectOperation[]>;
-    /** Field-level permissions (use "*" for all fields, "object.*" for all fields in object) */
-    field_permissions?: Record<string, FieldOperation[]>;
-}
-
-/**
- * Permission set - additional permissions beyond profile
- */
-export interface PermissionSet {
-    /** Permission set name (unique identifier) */
-    name: string;
-    /** Display label */
-    label: string;
-    /** Description */
-    description?: string;
-    /** Field-level permissions granted by this set */
-    field_permissions?: Record<string, FieldOperation[]>;
-    /** API-specific permissions */
-    api_permissions?: {
-        /** Whether API access is enabled */
-        enabled: boolean;
-        /** API rate limit (requests per hour) */
-        rate_limit?: number;
-        /** Allowed operations */
-        allowed_operations?: ObjectOperation[];
-    };
-}
-
-/**
  * Condition for action execution
  */
 export interface ActionCondition {
@@ -461,12 +422,6 @@ export interface PermissionConfig {
     
     /** Sharing rules */
     sharing_rules?: SharingRule[];
-    
-    /** Permission profiles */
-    profiles?: PermissionProfile[];
-    
-    /** Permission sets */
-    permission_sets?: PermissionSet[];
     
     /** Action permissions */
     action_permissions?: ActionPermissions;

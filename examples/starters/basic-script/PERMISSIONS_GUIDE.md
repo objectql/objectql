@@ -1,17 +1,17 @@
 # Permission Metadata Guide
 
-This guide demonstrates how to use ObjectQL's permission system to implement comprehensive access control for your applications.
+This guide demonstrates how to use ObjectQL's permission system to implement comprehensive access control for your applications using Role-Based Access Control (RBAC).
 
 ## Overview
 
-ObjectQL provides a complete permission system that supports:
+ObjectQL provides a complete RBAC permission system that supports:
 
+- **Role-Based Access Control**: Define roles and assign permissions based on roles
 - **Object-level permissions**: Control CRUD operations on entire objects
 - **Field-level security**: Hide/protect sensitive fields from unauthorized users
 - **Record-level rules**: Dynamic filtering based on ownership, sharing, or custom rules
 - **Action permissions**: Control who can execute specific actions
 - **View permissions**: Restrict access to specific UI views
-- **Profiles & Permission Sets**: Organize and extend permissions
 - **Security Features**: Row-level security, field masking, and audit trails
 
 ## File Structure
@@ -196,134 +196,6 @@ sharing_rules:
       update: false
 ```
 
-## Permission Profiles vs Permission Sets
-
-**Understanding the Difference** (following Salesforce industry standard):
-
-### Permission Profiles
-- **Base permission template** assigned to each user (1:1 relationship)
-- Every user must have exactly one profile
-- Defines the default access level for the user
-- Think of it as the user's "job role template"
-
-```yaml
-profiles:
-  - name: standard_user
-    label: Standard User
-    description: Regular employee access
-    object_permissions:
-      projects: [create, read, update]
-      tasks: [create, read, update, delete]
-    field_permissions:
-      "projects.budget": [read]
-  
-  - name: system_admin
-    label: System Administrator
-    description: Full system access
-    object_permissions:
-      "*": [create, read, update, delete, view_all, modify_all]
-    field_permissions:
-      "*": [read, update]
-```
-
-### Permission Sets
-- **Additional permissions** on top of the profile (1:many relationship)
-- Grant extra capabilities without changing the user's profile
-- Can be assigned to multiple users
-- Use for temporary or specialized access needs
-
-```yaml
-permission_sets:
-  - name: finance_access
-    label: Financial Data Access
-    description: Grant access to financial fields
-    field_permissions:
-      "*.budget": [read, update]
-      "*.cost": [read, update]
-      "*.revenue": [read, update]
-  
-  - name: api_access
-    label: API Access
-    description: Allow API integration capabilities
-    api_permissions:
-      enabled: true
-      rate_limit: 1000
-      allowed_operations: [create, read, update]
-```
-
-### Usage Example
-
-```yaml
-# User Assignment (conceptual)
-user: john_smith
-profile: standard_user              # Base permissions
-permission_sets:                    # Additional permissions
-  - finance_access
-  - api_access
-
-# Effective permissions = profile + all permission sets
-# John can do everything a standard_user can do,
-# PLUS access financial data and use the API
-```
-
-### When to Use Each
-
-**Use Profiles for:**
-- Job role definitions (Admin, Manager, User, Viewer)
-- Default access levels
-- Core permissions that define user capabilities
-
-**Use Permission Sets for:**
-- Specialized access (Finance Data, API Access)
-- Temporary additional permissions
-- Cross-team capabilities
-- Feature flags/beta access
-
-## Permission Profiles (Detailed)
-
-Organize permissions into reusable profiles:
-
-```yaml
-profiles:
-  - name: task_admin
-    label: Task Administrator
-    description: Full control over all tasks
-    object_permissions:
-      tasks: [create, read, update, delete, view_all, modify_all]
-    field_permissions:
-      "tasks.*": [read, update]
-  
-  - name: task_viewer
-    label: Task Viewer
-    description: Read-only access to tasks
-    object_permissions:
-      tasks: [read]
-    field_permissions:
-      "tasks.*": [read]
-```
-
-## Permission Sets
-
-Grant additional permissions beyond a user's profile:
-
-```yaml
-permission_sets:
-  - name: task_reporter
-    label: Task Reporting Access
-    description: Access to view task analytics
-    field_permissions:
-      "tasks.estimated_hours": [read]
-      "tasks.priority": [read]
-  
-  - name: task_api_access
-    label: Task API Access
-    description: Allow API access for integrations
-    api_permissions:
-      enabled: true
-      rate_limit: 1000
-      allowed_operations: [create, read, update]
-```
-
 ## Action Permissions
 
 Control who can execute custom actions:
@@ -427,16 +299,17 @@ audit:
 See the example files in this directory:
 
 - `projects.permission.yml` - Comprehensive permission rules with all features
-- `tasks.permission.yml` - Advanced scenarios including profiles and permission sets
+- `tasks.permission.yml` - Advanced scenarios with record-level rules and security features
 
 ## Best Practices
 
 1. **Principle of Least Privilege**: Grant only the minimum permissions needed
-2. **Use Profiles**: Create profiles for common role combinations
+2. **Define Clear Roles**: Create well-defined roles that match your organizational structure
 3. **Test Thoroughly**: Validate permissions with different user roles
 4. **Document Rules**: Add clear descriptions to all permission rules
 5. **Regular Audits**: Review permissions regularly for compliance
 6. **Default Deny**: Deny access unless explicitly granted
+7. **Use Record Rules**: Leverage dynamic record-level rules for fine-grained control
 
 ## TypeScript Type Safety
 

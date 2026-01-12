@@ -118,51 +118,6 @@ sharing_rules:
       read: true
       update: false
 
-# Permission profiles
-profiles:
-  - name: task_admin
-    label: Task Administrator
-    description: Full control over all tasks
-    object_permissions:
-      tasks: [create, read, update, delete, view_all, modify_all]
-    field_permissions:
-      "tasks.*": [read, update]
-  
-  - name: task_contributor
-    label: Task Contributor
-    description: Can create and manage own tasks
-    object_permissions:
-      tasks: [create, read, update]
-    field_permissions:
-      tasks.name: [read, update]
-      tasks.due_date: [read, update]
-      tasks.completed: [read, update]
-  
-  - name: task_viewer
-    label: Task Viewer
-    description: Read-only access to tasks
-    object_permissions:
-      tasks: [read]
-    field_permissions:
-      "tasks.*": [read]
-
-# Permission sets for additional capabilities
-permission_sets:
-  - name: task_reporter
-    label: Task Reporting Access
-    description: Access to view task analytics and estimated hours
-    field_permissions:
-      "tasks.estimated_hours": [read]
-      "tasks.priority": [read]
-  
-  - name: task_api_access
-    label: Task API Access
-    description: Allow API access for task integrations
-    api_permissions:
-      enabled: true
-      rate_limit: 1000
-      allowed_operations: [create, read, update]
-
 # Row-level security
 row_level_security:
   enabled: true
