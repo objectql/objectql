@@ -4,7 +4,6 @@
 
 For complete documentation, see:
 - 📖 [English Guide](./formulas-and-rules.md)
-- 📖 [中文指南](./formulas-and-rules.zh-CN.md)
 
 ## Formula Syntax Quick Reference
 
