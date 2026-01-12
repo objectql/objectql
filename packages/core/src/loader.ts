@@ -1,8 +1,9 @@
 import * as fs from 'fs';
 import * as glob from 'fast-glob';
 import * as path from 'path';
-import { MetadataRegistry, ObjectConfig, LoaderPlugin, LoaderHandlerContext } from '@objectql/types';
+import { MetadataRegistry, ObjectConfig, LoaderPlugin, LoaderHandlerContext, FieldConfig } from '@objectql/types';
 import * as yaml from 'js-yaml';
+import { toTitleCase } from './util';
 
 export class ObjectLoader {
     private plugins: LoaderPlugin[] = [];
@@ -243,16 +244,48 @@ export class ObjectLoader {
 }
 
 function registerObject(registry: MetadataRegistry, obj: any, file: string, packageName?: string) {
-    // Normalize fields
+    if (!obj.name) return;
+
+    // --- Smart Defaults & Normalization ---
+
+    // 1. Object Label: Infer from name if missing
+    if (!obj.label) {
+        obj.label = toTitleCase(obj.name);
+    }
+
+    // 2. Normalize Fields
     if (obj.fields) {
         for (const [key, field] of Object.entries(obj.fields)) {
             if (typeof field === 'object' && field !== null) {
-                if (!(field as any).name) {
-                    (field as any).name = key;
+                const f = field as any;
+                
+                // Ensure field has a name
+                if (!f.name) {
+                    f.name = key;
+                }
+
+                // Field Label: Infer from key if missing
+                if (!f.label) {
+                    f.label = toTitleCase(key);
+                }
+
+                // Inferred Types
+                if (!f.type) {
+                    if (f.reference_to) {
+                        f.type = 'lookup';
+                    } else if (f.options) {
+                        f.type = 'select';
+                    } else if (f.formula) {
+                        f.type = 'formula';
+                    } else if (f.summary_object) {
+                        f.type = 'summary';
+                    }
                 }
             }
         }
     }
+
+    // --- End Smart Defaults ---
 
     // Check for existing object to Merge
     const existing = registry.getEntry('object', obj.name);
