@@ -99,6 +99,14 @@ action_permissions:
   bulk_update_status:
     execute: [admin, manager]
 
+# View permissions
+view_permissions:
+  all_projects:
+    access: [admin, manager, developer, user, viewer]
+    field_restrictions:
+      budget:
+        visible_to: [admin, manager]
+
 # Row-level security
 row_level_security:
   enabled: true
