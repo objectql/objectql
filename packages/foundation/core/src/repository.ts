@@ -86,7 +86,9 @@ export class ObjectRepository {
         // 2. Validate object-level validation rules
         if (schema.validation?.rules && schema.validation.rules.length > 0) {
             // Track which fields changed (using shallow comparison for performance)
-            // Note: This may not detect changes in nested objects/arrays
+            // IMPORTANT: Shallow comparison does not detect changes in nested objects/arrays.
+            // If your validation rules rely on detecting changes in complex nested structures,
+            // you may need to implement custom change tracking in hooks.
             const changedFields = previousRecord 
                 ? Object.keys(record).filter(key => record[key] !== previousRecord[key])
                 : undefined;
