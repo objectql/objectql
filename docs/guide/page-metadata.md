@@ -625,19 +625,19 @@ meta:
 
 ### Complete Dashboard Example
 
-See `examples/starters/basic-script/src/dashboard.page.yml` for a full dashboard implementation.
+See `packages/starters/basic/src/dashboard.page.yml` for a full dashboard implementation.
 
 ### Form Page Example
 
-See `examples/starters/basic-script/src/project_detail.page.yml` for a two-column detail page with forms.
+See `packages/starters/basic/src/project_detail.page.yml` for a two-column detail page with forms.
 
 ### Wizard Example
 
-See `examples/starters/basic-script/src/create_project_wizard.page.yml` for a multi-step wizard.
+See `packages/starters/basic/src/create_project_wizard.page.yml` for a multi-step wizard.
 
 ### Canvas Layout Example
 
-See `examples/starters/basic-script/src/landing.page.yml` for a custom landing page.
+See `packages/starters/basic/src/landing.page.yml` for a custom landing page.
 
 ## Integration with Navigation
 

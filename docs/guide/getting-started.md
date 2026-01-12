@@ -13,7 +13,7 @@
 Install the core package and a driver (e.g., PostgreSQL or MongoDB).
 
 ```bash
-npm install @objectql/core @objectql/driver-knex knex pg
+npm install @objectql/core @objectql/driver-sql knex pg
 # or
 npm install @objectql/core @objectql/driver-mongo mongodb
 ```

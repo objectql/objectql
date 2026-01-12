@@ -24,7 +24,7 @@ The Connection String URI defining the database connection.
 *   `postgres://user:pass@host:5432/db`
 *   `mongodb://host:27017/db`
 
-The engine will automatically load the appropriate driver (`@objectql/driver-knex` or `@objectql/driver-mongo`).
+The engine will automatically load the appropriate driver (`@objectql/driver-sql` or `@objectql/driver-mongo`).
 
 ### `source` (string | string[])
 One or more directory paths (relative or absolute) containing your schema files (`*.object.yml`).
