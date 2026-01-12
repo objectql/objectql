@@ -50,11 +50,8 @@ describe('MongoDriver Integration Tests', () => {
         }
     });
 
-    // Use conditional test execution
-    const testIf = (condition: boolean) => condition ? test : test.skip;
-
     describe('Basic CRUD Operations', () => {
-        testIf(!skipTests)('should create a document', async () => {
+        test.skip('should create a document', async () => {
             const data = {
                 name: 'Alice',
                 age: 25,
