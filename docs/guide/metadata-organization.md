@@ -62,7 +62,7 @@ src/
 
 See the complete working example at:
 ```
-examples/scenarios/enterprise-structure/
+packages/starters/enterprise/
 ```
 
 This demonstrates:
@@ -333,7 +333,7 @@ describe('Account Object', () => {
 
 Explore the full example with 20+ objects:
 ```bash
-cd examples/scenarios/enterprise-structure
+cd packages/starters/enterprise
 pnpm install
 pnpm build
 ```
@@ -362,4 +362,4 @@ The example includes:
 - [Data Modeling Guide](./data-modeling.md)
 - [Plugin Development](./plugins.md)
 - [Logic Hooks](./logic-hooks.md)
-- [Complete Example](../../examples/scenarios/enterprise-structure/)
+- [Complete Example](../../packages/starters/enterprise/)

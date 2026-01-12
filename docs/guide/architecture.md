@@ -15,8 +15,7 @@ An ObjectQL application consists of three main layers:
 The project is structured as a monorepo with strict dependency rules to ensure scalability and maintainability.
 
 *   **`@objectql/types`**: The shared contract. Contains all interfaces (`ObjectConfig`, `ObjectQLDriver`). Has **zero dependencies**.
-*   **`@objectql/parser`**: Responsible for parsing YAML/JSON into the internal AST.
-*   **`@objectql/core`**: The main runtime. It depends on `types` and `parser`.
+*   **`@objectql/core`**: The main runtime. It depends on `types`.
 *   **`@objectql/driver-*`**: Database adapters. They implement interfaces from `types` but do **not** depend on `core` (avoiding circular dependencies).
 
 ## Core Concepts

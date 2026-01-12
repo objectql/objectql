@@ -5,7 +5,7 @@ The SQL driver implementation is based on [Knex.js](https://knexjs.org/), a powe
 ## Installation
 
 ```bash
-npm install @objectql/driver-knex knex pg
+npm install @objectql/driver-sql knex pg
 # Replace 'pg' with 'mysql', 'sqlite3', or 'mssql' depending on your database.
 ```
 
@@ -14,7 +14,7 @@ npm install @objectql/driver-knex knex pg
 The `KnexDriver` constructor accepts the standard [Knex configuration object](https://knexjs.org/guide/#configuration-options).
 
 ```typescript
-import { KnexDriver } from '@objectql/driver-knex';
+import { KnexDriver } from '@objectql/driver-sql';
 
 const driver = new KnexDriver({
   client: 'pg', // 'mysql', 'sqlite3', etc.

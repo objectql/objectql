@@ -17,7 +17,7 @@ Drivers are instantiated and passed to the `ObjectQL` constructor under the `dri
 
 ```typescript
 import { ObjectQL } from '@objectql/core';
-import { KnexDriver } from '@objectql/driver-knex';
+import { KnexDriver } from '@objectql/driver-sql';
 
 const myDriver = new KnexDriver({ /* options */ });
 
