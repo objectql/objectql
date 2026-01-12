@@ -7,6 +7,7 @@ import { initProject } from './commands/init';
 import { newMetadata } from './commands/new';
 import { i18nExtract, i18nInit, i18nValidate } from './commands/i18n';
 import { migrate, migrateCreate, migrateStatus } from './commands/migrate';
+import { aiGenerate, aiValidate, aiChat } from './commands/ai';
 
 const program = new Command();
 
@@ -187,6 +188,54 @@ program
             dir: options.dir,
             open: options.open
         });
+    });
+
+// AI commands
+const aiCmd = program
+    .command('ai')
+    .description('AI-powered application generation and validation');
+
+aiCmd
+    .command('generate')
+    .description('Generate ObjectQL metadata from natural language description')
+    .requiredOption('-d, --description <text>', 'Description of the application to generate')
+    .option('-o, --output <path>', 'Output directory for generated files', './src')
+    .option('-t, --type <type>', 'Generation type: basic, complete, or custom', 'custom')
+    .action(async (options) => {
+        try {
+            await aiGenerate(options);
+        } catch (error) {
+            console.error(error);
+            process.exit(1);
+        }
+    });
+
+aiCmd
+    .command('validate')
+    .description('Validate metadata files using AI')
+    .argument('<path>', 'Path to metadata files directory')
+    .option('--fix', 'Automatically fix issues where possible')
+    .option('-v, --verbose', 'Show detailed validation output')
+    .action(async (pathArg, options) => {
+        try {
+            await aiValidate({ path: pathArg, ...options });
+        } catch (error) {
+            console.error(error);
+            process.exit(1);
+        }
+    });
+
+aiCmd
+    .command('chat')
+    .description('Interactive AI assistant for ObjectQL')
+    .option('-p, --prompt <text>', 'Initial prompt for the AI')
+    .action(async (options) => {
+        try {
+            await aiChat({ initialPrompt: options.prompt });
+        } catch (error) {
+            console.error(error);
+            process.exit(1);
+        }
     });
 
 program.parse();
