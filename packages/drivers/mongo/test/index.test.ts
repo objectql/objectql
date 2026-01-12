@@ -174,4 +174,50 @@ describe('MongoDriver', () => {
         expect(result).toHaveProperty('name', 'Charlie');
     });
 
+    // Backward compatibility tests for legacy '_id' usage
+    it('should accept "_id" field in filters for backward compatibility', async () => {
+        const query = {
+            filters: [['_id', '=', '12345']]
+        };
+        await driver.find('users', query);
+        
+        expect(mockCollection.find).toHaveBeenCalledWith(
+            { _id: '12345' },
+            expect.any(Object)
+        );
+    });
+
+    it('should accept "_id" in sorting for backward compatibility', async () => {
+        const query = {
+            sort: [['_id', 'asc']]
+        };
+        await driver.find('users', query);
+        
+        expect(mockCollection.find).toHaveBeenCalledWith(
+            {},
+            expect.objectContaining({ 
+                sort: { _id: 1 }
+            })
+        );
+    });
+
+    it('should accept "_id" in field projection for backward compatibility', async () => {
+        mockCollection.toArray.mockResolvedValueOnce([{ _id: '456', name: 'Dave' }]);
+        
+        const query = {
+            fields: ['_id', 'name']
+        };
+        const results = await driver.find('users', query);
+        
+        expect(mockCollection.find).toHaveBeenCalledWith(
+            {},
+            expect.objectContaining({ 
+                projection: { _id: 1, name: 1 }
+            })
+        );
+        
+        // Should still return 'id' instead of '_id' in results
+        expect(results[0]).toEqual({ id: '456', name: 'Dave' });
+    });
+
 });

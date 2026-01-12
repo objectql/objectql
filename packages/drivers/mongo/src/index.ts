@@ -136,16 +136,16 @@ export class MongoDriver implements Driver {
             // map [['field', 'desc']] to { field: -1 }
             findOptions.sort = {};
             for (const [field, order] of query.sort) {
-                // Map 'id' to '_id' for sorting
-                const dbField = field === 'id' ? '_id' : field;
+                // Map both 'id' and '_id' to '_id' for backward compatibility
+                const dbField = (field === 'id' || field === '_id') ? '_id' : field;
                 (findOptions.sort as any)[dbField] = order === 'desc' ? -1 : 1;
             }
         }
         if (query.fields && query.fields.length > 0) {
             findOptions.projection = {};
             for (const field of query.fields) {
-                // Map 'id' to '_id' for projection
-                const dbField = field === 'id' ? '_id' : field;
+                // Map both 'id' and '_id' to '_id' for backward compatibility
+                const dbField = (field === 'id' || field === '_id') ? '_id' : field;
                 (findOptions.projection as any)[dbField] = 1;
             }
         }

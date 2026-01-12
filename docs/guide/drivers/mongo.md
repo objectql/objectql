@@ -85,13 +85,17 @@ const users = await app.find('users', query);
 
 ### Migration from Legacy Code
 
-If you have existing code using `_id`, you should migrate to using `id` for consistency:
+If you have existing code using `_id`, you have two options:
+
+1. **Recommended: Migrate to `id`** for consistency across drivers:
 
 **Before (Legacy):**
 ```typescript
 // ❌ Old way - inconsistent with SQL drivers
 const query = {
-  filters: [['_id', '=', '507f1f77bcf86cd799439011']]
+  filters: [['_id', '=', '507f1f77bcf86cd799439011']],
+  sort: [['_id', 'desc']],
+  fields: ['_id', 'name']
 };
 ```
 
@@ -99,11 +103,34 @@ const query = {
 ```typescript
 // ✅ New way - consistent across all drivers
 const query = {
-  filters: [['id', '=', '507f1f77bcf86cd799439011']]
+  filters: [['id', '=', '507f1f77bcf86cd799439011']],
+  sort: [['id', 'desc']],
+  fields: ['id', 'name']
 };
 ```
 
-**Note:** The MongoDB driver still accepts `_id` in filters for backward compatibility, but using `id` is strongly recommended for new code.
+2. **Backward Compatible Mode:** Continue using `_id` in queries (results still return `id`)
+
+The MongoDB driver **fully supports `_id` in filters, sorting, and field projections** for backward compatibility:
+
+```typescript
+// ✅ This works - backward compatible
+const query = {
+  filters: [['_id', '=', '507f1f77bcf86cd799439011']],
+  sort: [['_id', 'desc']],
+  fields: ['_id', 'name']
+};
+const users = await app.find('users', query);
+
+// Results ALWAYS use 'id' regardless of query field name
+console.log(users[0].id); // '507f1f77bcf86cd799439011'
+console.log(users[0]._id); // undefined
+```
+
+**Key Points:**
+- Queries accept both `id` and `_id` (automatically mapped to MongoDB's `_id`)
+- Results always return `id` field (never `_id`)
+- Using `id` is recommended for database portability
 
 ## ID Generation
 

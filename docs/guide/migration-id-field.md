@@ -133,24 +133,33 @@ find src/ -type f -name "*.ts" -exec sed -i "s/\['_id'/\['id'/g" {} +
 
 ### MongoDB Driver
 
-The MongoDB driver maintains backward compatibility:
+The MongoDB driver maintains **full backward compatibility** for `_id` usage:
 
-- `_id` in filters still works (mapped to `id` internally)
-- `_id` in create operations is mapped to `id`
-- Results always return `id` (not `_id`)
+- `_id` in **filters** is automatically mapped to MongoDB's `_id`
+- `_id` in **sorting** is automatically mapped to MongoDB's `_id`
+- `_id` in **field projections** is automatically mapped to MongoDB's `_id`
+- `_id` in **create operations** is mapped to `id`
+- Results **always** return `id` (not `_id`)
 
 **Example:**
 ```typescript
-// Legacy code - still works but not recommended
+// Legacy code - fully supported for backward compatibility
 const query = {
-  filters: [['_id', '=', 'user-123']]
+  filters: [['_id', '=', 'user-123']],
+  sort: [['_id', 'desc']],
+  fields: ['_id', 'name', 'email']
 };
 const users = await app.find('users', query);
 
-// Result uses 'id' (not '_id')
+// Results use 'id' (not '_id')
 console.log(users[0].id); // 'user-123'
 console.log(users[0]._id); // undefined
 ```
+
+**No Breaking Changes:** Your existing queries using `_id` will continue to work without modification. However, migrating to `id` is recommended for:
+- Consistency with SQL drivers
+- Database portability
+- Future-proofing your code
 
 ### SQL Driver
 
