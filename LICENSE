@@ -1,21 +1,25 @@
-MIT License
+ObjectQL Dual License
 
 Copyright (c) 2026 ObjectQL Contributors
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This software is made available under a dual-license model:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. GNU Affero General Public License v3.0 (AGPL-3.0) - See LICENSE-AGPL
+2. Commercial License - See LICENSE-COMMERCIAL.md
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+You may choose either license option that best suits your needs.
+
+================================================================================
+
+IMPORTANT NOTICE:
+
+- If you use ObjectQL in an open-source project or are willing to open-source
+  your modifications, you may use it under the AGPL-3.0 license (free).
+
+- If you want to use ObjectQL in a proprietary/closed-source application or
+  SaaS product without open-sourcing your code, you must obtain a commercial
+  license.
+
+For commercial licensing inquiries, please contact: license@objectql.org
+
+================================================================================
