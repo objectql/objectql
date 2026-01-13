@@ -16,15 +16,22 @@ This section contains the complete metadata specifications for the ObjectQL plat
 *   [**Actions (RPC)**](./action.md) - Custom server-side functions and APIs
 *   [**Workflows & Processes**](./workflow.md) - Automated business processes and approval chains
 
-### Presentation Layer
-*   [**Components**](./component.md) - Reusable UI components and component customization
+## Presentation Layer
+
+### UI Components
+*   [**Platform Base Components**](./base-components.md) - Complete specification for all built-in components (ObjectTable, ObjectForm, etc.)
+*   [**Component Metadata**](./component.md) - Reusable UI components and component customization
 *   [**Component Packages**](./component-package.md) - Distributable component packages (npm UMD)
+
+### Page Composition
 *   [**Pages**](./page.md) - Composable UI pages with layouts, components, and interactions
 *   [**Views & Layouts**](./view.md) - Data presentation configurations (list, grid, kanban, calendar)
 *   [**Forms**](./form.md) - Data entry and editing interfaces
+
+### Analytics & Navigation
 *   [**Reports & Dashboards**](./report.md) - Analytics, visualizations, and business intelligence
 *   [**Menus & Navigation**](./menu.md) - Application structure and navigation hierarchy
-*   [**Applications**](./app.md) - Application container and simple metadata
+*   [**Applications**](./app.md) - Application container and configuration metadata
 
 ## Security & Access Control
 
