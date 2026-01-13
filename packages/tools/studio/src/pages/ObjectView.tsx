@@ -98,7 +98,8 @@ export function ObjectView({ objectName }: ObjectViewProps) {
                         })
                     });
                     const resJson = await response.json();
-                    const rows = resJson.data || resJson; // normalize
+                    // Support new format (items) and old format (data)
+                    const rows = resJson.items || resJson.data || resJson; // normalize
 
                     // 4. Fetch Count (for total pagination)
                     // Optimization: Only fetch count if we don't know it or filter changed? 
@@ -117,7 +118,8 @@ export function ObjectView({ objectName }: ObjectViewProps) {
                             })
                         });
                         const countJson = await countRes.json();
-                        lastRow = typeof countJson === 'number' ? countJson : countJson.data;
+                        // Handle both old format (data) and new format (count)
+                        lastRow = typeof countJson === 'number' ? countJson : (countJson.count || countJson.data);
                     }
 
                    params.successCallback(rows, lastRow);

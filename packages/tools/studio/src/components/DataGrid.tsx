@@ -53,7 +53,7 @@ function DataGrid() {
       }
 
       const result = await response.json();
-      const data = result.data || [];
+      const data = result.items || result.data || [];
       setRecords(data);
 
       // Auto-detect fields if not already set
