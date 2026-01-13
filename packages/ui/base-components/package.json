@@ -1,0 +1,50 @@
+{
+  "name": "@objectql/base-components",
+  "version": "1.0.0",
+  "description": "TypeScript definitions and React component interfaces for ObjectQL platform base components",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc && rollup -c",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "objectql",
+    "base-components",
+    "react",
+    "typescript",
+    "ui-components",
+    "metadata-driven"
+  ],
+  "author": "ObjectQL Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^5.0.0",
+    "rollup": "^3.0.0",
+    "rollup-plugin-typescript2": "^0.34.0"
+  },
+  "dependencies": {
+    "@objectql/types": "workspace:*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/objectql/objectql.git",
+    "directory": "packages/ui/base-components"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
