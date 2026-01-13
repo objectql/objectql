@@ -1,0 +1,340 @@
+# Custom Table Component Example
+# This demonstrates how to create a custom component that extends the built-in ObjectTable
+
+name: custom_table
+label: Custom Data Table
+description: Enhanced table component with custom styling and advanced features
+category: data_display
+version: 1.0.0
+author: ObjectQL Team
+
+# Implementation
+# In a real application, this would point to your React/Vue/Svelte component
+implementation: ./CustomTable.tsx
+framework: react
+render_mode: client
+
+# Component Properties
+props:
+  - name: object
+    type: string
+    description: Name of the object to display
+    required: true
+    examples:
+      - projects
+      - tasks
+      - customers
+  
+  - name: columns
+    type: array
+    description: Column definitions for the table
+    required: false
+    examples:
+      - [{ field: 'name', label: 'Name', width: 200 }]
+    
+    ai_context:
+      intent: "Define which fields to display as columns"
+      usage_guide: "If not provided, shows all fields from the object"
+  
+  - name: filters
+    type: array
+    description: Default filters to apply
+    required: false
+    examples:
+      - [{ field: 'status', operator: '=', value: 'active' }]
+  
+  - name: sortable
+    type: boolean
+    description: Enable column sorting
+    default: true
+  
+  - name: filterable
+    type: boolean
+    description: Enable filtering UI
+    default: true
+  
+  - name: pageSize
+    type: number
+    description: Number of records per page
+    default: 25
+    validation:
+      min: 10
+      max: 100
+  
+  - name: selectable
+    type: boolean
+    description: Enable row selection with checkboxes
+    default: false
+  
+  - name: exportable
+    type: boolean
+    description: Show export to CSV/Excel button
+    default: true
+  
+  - name: highlightRow
+    type: function
+    description: Function to determine if a row should be highlighted
+    required: false
+
+# Events
+events:
+  - name: onRowClick
+    description: Fired when a user clicks on a table row
+    payload: "{ row: Record, index: number, event: MouseEvent }"
+    examples:
+      - scenario: User clicks on project row
+        payload: 
+          row: { id: "p1", name: "Website Redesign", status: "active" }
+          index: 0
+  
+  - name: onSort
+    description: Fired when user changes sort order
+    payload: "{ column: string, direction: 'asc' | 'desc' }"
+    examples:
+      - scenario: User clicks name column header
+        payload:
+          column: name
+          direction: asc
+  
+  - name: onFilter
+    description: Fired when user applies filters
+    payload: "{ filters: FilterDefinition[] }"
+  
+  - name: onSelect
+    description: Fired when row selection changes
+    payload: "{ selectedRows: Record[], selectedIds: string[] }"
+  
+  - name: onExport
+    description: Fired before data export
+    payload: "{ format: 'csv' | 'excel', data: Record[] }"
+
+# Public Methods
+methods:
+  - name: refresh
+    description: Reload table data from the server
+    parameters: []
+    returns: Promise<void>
+    examples:
+      - usage: "tableRef.current.refresh()"
+  
+  - name: clearFilters
+    description: Remove all active filters
+    parameters: []
+    returns: void
+  
+  - name: selectAll
+    description: Select all visible rows
+    parameters: []
+    returns: void
+  
+  - name: exportData
+    description: Trigger data export
+    parameters:
+      - name: format
+        type: string
+        description: Export format (csv or excel)
+        required: false
+    returns: void
+    examples:
+      - usage: "tableRef.current.exportData('csv')"
+        result: "Downloads table data as CSV file"
+
+# Component Slots
+slots:
+  - name: toolbar
+    description: Custom toolbar content (shown above table)
+    required: false
+  
+  - name: empty
+    description: Custom empty state when no data
+    required: false
+    default: "No records found"
+  
+  - name: actions
+    description: Row action buttons
+    required: false
+    allowed_types:
+      - ActionButton
+      - Dropdown
+
+# Styling Configuration
+styling:
+  framework: tailwind
+  theme_vars:
+    - primary-color
+    - border-color
+    - text-color
+    - hover-bg
+  
+  customizable:
+    - name: headerBg
+      description: Table header background color
+      type: color
+      default: bg-gray-100
+    
+    - name: rowHeight
+      description: Table row height
+      type: size
+      default: h-12
+    
+    - name: borderColor
+      description: Border color for cells
+      type: color
+      default: border-gray-200
+    
+    - name: hoverBg
+      description: Background color on row hover
+      type: color
+      default: hover:bg-gray-50
+
+# Accessibility
+accessibility:
+  role: grid
+  keyboard_navigation: true
+  screen_reader: true
+  focus_management: true
+  color_contrast: AA
+  
+  aria_attributes:
+    - aria-label
+    - aria-sort
+    - aria-rowcount
+    - aria-colcount
+    - aria-selected
+
+# Performance
+performance:
+  lazy_loadable: true
+  bundle_size: 45
+  complexity: medium
+  memoizable: true
+  virtual_scroll: true
+
+# Dependencies
+dependencies:
+  - name: "@tanstack/react-table"
+    version: "^8.0.0"
+    type: library
+  
+  - name: "react"
+    version: "^18.0.0"
+    type: library
+
+# Features
+features:
+  realtime: true
+  offline: false
+  i18n: true
+  themeable: true
+  responsive: true
+  printable: false
+  exportable: true
+
+# Platform Compatibility
+platforms:
+  web: true
+  mobile: true
+  desktop: false
+  ssr: true
+
+# AI Context
+ai_context:
+  purpose: "Display and interact with tabular business data from ObjectQL objects"
+  
+  use_cases:
+    - "Browse and search through lists of records (projects, tasks, customers)"
+    - "Perform bulk operations on multiple selected records"
+    - "Export data for reporting or analysis"
+    - "Quick navigation to record detail views"
+  
+  best_practices:
+    - "Use virtual scrolling for datasets with more than 1000 rows"
+    - "Provide clear column headers with sort indicators"
+    - "Include search/filter capabilities for tables with more than 20 rows"
+    - "Show loading states during data fetch"
+    - "Implement keyboard navigation (arrow keys, enter, space)"
+    - "Use responsive design to adapt to mobile screens"
+  
+  anti_patterns:
+    - "Don't load all data at once without pagination"
+    - "Don't make columns too narrow (minimum 100px)"
+    - "Don't use tables for non-tabular data"
+    - "Don't skip loading states"
+  
+  common_mistakes:
+    - "Forgetting to handle empty state"
+    - "Not providing sort/filter feedback"
+    - "Missing loading indicators"
+    - "Poor mobile responsiveness"
+    - "Inaccessible for keyboard users"
+  
+  integration_hints:
+    - "Works seamlessly with ObjectQL query system"
+    - "Automatically respects object permissions"
+    - "Can be embedded in pages, modals, or sidebars"
+    - "Integrates with ObjectQL actions for row operations"
+
+# Examples
+examples:
+  - title: Basic Usage
+    description: Simple table displaying project data
+    code: |
+      <CustomTable
+        object="projects"
+        columns={[
+          { field: 'name', label: 'Project Name', width: 300 },
+          { field: 'status', label: 'Status', width: 120 },
+          { field: 'owner.name', label: 'Owner', width: 150 },
+          { field: 'budget', label: 'Budget', width: 120, format: 'currency' }
+        ]}
+        pageSize={25}
+      />
+  
+  - title: With Filters and Selection
+    description: Table with default filters and row selection enabled
+    code: |
+      <CustomTable
+        object="tasks"
+        filters={[
+          { field: 'status', operator: '!=', value: 'completed' },
+          { field: 'priority', operator: '=', value: 'high' }
+        ]}
+        selectable={true}
+        onSelect={(selected) => {
+          console.log('Selected tasks:', selected.selectedIds);
+        }}
+      />
+  
+  - title: With Custom Actions
+    description: Table with row click handler and custom toolbar
+    code: |
+      <CustomTable
+        object="customers"
+        onRowClick={(row) => navigate(`/customers/${row.id}`)}
+        exportable={true}
+      >
+        <template #toolbar>
+          <button onClick={handleImport}>Import Customers</button>
+        </template>
+        
+        <template #actions>
+          <ActionButton label="Edit" icon="edit" />
+          <ActionButton label="Delete" icon="delete" />
+        </template>
+      </CustomTable>
+  
+  - title: Advanced Features
+    description: Table with virtual scrolling and custom row highlighting
+    code: |
+      <CustomTable
+        object="transactions"
+        pageSize={100}
+        highlightRow={(row) => row.amount > 10000}
+        onSort={(sort) => console.log('Sorted by:', sort)}
+        onFilter={(filters) => console.log('Filtered:', filters)}
+      />
+
+# Documentation
+docs_url: https://docs.objectql.com/components/custom-table
+repository: https://github.com/objectql/objectql
+license: MIT
