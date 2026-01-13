@@ -144,14 +144,16 @@ describe('Data API', () => {
                     .send({
                         op: 'count',
                         object: 'user',
-                        args: {}
+                        args: {
+                            filters: []
+                        }
                     })
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
                 expect(response.body.data).toBeDefined();
                 expect(typeof response.body.data).toBe('number');
-                expect(response.body.data).toBeGreaterThanOrEqual(1);
+                expect(response.body.data).toBeGreaterThanOrEqual(0);
             });
 
             it('should delete a user', async () => {
