@@ -78,12 +78,6 @@ export interface ObjectQLResponse {
     // For list operations (find)
     items?: any[];
     
-    // For single item operations (findOne, create, update)
-    data?: any;
-    
-    // Object type identifier (for type assertion and polymorphism)
-    object?: string;
-    
     // Pagination metadata (for list operations)
     meta?: PaginationMeta;
     
@@ -93,4 +87,8 @@ export interface ObjectQLResponse {
         message: string;
         details?: ErrorDetails | any; // Allow flexible details structure
     };
+    
+    // For single item operations, the response is the object itself with __object field
+    // This allows any additional fields from the actual data object
+    [key: string]: any;
 }

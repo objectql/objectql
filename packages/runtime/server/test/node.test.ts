@@ -78,8 +78,9 @@ describe('Node Adapter', () => {
 
         expect(response.status).toBe(200);
         expect(response.body).toEqual({
-            data: { id: 2, name: 'Bob' },
-            object: 'user'
+            id: 2,
+            name: 'Bob',
+            __object: 'user'
         });
     });
 
