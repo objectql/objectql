@@ -107,6 +107,30 @@ export class ObjectQLServer {
                         return { ...result, '@type': req.object };
                     }
                     return result;
+                case 'createMany':
+                    // Bulk create operation
+                    result = await repo.createMany(req.args);
+                    return { 
+                        items: result,
+                        count: Array.isArray(result) ? result.length : 0,
+                        '@type': req.object
+                    };
+                case 'updateMany':
+                    // Bulk update operation
+                    // args should be { filters, data }
+                    result = await repo.updateMany(req.args.filters, req.args.data);
+                    return { 
+                        count: result,
+                        '@type': req.object
+                    };
+                case 'deleteMany':
+                    // Bulk delete operation
+                    // args should be { filters }
+                    result = await repo.deleteMany(req.args.filters || req.args);
+                    return { 
+                        count: result,
+                        '@type': req.object
+                    };
                 default:
                     return this.errorResponse(
                         ErrorCode.INVALID_REQUEST,

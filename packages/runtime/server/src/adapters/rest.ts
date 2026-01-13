@@ -64,11 +64,13 @@ function sendJSON(res: ServerResponse, statusCode: number, data: any) {
  * Creates a REST-style HTTP request handler for ObjectQL
  * 
  * Endpoints:
- * - GET    /api/data/:object       - List records
- * - GET    /api/data/:object/:id   - Get single record
- * - POST   /api/data/:object       - Create record
- * - PUT    /api/data/:object/:id   - Update record
- * - DELETE /api/data/:object/:id   - Delete record
+ * - GET    /api/data/:object               - List records
+ * - GET    /api/data/:object/:id           - Get single record
+ * - POST   /api/data/:object               - Create record (or create many if array)
+ * - POST   /api/data/:object/bulk-update   - Update many records
+ * - POST   /api/data/:object/bulk-delete   - Delete many records
+ * - PUT    /api/data/:object/:id           - Update record
+ * - DELETE /api/data/:object/:id           - Delete record
  */
 export function createRESTHandler(app: IObjectQL) {
     const server = new ObjectQLServer(app);
@@ -99,7 +101,7 @@ export function createRESTHandler(app: IObjectQL) {
             const url = req.url || '';
             const method = req.method || 'GET';
 
-            // Parse URL: /api/data/:object or /api/data/:object/:id
+            // Parse URL: /api/data/:object or /api/data/:object/:id or /api/data/:object/bulk-*
             const match = url.match(/^\/api\/data\/([^\/\?]+)(?:\/([^\/\?]+))?(\?.*)?$/);
 
             if (!match) {
@@ -161,13 +163,43 @@ export function createRESTHandler(app: IObjectQL) {
                     break;
 
                 case 'POST':
-                    // POST /api/data/:object - Create record
                     const createBody = req.body || await readBody(req);
-                    qlRequest = {
-                        op: 'create',
-                        object: objectName,
-                        args: createBody
-                    };
+                    
+                    // Check for bulk operations
+                    if (id === 'bulk-update') {
+                        // POST /api/data/:object/bulk-update - Update many records
+                        qlRequest = {
+                            op: 'updateMany',
+                            object: objectName,
+                            args: {
+                                filters: createBody.filters,
+                                data: createBody.data
+                            }
+                        };
+                    } else if (id === 'bulk-delete') {
+                        // POST /api/data/:object/bulk-delete - Delete many records
+                        qlRequest = {
+                            op: 'deleteMany',
+                            object: objectName,
+                            args: {
+                                filters: createBody.filters || createBody
+                            }
+                        };
+                    } else if (Array.isArray(createBody)) {
+                        // POST /api/data/:object with array - Create many records
+                        qlRequest = {
+                            op: 'createMany',
+                            object: objectName,
+                            args: createBody
+                        };
+                    } else {
+                        // POST /api/data/:object - Create single record
+                        qlRequest = {
+                            op: 'create',
+                            object: objectName,
+                            args: createBody
+                        };
+                    }
                     break;
 
                 case 'PUT':
