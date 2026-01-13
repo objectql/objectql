@@ -230,10 +230,6 @@ src/
 
 ## 7. Key Documentation References
 
-### Specifications
-- **[Metadata Standard](../docs/spec/metadata-standard.md)**: Complete overview of the metadata system.
-- **[Object Schema](../docs/spec/object.md)**: Object and field definitions.
-- **[Query Language](../docs/spec/query-language.md)**: JSON-DSL query protocol.
 
 ## 8. Build & Test Commands
 
