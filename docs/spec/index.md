@@ -18,6 +18,7 @@ This section contains the complete metadata specifications for the ObjectQL plat
 
 ### Presentation Layer
 *   [**Components**](./component.md) - Reusable UI components and component customization
+*   [**Component Packages**](./component-package.md) - Distributable component packages (npm UMD)
 *   [**Pages**](./page.md) - Composable UI pages with layouts, components, and interactions
 *   [**Views & Layouts**](./view.md) - Data presentation configurations (list, grid, kanban, calendar)
 *   [**Forms**](./form.md) - Data entry and editing interfaces
