@@ -118,8 +118,8 @@ export function ObjectView({ objectName }: ObjectViewProps) {
                             })
                         });
                         const countJson = await countRes.json();
-                        // Handle both old format (data) and new format (count)
-                        lastRow = typeof countJson === 'number' ? countJson : (countJson.count || countJson.data);
+                        // Count operation returns { count: number, '@type': string }
+                        lastRow = typeof countJson === 'number' ? countJson : countJson.count;
                     }
 
                    params.successCallback(rows, lastRow);
