@@ -120,11 +120,31 @@ interface ObjectQLRequest {
 
 ```typescript
 interface ObjectQLResponse {
-  data?: any;
+  // For list operations (find)
+  items?: any[];
+  
+  // Pagination metadata (for list operations)
+  meta?: {
+    total: number;      // Total number of records
+    page?: number;      // Current page number (1-indexed)
+    size?: number;      // Number of items per page
+    pages?: number;     // Total number of pages
+    has_next?: boolean; // Whether there is a next page
+  };
+  
+  // For single item operations, the response is the object itself with '@type' field
+  // Examples: findOne, create, update return { id: '...', name: '...', '@type': 'users' }
+  '@type'?: string;    // Object type identifier
+  
+  // Error information
   error?: {
     code: string;
     message: string;
-  }
+    details?: any;
+  };
+  
+  // Other fields from the actual data object (for single item responses)
+  [key: string]: any;
 }
 ```
 
@@ -161,7 +181,7 @@ Retrieve multiple records with filtering, sorting, pagination, and joins.
 **Response:**
 ```json
 {
-  "data": [
+  "items": [
     {
       "order_no": "ORD-001",
       "amount": 1500,
@@ -172,7 +192,14 @@ Retrieve multiple records with filtering, sorting, pagination, and joins.
         "email": "contact@acme.com"
       }
     }
-  ]
+  ],
+  "meta": {
+    "total": 150,
+    "page": 1,
+    "size": 20,
+    "pages": 8,
+    "has_next": true
+  }
 }
 ```
 
@@ -232,14 +259,13 @@ Insert a new record.
 **Response:**
 ```json
 {
-  "data": {
-    "id": "task_456",
-    "name": "Review PR",
-    "priority": "high",
-    "assignee_id": "user_123",
-    "due_date": "2024-01-20",
-    "created_at": "2024-01-15T10:30:00Z"
-  }
+  "id": "task_456",
+  "name": "Review PR",
+  "priority": "high",
+  "assignee_id": "user_123",
+  "due_date": "2024-01-20",
+  "created_at": "2024-01-15T10:30:00Z",
+  "@type": "tasks"
 }
 ```
 
@@ -265,11 +291,10 @@ Modify an existing record.
 **Response:**
 ```json
 {
-  "data": {
-    "id": "task_456",
-    "status": "completed",
-    "completed_at": "2024-01-16T14:00:00Z"
-  }
+  "id": "task_456",
+  "status": "completed",
+  "completed_at": "2024-01-16T14:00:00Z",
+  "@type": "tasks"
 }
 ```
 
@@ -291,10 +316,9 @@ Remove a record by ID.
 **Response:**
 ```json
 {
-  "data": {
-    "id": "task_456",
-    "deleted": true
-  }
+  "id": "task_456",
+  "deleted": true,
+  "@type": "tasks"
 }
 ```
 
@@ -318,7 +342,8 @@ Get the count of records matching a filter.
 **Response:**
 ```json
 {
-  "data": 42
+  "count": 42,
+  "@type": "orders"
 }
 ```
 
@@ -345,15 +370,14 @@ Execute a custom server-side action (RPC-style operation).
 **Response:**
 ```json
 {
-  "data": {
-    "success": true,
-    "message": "Order approved successfully",
-    "order": {
-      "id": "order_789",
-      "status": "approved",
-      "approved_at": "2024-01-15T10:30:00Z"
-    }
-  }
+  "success": true,
+  "message": "Order approved successfully",
+  "order": {
+    "id": "order_789",
+    "status": "approved",
+    "approved_at": "2024-01-15T10:30:00Z"
+  },
+  "@type": "orders"
 }
 ```
 
