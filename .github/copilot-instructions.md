@@ -10,17 +10,39 @@ It serves as the underlying data engine for **ObjectOS**, but functions perfectl
 
 ## 2. Architecture & Directory Structure
 
-We use **Turborepo** + **PNPM Workspaces**.
+We use **PNPM Workspaces** organized in a monorepo structure.
 
+### Foundation Layer (Core Abstractions)
 | Path | Package Name | Environment | Role | Description |
 | --- | --- | --- | --- | --- |
-| `packages/types` | `@objectql/types` | **Universal** | **The Contract** | Pure TS Interfaces, Enums, and Error Classes. **No deps.** |
-| `packages/core` | `@objectql/core` | **Universal** | **The Engine** | Main entry point (`ObjectQL` class). Connects Drivers & Registry. |
-| `packages/driver-sql` | `@objectql/driver-sql` | **Node.js** | **The Adapter** | SQL implementation (SQLite/Postgres/MySQL) via Knex. |
-| `packages/driver-mongo` | `@objectql/driver-mongo` | **Node.js** | **The Adapter** | MongoDB implementation. |
-| `packages/server` | `@objectql/server` | **Node.js** | **The Adapter** | HTTP Server Adapter for ObjectQL API. |
-| `packages/cli` | `@objectql/cli` | **Node.js** | **The Tools** | CLI for validation and migration. |
-| `packages/studio` | `@objectql/studio` | **Browser** | **The UI** | Web-based admin studio for data management. |
+| `packages/foundation/types` | `@objectql/types` | **Universal** | **The Contract** | Pure TS Interfaces, Enums, and Error Classes. **No deps.** |
+| `packages/foundation/core` | `@objectql/core` | **Universal** | **The Engine** | Main runtime (`ObjectQL` class, `Validator`, `Repository`). Orchestrates drivers. |
+| `packages/foundation/platform-node` | `@objectql/platform-node` | **Node.js** | **Platform Utils** | Node.js-specific features: file-based metadata loader, plugin system. |
+
+### Drivers Layer (Database Adapters)
+| Path | Package Name | Environment | Role | Description |
+| --- | --- | --- | --- | --- |
+| `packages/drivers/sql` | `@objectql/driver-sql` | **Node.js** | **SQL Adapter** | SQL implementation (SQLite/Postgres/MySQL) via Knex with JSONB support. |
+| `packages/drivers/mongo` | `@objectql/driver-mongo` | **Node.js** | **NoSQL Adapter** | MongoDB implementation with aggregation pipeline support. |
+| `packages/drivers/sdk` | `@objectql/sdk` | **Universal** | **Remote Adapter** | HTTP/Remote driver for accessing ObjectQL servers from clients. |
+
+### Runtime Layer (Servers & APIs)
+| Path | Package Name | Environment | Role | Description |
+| --- | --- | --- | --- | --- |
+| `packages/runtime/server` | `@objectql/server` | **Node.js** | **HTTP Server** | HTTP Server Adapter with REST and JSON-RPC API handlers. |
+
+### Tools Layer (Developer Experience)
+| Path | Package Name | Environment | Role | Description |
+| --- | --- | --- | --- | --- |
+| `packages/tools/cli` | `@objectql/cli` | **Node.js** | **CLI Tools** | Command-line tools for project init, validation, migration, and studio. |
+| `packages/tools/studio` | `@objectql/studio` | **Browser** | **Admin UI** | Web-based admin console for database management and schema inspection. |
+
+### Starters & Examples
+| Path | Package Name | Environment | Role | Description |
+| --- | --- | --- | --- | --- |
+| `packages/starters/basic` | `@objectql/starter-basic` | **Node.js** | **Template** | Minimal script example for getting started. |
+| `packages/starters/enterprise` | `@objectql/starter-enterprise` | **Node.js** | **Template** | Enterprise-scale metadata organization pattern. |
+| `packages/starters/express-api` | `@objectql/starter-express-api` | **Node.js** | **Template** | Express.js server integration example. |
 
 ## 3. Dependency Graph & Constraints (CRITICAL)
 
