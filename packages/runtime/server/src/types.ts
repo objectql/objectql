@@ -61,18 +61,33 @@ export interface ErrorDetails {
 }
 
 /**
+ * Pagination metadata
+ */
+export interface PaginationMeta {
+    total: number;        // Total number of records
+    page?: number;        // Current page number (1-indexed)
+    size?: number;        // Number of items per page
+    pages?: number;       // Total number of pages
+    has_next?: boolean;   // Whether there is a next page
+}
+
+/**
  * ObjectQL API response
  */
 export interface ObjectQLResponse {
+    // For list operations (find)
+    items?: any[];
+    
+    // For single item operations (findOne, create, update)
     data?: any;
+    
+    // Pagination metadata (for list operations)
+    meta?: PaginationMeta;
+    
+    // Error information
     error?: {
         code: ErrorCode | string;
         message: string;
         details?: ErrorDetails;
-    };
-    meta?: {
-        total?: number;
-        page?: number;
-        per_page?: number;
     };
 }

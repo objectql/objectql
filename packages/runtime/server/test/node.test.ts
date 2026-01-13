@@ -60,7 +60,7 @@ describe('Node Adapter', () => {
 
         expect(response.status).toBe(200);
         expect(response.body).toEqual({
-            data: [{ id: 1, name: 'Alice' }]
+            items: [{ id: 1, name: 'Alice' }]
         });
     });
 

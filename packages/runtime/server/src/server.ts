@@ -58,17 +58,18 @@ export class ObjectQLServer {
             switch (req.op) {
                 case 'find':
                     result = await repo.find(req.args);
-                    break;
+                    // For find operations, return items array with pagination metadata
+                    return this.buildListResponse(result, req.args, repo);
                 case 'findOne':
                     // Support both string ID and query object
                     result = await repo.findOne(req.args);
-                    break;
+                    return { data: result };
                 case 'create':
                     result = await repo.create(req.args);
-                    break;
+                    return { data: result };
                 case 'update':
                     result = await repo.update(req.args.id, req.args.data);
-                    break;
+                    return { data: result };
                 case 'delete':
                     result = await repo.delete(req.args.id);
                     if (!result) {
@@ -78,11 +79,10 @@ export class ObjectQLServer {
                         );
                     }
                     // Return standardized delete response on success
-                    result = { id: req.args.id, deleted: true };
-                    break;
+                    return { data: { id: req.args.id, deleted: true } };
                 case 'count':
                     result = await repo.count(req.args);
-                    break;
+                    return { data: result };
                 case 'action':
                     // Map generic args to ActionContext
                     result = await app.executeAction(req.object, req.args.action, {
@@ -90,7 +90,7 @@ export class ObjectQLServer {
                          id: req.args.id,
                          input: req.args.input || req.args.params // Support both for convenience
                     });
-                    break;
+                    return { data: result };
                 default:
                     return this.errorResponse(
                         ErrorCode.INVALID_REQUEST,
@@ -98,11 +98,42 @@ export class ObjectQLServer {
                     );
             }
 
-            return { data: result };
-
         } catch (e: any) {
             return this.handleError(e);
         }
+    }
+
+    /**
+     * Build a standardized list response with pagination metadata
+     */
+    private async buildListResponse(items: any[], args: any, repo: any): Promise<ObjectQLResponse> {
+        const response: ObjectQLResponse = {
+            items
+        };
+
+        // Calculate pagination metadata if limit/skip are present
+        if (args && (args.limit || args.skip)) {
+            const skip = args.skip || 0;
+            const limit = args.limit || items.length;
+            
+            // Get total count - use the same filters from the query
+            const total = await repo.count(args.filters || {});
+            
+            const size = limit;
+            const page = limit > 0 ? Math.floor(skip / limit) + 1 : 1;
+            const pages = limit > 0 ? Math.ceil(total / limit) : 1;
+            const has_next = skip + items.length < total;
+
+            response.meta = {
+                total,
+                page,
+                size,
+                pages,
+                has_next
+            };
+        }
+
+        return response;
     }
 
     /**
