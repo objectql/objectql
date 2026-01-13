@@ -114,7 +114,9 @@ export function ObjectView({ objectName }: ObjectViewProps) {
                             body: JSON.stringify({
                                 op: 'count',
                                 object: objectName,
-                                args: filters.length > 0 ? filters : {}
+                                args: {
+                                    filters: filters.length > 0 ? filters : undefined
+                                }
                             })
                         });
                         const countJson = await countRes.json();
