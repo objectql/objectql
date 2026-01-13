@@ -260,6 +260,8 @@ describe('ObjectQL Repository Validation Integration', () => {
             const created = await repo.create({ 
                 name: 'Test Project',
                 status: 'completed',
+                start_date: '2024-01-01',
+                end_date: '2024-12-31',
             });
 
             await expect(
@@ -274,6 +276,8 @@ describe('ObjectQL Repository Validation Integration', () => {
             const created = await repo.create({ 
                 name: 'Test Project',
                 status: 'planning',
+                start_date: '2024-01-01',
+                end_date: '2024-12-31',
             });
 
             const updated = await repo.update(created._id, { status: 'active' });
@@ -287,6 +291,8 @@ describe('ObjectQL Repository Validation Integration', () => {
             const created = await repo.create({ 
                 name: 'Test Project',
                 status: 'completed',
+                start_date: '2024-01-01',
+                end_date: '2024-12-31',
             });
 
             const updated = await repo.update(created._id, { name: 'Updated Project' });
