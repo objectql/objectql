@@ -241,7 +241,136 @@ setup(app) {
 }
 ```
 
-## 5. Scope Isolation
+## 5. Package Namespaces
+
+When building plugins or packages for the application marketplace, it's crucial to prevent table name conflicts between different packages. ObjectQL provides a namespace mechanism to automatically prefix object names.
+
+### How Namespaces Work
+
+When a package is loaded with a namespace, all object names are automatically prefixed with `{namespace}__`. For example, if a package with namespace `audit` defines an object `note`, it will be registered as `audit__note`.
+
+### Configuring Namespaces
+
+There are three ways to configure namespaces:
+
+#### Method 1: In package.json (Recommended for Packages)
+
+```json
+{
+  "name": "@example/audit-log",
+  "version": "1.0.0",
+  "objectql": {
+    "namespace": "audit"
+  }
+}
+```
+
+#### Method 2: In ObjectQL Config (For Application Configuration)
+
+```typescript
+const db = new ObjectQL({
+    presets: ['@example/audit-log'],
+    packageNamespaces: {
+        '@example/audit-log': 'audit'
+    }
+});
+```
+
+Or using the platform-node loader:
+
+```typescript
+import { ObjectLoader } from '@objectql/platform-node';
+
+const loader = new ObjectLoader(db.metadata, {
+    '@example/audit-log': 'audit'
+});
+loader.loadPackage('@example/audit-log');
+```
+
+#### Method 3: Explicit Parameter
+
+```typescript
+loader.loadPackage('@example/audit-log', 'audit');
+// or
+loader.load(packageDir, packageName, 'audit');
+```
+
+### Automatic Namespace Derivation
+
+If no explicit namespace is configured, ObjectQL will attempt to derive one from the package name:
+
+- `@example/audit-log` → `audit_log`
+- `my-plugin` → No automatic namespace (only applies to scoped packages)
+
+### Namespace Impact on Objects
+
+When an object is loaded with a namespace:
+
+1. **Object Name**: Automatically prefixed (e.g., `note` → `audit__note`)
+2. **Label**: Remains unchanged (human-readable name)
+3. **Reference Fields**: Automatically updated to reference namespaced objects
+4. **Namespace Property**: Added to the object config for reference
+
+**Example:**
+
+Original object definition (`note.object.yml`):
+```yaml
+name: note
+label: Note
+fields:
+  title:
+    type: text
+  author:
+    type: lookup
+    reference_to: user
+```
+
+After loading with namespace `audit`:
+```typescript
+{
+  name: 'audit__note',
+  label: 'Note',  // Unchanged
+  namespace: 'audit',
+  fields: {
+    title: { type: 'text' },
+    author: { 
+      type: 'lookup', 
+      reference_to: 'audit__user'  // Automatically prefixed
+    }
+  }
+}
+```
+
+### Namespace Utility Functions
+
+ObjectQL Core provides utility functions for working with namespaces:
+
+```typescript
+import { applyNamespace, removeNamespace, extractNamespace, hasNamespace } from '@objectql/core';
+
+// Apply namespace
+applyNamespace('note', 'audit'); // → 'audit__note'
+
+// Remove namespace
+removeNamespace('audit__note', 'audit'); // → 'note'
+
+// Extract namespace
+extractNamespace('audit__note'); // → 'audit'
+
+// Check if namespaced
+hasNamespace('audit__note'); // → true
+hasNamespace('note'); // → false
+```
+
+### Best Practices
+
+1. **Always use namespaces for marketplace packages** to prevent conflicts
+2. **Use descriptive namespaces** that match your package's purpose (e.g., `crm`, `audit`, `billing`)
+3. **Keep namespaces short** to avoid overly long table names
+4. **Document your namespace** in your package README
+5. **Internal references only**: Only objects within the same package should reference each other. Cross-package references should be explicit.
+
+## 6. Scope Isolation
 
 
 When a plugin is loaded via **Package Name** (Method 2), ObjectQL automatically marks the hooks and actions registered by that plugin with its package name.

@@ -10,6 +10,9 @@
   },
   "private": true,
   "main": "dist/index.js",
+  "objectql": {
+    "namespace": "audit"
+  },
   "scripts": {
     "build": "tsc",
     "repl": "objectql repl"
