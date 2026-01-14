@@ -85,7 +85,7 @@ The GraphQL schema is **automatically generated** from your ObjectQL metadata. E
 
 1. **Output Type**: For query results (e.g., `User`, `Task`)
 2. **Input Type**: For mutations (e.g., `UserInput`, `TaskInput`)
-3. **Query Fields**: For fetching data (e.g., `user(id)`, `users()`)
+3. **Query Fields**: For fetching data (e.g., `user(id)`, `userList()`)
 4. **Mutation Fields**: For creating/updating/deleting data
 
 ### Example Object Definition
@@ -152,7 +152,7 @@ Query multiple records with optional filtering and pagination:
 
 ```graphql
 query {
-  users(limit: 10, skip: 0) {
+  userList(limit: 10, skip: 0) {
     id
     name
     email
@@ -173,7 +173,7 @@ Use the `filters` argument with JSON-encoded filter expressions:
 
 ```graphql
 query {
-  users(
+  userList(
     filters: "[[\\"role\\", \\"=\\", \\"admin\\"], \\"and\\", [\\"age\\", \\">=\\", 30]]"
     limit: 20
   ) {
@@ -191,7 +191,7 @@ Use the `sort` argument with JSON-encoded sort specification:
 
 ```graphql
 query {
-  users(
+  userList(
     sort: "[[\\"created_at\\", \\"desc\\"]]"
   ) {
     id
@@ -207,7 +207,7 @@ GraphQL's field selection naturally limits the data returned:
 
 ```graphql
 query {
-  users {
+  userList {
     id
     name
     # Only these two fields are returned
@@ -519,7 +519,7 @@ GraphQL provides built-in introspection for schema discovery:
 ```typescript
 const query = `
   query GetUsers {
-    users(limit: 10) {
+    userList(limit: 10) {
       id
       name
       email
@@ -537,7 +537,7 @@ const response = await fetch('/api/graphql', {
 });
 
 const result = await response.json();
-console.log(result.data.users);
+console.log(result.data.userList);
 ```
 
 ### Apollo Client
@@ -553,7 +553,7 @@ const client = new ApolloClient({
 const { data } = await client.query({
   query: gql`
     query GetUsers {
-      users {
+      userList {
         id
         name
         email
@@ -570,7 +570,7 @@ import { useQuery, gql } from '@apollo/client';
 
 const GET_USERS = gql`
   query GetUsers {
-    users {
+    userList {
       id
       name
       email
@@ -586,7 +586,7 @@ function UserList() {
   
   return (
     <ul>
-      {data.users.map(user => (
+      {data.userList.map(user => (
         <li key={user.id}>{user.name}</li>
       ))}
     </ul>
@@ -632,7 +632,7 @@ Import the GraphQL schema into Postman for testing:
 ❌ **Don't** request all fields:
 ```graphql
 query {
-  users {
+  userList {
     id
     name
     email
@@ -648,7 +648,7 @@ query {
 ✅ **Do** request specific fields:
 ```graphql
 query {
-  users {
+  userList {
     id
     name
     email
@@ -691,7 +691,7 @@ query {
     role
   }
   
-  users(limit: 10) {
+  userList(limit: 10) {
     ...UserBasic
   }
 }
@@ -701,7 +701,7 @@ query {
 
 ```graphql
 query GetUsersPaginated($limit: Int!, $skip: Int!) {
-  users(limit: $limit, skip: $skip) {
+  userList(limit: $limit, skip: $skip) {
     id
     name
     email
@@ -906,7 +906,7 @@ query GetUser($id: String!) {
 
 # Read Many
 query ListUsers($limit: Int, $skip: Int) {
-  users(limit: $limit, skip: $skip) {
+  userList(limit: $limit, skip: $skip) {
     id
     name
     email

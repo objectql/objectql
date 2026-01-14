@@ -30,7 +30,7 @@ server.listen(3000);
 
 ```graphql
 query {
-  users(limit: 10) {
+  userList(limit: 10) {
     id
     name
     email

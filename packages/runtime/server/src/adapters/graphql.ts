@@ -128,6 +128,8 @@ export function generateGraphQLSchema(app: IObjectQL): GraphQLSchema {
     const deleteResultTypeMap: Record<string, GraphQLObjectType> = {};
     
     // Create a shared ObjectQL server instance to reuse across resolvers
+    // This is safe because ObjectQLServer is stateless - it only holds a reference to the app
+    // and creates fresh contexts for each request via handle()
     const server = new ObjectQLServer(app);
     
     // First pass: Create all object types
@@ -218,9 +220,9 @@ export function generateGraphQLSchema(app: IObjectQL): GraphQLSchema {
             }
         };
         
-        // Query list of records (simple pluralization with 's')
-        // Note: This uses naive pluralization. For irregular plurals, consider using a pluralization library.
-        queryFields[objectName + 's'] = {
+        // Query list of records
+        // Using 'List' suffix to avoid naming conflicts and handle irregular plurals
+        queryFields[objectName + 'List'] = {
             type: new GraphQLList(typeMap[objectName]),
             args: {
                 limit: { type: GraphQLInt },

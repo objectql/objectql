@@ -178,7 +178,7 @@ describe('GraphQL API Adapter', () => {
         it('should query list of users', async () => {
             const query = `
                 query {
-                    users {
+                    userList {
                         id
                         name
                         email
@@ -193,14 +193,14 @@ describe('GraphQL API Adapter', () => {
 
             expect(response.status).toBe(200);
             expect(response.body.data).toBeDefined();
-            expect(response.body.data.users).toHaveLength(2);
-            expect(response.body.data.users[0].name).toBe('Alice');
+            expect(response.body.data.userList).toHaveLength(2);
+            expect(response.body.data.userList[0].name).toBe('Alice');
         });
 
         it('should support pagination with limit and skip', async () => {
             const query = `
                 query {
-                    users(limit: 1, skip: 1) {
+                    userList(limit: 1, skip: 1) {
                         id
                         name
                     }
@@ -213,14 +213,14 @@ describe('GraphQL API Adapter', () => {
                 .set('Accept', 'application/json');
 
             expect(response.status).toBe(200);
-            expect(response.body.data.users).toHaveLength(1);
-            expect(response.body.data.users[0].name).toBe('Bob');
+            expect(response.body.data.userList).toHaveLength(1);
+            expect(response.body.data.userList[0].name).toBe('Bob');
         });
 
         it('should support field selection', async () => {
             const query = `
                 query {
-                    users(fields: ["name"]) {
+                    userList(fields: ["name"]) {
                         id
                         name
                     }
@@ -233,13 +233,13 @@ describe('GraphQL API Adapter', () => {
                 .set('Accept', 'application/json');
 
             expect(response.status).toBe(200);
-            expect(response.body.data.users).toBeDefined();
+            expect(response.body.data.userList).toBeDefined();
         });
 
         it('should query tasks', async () => {
             const query = `
                 query {
-                    tasks {
+                    taskList {
                         id
                         title
                         status
@@ -254,8 +254,8 @@ describe('GraphQL API Adapter', () => {
                 .set('Accept', 'application/json');
 
             expect(response.status).toBe(200);
-            expect(response.body.data.tasks).toHaveLength(2);
-            expect(response.body.data.tasks[0].title).toBe('Task 1');
+            expect(response.body.data.taskList).toHaveLength(2);
+            expect(response.body.data.taskList[0].title).toBe('Task 1');
         });
 
         it('should support GET requests with query parameter', async () => {
@@ -384,7 +384,7 @@ describe('GraphQL API Adapter', () => {
         it('should reject non-POST/GET methods', async () => {
             const response = await request(server)
                 .put('/api/graphql')
-                .send({ query: '{ users { id } }' })
+                .send({ query: '{ userList { id } }' })
                 .set('Accept', 'application/json');
 
             expect(response.status).toBe(405);
