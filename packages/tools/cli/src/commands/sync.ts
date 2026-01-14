@@ -162,7 +162,8 @@ function generateObjectDefinition(table: IntrospectedTable, schema: Introspected
                 field.unique = true;
             }
             
-            if (column.maxLength && ['text', 'string', 'email', 'url', 'phone'].includes(fieldType)) {
+            // Add maxLength for text-based fields
+            if (column.maxLength && (fieldType === 'text' || fieldType === 'textarea')) {
                 field.maxLength = column.maxLength;
             }
             
@@ -272,18 +273,21 @@ async function loadObjectQLInstance(configPath?: string): Promise<any> {
     }
 
     // Register ts-node for TypeScript support
-    try {
-        require('ts-node').register({
-            transpileOnly: true,
-            compilerOptions: {
-                module: 'commonjs'
-            }
-        });
-    } catch (err) {
-        // ts-node not available, try to load JS directly
+    if (configFile.endsWith('.ts')) {
+        try {
+            require('ts-node').register({
+                transpileOnly: true,
+                compilerOptions: {
+                    module: 'commonjs'
+                }
+            });
+        } catch (err) {
+            throw new Error('TypeScript config file detected but ts-node is not installed. Please run: npm install --save-dev ts-node');
+        }
     }
 
     const configModule = require(configFile);
+    // Support multiple export patterns: default, app, objectql, or db (in order of precedence)
     const app = configModule.default || configModule.app || configModule.objectql || configModule.db;
 
     if (!app) {
