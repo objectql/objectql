@@ -12,6 +12,9 @@ Welcome to the ObjectQL API Reference.
 - [Rate Limiting](./README.md#rate-limiting)
 - [Error Handling](./README.md#error-handling)
 
+### File & Attachment Handling
+- **[Attachment API Specification](./attachments.md)** - File uploads, image handling, and attachment fields
+
 ### API Styles
 
 ObjectQL supports multiple API styles to fit your use case:
@@ -100,14 +103,31 @@ curl http://localhost:3000/api/metadata/objects/users
 
 ## Response Format
 
-All APIs return consistent JSON responses:
+ObjectQL APIs return consistent JSON responses based on the operation type:
 
-**Success:**
+**List Operations (find):**
 ```json
 {
-  "data": {
-    // Your data here
+  "items": [
+    // Array of records
+  ],
+  "meta": {
+    "total": 100,
+    "page": 1,
+    "size": 20,
+    "pages": 5,
+    "has_next": true
   }
+}
+```
+
+**Single Item Operations (findOne, create, update):**
+```json
+{
+  "id": "record_123",
+  "name": "Example",
+  "@type": "objectName"
+  // ... other record fields
 }
 ```
 
@@ -124,6 +144,7 @@ All APIs return consistent JSON responses:
 ## Related Documentation
 
 - [Query Language Specification](../spec/query-language.md) - Deep dive into filter syntax
+- [Attachment API Specification](./attachments.md) - File and image handling
 - [Actions Guide](../guide/logic-actions.md) - Building custom operations
 - [Hooks Guide](../guide/logic-hooks.md) - Event-driven logic
 - [Server Integration](../guide/server-integration.md) - Deploying ObjectQL

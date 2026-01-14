@@ -73,14 +73,14 @@ export function createMetadataHandler(app: IObjectQL) {
                         description: obj.description,
                         fields: obj.fields || {}
                     }));
-                    // Return both keys for compatibility during migration
-                    return sendJson({ objects, object: objects });
+                    // Return standardized format with items
+                    return sendJson({ items: objects });
                 }
                 
                 const entries = app.metadata.list(type);
-                // Return simple list
+                // Return standardized list format
                 return sendJson({ 
-                    [type]: entries
+                    items: entries
                 });
             }
 
@@ -152,7 +152,7 @@ export function createMetadataHandler(app: IObjectQL) {
             // 4. Object Sub-resources (Fields, Actions)
             // ---------------------------------------------------------
             
-            // GET /api/metadata/objects/:name/fields/:field
+            // GET /api/metadata/object/:name/fields/:field
             // Legacy path support.
             const fieldMatch = url.match(/^\/api\/metadata\/(?:objects|object)\/([^\/]+)\/fields\/([^\/\?]+)$/);
             if (method === 'GET' && fieldMatch) {
@@ -180,7 +180,7 @@ export function createMetadataHandler(app: IObjectQL) {
                 });
             }
 
-            // GET /api/metadata/objects/:name/actions
+            // GET /api/metadata/object/:name/actions
             const actionsMatch = url.match(/^\/api\/metadata\/(?:objects|object)\/([^\/]+)\/actions$/);
             if (method === 'GET' && actionsMatch) {
                 const [, objectName] = actionsMatch;
@@ -201,7 +201,7 @@ export function createMetadataHandler(app: IObjectQL) {
                     };
                 });
 
-                return sendJson({ actions: formattedActions });
+                return sendJson({ items: formattedActions });
             }
 
             // Not found

@@ -9,12 +9,14 @@ This document provides a comprehensive reference for all ObjectQL API interfaces
 1. [API Overview](#api-overview)
 2. [JSON-RPC Style API](#json-rpc-style-api)
 3. [REST-Style API](#rest-style-api)
-4. [Metadata API](#metadata-api)
-5. [WebSocket API](#websocket-api)
-6. [Authentication & Authorization](#authentication--authorization)
-7. [Error Handling](#error-handling)
-8. [Rate Limiting](#rate-limiting)
-9. [Examples](#examples)
+4. [GraphQL API](./graphql.md)
+5. [Metadata API](#metadata-api)
+6. [File & Attachment API](#file--attachment-api)
+7. [WebSocket API](#websocket-api)
+8. [Authentication & Authorization](#authentication--authorization)
+9. [Error Handling](#error-handling)
+10. [Rate Limiting](#rate-limiting)
+11. [Examples](#examples)
 
 ---
 
@@ -27,7 +29,7 @@ ObjectQL provides a **unified query protocol** that can be exposed through multi
 | **JSON-RPC** | Universal client, AI agents, microservices | `POST /api/objectql` |
 | **REST** | Traditional web apps, mobile apps | `GET/POST/PUT/DELETE /api/data/:object` |
 | **Metadata** | Admin interfaces, schema discovery, runtime config | `GET /api/metadata/*` |
-| **GraphQL** | Modern frontends with complex data requirements | `POST /api/graphql` *(Planned)* |
+| **GraphQL** | Modern frontends with complex data requirements | `POST /api/graphql` |
 | **WebSocket** | Real-time apps, live updates | `ws://host/api/realtime` *(Planned)* |
 
 ### Design Principles
@@ -105,7 +107,7 @@ interface ObjectQLRequest {
   };
   
   // The operation to perform
-  op: 'find' | 'findOne' | 'create' | 'update' | 'delete' | 'count' | 'action';
+  op: 'find' | 'findOne' | 'create' | 'update' | 'delete' | 'count' | 'action' | 'createMany' | 'updateMany' | 'deleteMany';
   
   // The target object/table
   object: string;
@@ -119,11 +121,31 @@ interface ObjectQLRequest {
 
 ```typescript
 interface ObjectQLResponse {
-  data?: any;
+  // For list operations (find)
+  items?: any[];
+  
+  // Pagination metadata (for list operations)
+  meta?: {
+    total: number;      // Total number of records
+    page?: number;      // Current page number (1-indexed)
+    size?: number;      // Number of items per page
+    pages?: number;     // Total number of pages
+    has_next?: boolean; // Whether there is a next page
+  };
+  
+  // For single item operations, the response is the object itself with '@type' field
+  // Examples: findOne, create, update return { id: '...', name: '...', '@type': 'users' }
+  '@type'?: string;    // Object type identifier
+  
+  // Error information
   error?: {
     code: string;
     message: string;
-  }
+    details?: any;
+  };
+  
+  // Other fields from the actual data object (for single item responses)
+  [key: string]: any;
 }
 ```
 
@@ -160,7 +182,7 @@ Retrieve multiple records with filtering, sorting, pagination, and joins.
 **Response:**
 ```json
 {
-  "data": [
+  "items": [
     {
       "order_no": "ORD-001",
       "amount": 1500,
@@ -171,7 +193,14 @@ Retrieve multiple records with filtering, sorting, pagination, and joins.
         "email": "contact@acme.com"
       }
     }
-  ]
+  ],
+  "meta": {
+    "total": 150,
+    "page": 1,
+    "size": 20,
+    "pages": 8,
+    "has_next": true
+  }
 }
 ```
 
@@ -202,11 +231,10 @@ Retrieve a single record by ID or query.
 **Response:**
 ```json
 {
-  "data": {
-    "id": "user_123",
-    "name": "Alice",
-    "email": "alice@example.com"
-  }
+  "id": "user_123",
+  "name": "Alice",
+  "email": "alice@example.com",
+  "@type": "users"
 }
 ```
 
@@ -231,14 +259,13 @@ Insert a new record.
 **Response:**
 ```json
 {
-  "data": {
-    "id": "task_456",
-    "name": "Review PR",
-    "priority": "high",
-    "assignee_id": "user_123",
-    "due_date": "2024-01-20",
-    "created_at": "2024-01-15T10:30:00Z"
-  }
+  "id": "task_456",
+  "name": "Review PR",
+  "priority": "high",
+  "assignee_id": "user_123",
+  "due_date": "2024-01-20",
+  "created_at": "2024-01-15T10:30:00Z",
+  "@type": "tasks"
 }
 ```
 
@@ -264,11 +291,10 @@ Modify an existing record.
 **Response:**
 ```json
 {
-  "data": {
-    "id": "task_456",
-    "status": "completed",
-    "completed_at": "2024-01-16T14:00:00Z"
-  }
+  "id": "task_456",
+  "status": "completed",
+  "completed_at": "2024-01-16T14:00:00Z",
+  "@type": "tasks"
 }
 ```
 
@@ -290,10 +316,9 @@ Remove a record by ID.
 **Response:**
 ```json
 {
-  "data": {
-    "id": "task_456",
-    "deleted": true
-  }
+  "id": "task_456",
+  "deleted": true,
+  "@type": "tasks"
 }
 ```
 
@@ -317,7 +342,8 @@ Get the count of records matching a filter.
 **Response:**
 ```json
 {
-  "data": 42
+  "count": 42,
+  "@type": "orders"
 }
 ```
 
@@ -344,13 +370,154 @@ Execute a custom server-side action (RPC-style operation).
 **Response:**
 ```json
 {
-  "data": {
-    "success": true,
-    "message": "Order approved successfully",
-    "order": {
-      "id": "order_789",
-      "status": "approved",
-      "approved_at": "2024-01-15T10:30:00Z"
+  "success": true,
+  "message": "Order approved successfully",
+  "order": {
+    "id": "order_789",
+    "status": "approved",
+    "approved_at": "2024-01-15T10:30:00Z"
+  },
+  "@type": "orders"
+}
+```
+
+### Bulk Operations
+
+ObjectQL supports efficient bulk operations for creating, updating, and deleting multiple records in a single request.
+
+**Important Notes:**
+- **Validation & Hooks**: Bulk operations process each record individually to ensure validation rules and hooks (beforeCreate, afterCreate, etc.) are properly executed, maintaining data integrity
+- **Atomicity**: Operations are not atomic by default - if one record fails, others may have already been processed
+- **Performance**: While bulk operations are more efficient than separate API calls, they may be slower than driver-level bulk operations due to individual validation/hook execution
+- **Use Cases**: Use bulk operations when you need consistent validation and business logic enforcement. For high-performance batch imports where validation is already handled, consider using driver-level operations directly
+
+#### 8. `createMany` - Create Multiple Records
+
+Insert multiple records in a single operation.
+
+**Request:**
+```json
+{
+  "op": "createMany",
+  "object": "tasks",
+  "args": [
+    {
+      "name": "Task 1",
+      "priority": "high",
+      "assignee_id": "user_123"
+    },
+    {
+      "name": "Task 2",
+      "priority": "medium",
+      "assignee_id": "user_456"
+    },
+    {
+      "name": "Task 3",
+      "priority": "low",
+      "assignee_id": "user_789"
+    }
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "items": [
+    {
+      "id": "task_101",
+      "name": "Task 1",
+      "priority": "high",
+      "assignee_id": "user_123",
+      "created_at": "2024-01-15T10:30:00Z"
+    },
+    {
+      "id": "task_102",
+      "name": "Task 2",
+      "priority": "medium",
+      "assignee_id": "user_456",
+      "created_at": "2024-01-15T10:30:00Z"
+    },
+    {
+      "id": "task_103",
+      "name": "Task 3",
+      "priority": "low",
+      "assignee_id": "user_789",
+      "created_at": "2024-01-15T10:30:00Z"
+    }
+  ],
+  "count": 3,
+  "@type": "tasks"
+}
+```
+
+#### 9. `updateMany` - Update Multiple Records
+
+Update all records matching a filter.
+
+**Request:**
+```json
+{
+  "op": "updateMany",
+  "object": "tasks",
+  "args": {
+    "filters": {
+      "status": "pending",
+      "priority": "low"
+    },
+    "data": {
+      "status": "cancelled",
+      "cancelled_at": "2024-01-15T10:30:00Z"
+    }
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "count": 15,
+  "@type": "tasks"
+}
+```
+
+#### 10. `deleteMany` - Delete Multiple Records
+
+Delete all records matching a filter.
+
+**Request:**
+```json
+{
+  "op": "deleteMany",
+  "object": "tasks",
+  "args": {
+    "filters": {
+      "status": "completed",
+      "completed_at": ["<", "2023-01-01"]
+    }
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "count": 42,
+  "@type": "tasks"
+}
+```
+
+**Error Handling Example:**
+```json
+// If a record fails validation during bulk operation
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed",
+    "details": {
+      "fields": {
+        "priority": "Invalid priority value"
+      }
     }
   }
 }
@@ -425,7 +592,9 @@ For traditional REST clients, ObjectQL can expose a REST-style interface.
 |--------|------|-------------|
 | `GET` | `/api/data/:object` | List records |
 | `GET` | `/api/data/:object/:id` | Get single record |
-| `POST` | `/api/data/:object` | Create record |
+| `POST` | `/api/data/:object` | Create record (or create many if body is an array) |
+| `POST` | `/api/data/:object/bulk-update` | Update many records |
+| `POST` | `/api/data/:object/bulk-delete` | Delete many records |
 | `PUT` | `/api/data/:object/:id` | Update record |
 | `DELETE` | `/api/data/:object/:id` | Delete record |
 
@@ -438,11 +607,13 @@ GET /api/data/users?filter={"status":"active"}&sort=created_at&limit=20
 **Response:**
 ```json
 {
-  "data": [...],
+  "items": [...],
   "meta": {
     "total": 150,
     "page": 1,
-    "per_page": 20
+    "size": 20,
+    "pages": 8,
+    "has_next": true
   }
 }
 ```
@@ -456,11 +627,10 @@ GET /api/data/users/user_123
 **Response:**
 ```json
 {
-  "data": {
-    "id": "user_123",
-    "name": "Alice",
-    "email": "alice@example.com"
-  }
+  "id": "user_123",
+  "name": "Alice",
+  "email": "alice@example.com",
+  "@type": "users"
 }
 ```
 
@@ -480,13 +650,12 @@ Content-Type: application/json
 **Response:**
 ```json
 {
-  "data": {
-    "id": "user_456",
-    "name": "Bob",
-    "email": "bob@example.com",
-    "role": "admin",
-    "created_at": "2024-01-15T10:30:00Z"
-  }
+  "id": "user_456",
+  "name": "Bob",
+  "email": "bob@example.com",
+  "role": "admin",
+  "created_at": "2024-01-15T10:30:00Z",
+  "@type": "users"
 }
 ```
 
@@ -504,11 +673,10 @@ Content-Type: application/json
 **Response:**
 ```json
 {
-  "data": {
-    "id": "user_456",
-    "role": "user",
-    "updated_at": "2024-01-15T11:00:00Z"
-  }
+  "id": "user_456",
+  "role": "user",
+  "updated_at": "2024-01-15T11:00:00Z",
+  "@type": "users"
 }
 ```
 
@@ -521,10 +689,121 @@ DELETE /api/data/users/user_456
 **Response:**
 ```json
 {
-  "data": {
-    "id": "user_456",
-    "deleted": true
+  "id": "user_456",
+  "deleted": true,
+  "@type": "users"
+}
+```
+
+### Bulk Operations (REST)
+
+#### Create Many Records
+
+Send an array in the POST body to create multiple records at once.
+
+```bash
+POST /api/data/users
+Content-Type: application/json
+
+[
+  {
+    "name": "User1",
+    "email": "user1@example.com",
+    "role": "user"
+  },
+  {
+    "name": "User2",
+    "email": "user2@example.com",
+    "role": "user"
+  },
+  {
+    "name": "User3",
+    "email": "user3@example.com",
+    "role": "admin"
   }
+]
+```
+
+**Response:**
+```json
+{
+  "items": [
+    {
+      "id": "user_101",
+      "name": "User1",
+      "email": "user1@example.com",
+      "role": "user",
+      "created_at": "2024-01-15T10:30:00Z"
+    },
+    {
+      "id": "user_102",
+      "name": "User2",
+      "email": "user2@example.com",
+      "role": "user",
+      "created_at": "2024-01-15T10:30:00Z"
+    },
+    {
+      "id": "user_103",
+      "name": "User3",
+      "email": "user3@example.com",
+      "role": "admin",
+      "created_at": "2024-01-15T10:30:00Z"
+    }
+  ],
+  "count": 3,
+  "@type": "users"
+}
+```
+
+#### Update Many Records
+
+Update all records matching the provided filters.
+
+```bash
+POST /api/data/users/bulk-update
+Content-Type: application/json
+
+{
+  "filters": {
+    "role": "user",
+    "status": "inactive"
+  },
+  "data": {
+    "status": "archived",
+    "archived_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "count": 15,
+  "@type": "users"
+}
+```
+
+#### Delete Many Records
+
+Delete all records matching the provided filters.
+
+```bash
+POST /api/data/users/bulk-delete
+Content-Type: application/json
+
+{
+  "filters": {
+    "status": "archived",
+    "archived_at": ["<", "2023-01-01"]
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "count": 42,
+  "@type": "users"
 }
 ```
 
@@ -697,6 +976,149 @@ GET /api/metadata/objects/orders/actions
   ]
 }
 ```
+
+---
+
+## File & Attachment API
+
+ObjectQL provides comprehensive support for file uploads and attachments. The system handles files using a metadata-driven approach where file metadata (URL, size, type) is stored in the database while actual file content is stored in a configurable storage backend.
+
+### Supported Field Types
+
+- **`file`**: General file attachments (documents, PDFs, archives)
+- **`image`**: Image files with image-specific metadata (including avatars, photos, galleries)
+
+### Upload Endpoint
+
+```
+POST /api/files/upload
+Content-Type: multipart/form-data
+Authorization: Bearer <token>
+```
+
+**Request (using cURL):**
+
+```bash
+curl -X POST https://api.example.com/api/files/upload \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -F "file=@/path/to/invoice.pdf" \
+  -F "object=expense" \
+  -F "field=receipt"
+```
+
+**Response:**
+
+```json
+{
+  "id": "file_abc123",
+  "name": "invoice.pdf",
+  "url": "https://cdn.example.com/files/invoice.pdf",
+  "size": 245760,
+  "type": "application/pdf",
+  "uploaded_at": "2024-01-15T10:30:00Z",
+  "uploaded_by": "user_xyz",
+  "@type": "files"
+}
+```
+
+### Creating Records with Attachments
+
+**Step 1: Upload the file**
+
+```javascript
+const formData = new FormData();
+formData.append('file', file);
+formData.append('object', 'expense');
+formData.append('field', 'receipt');
+
+const uploadResponse = await fetch('/api/files/upload', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer ' + token },
+  body: formData
+});
+
+const uploadedFile = await uploadResponse.json();
+```
+
+**Step 2: Create record with file metadata**
+
+```javascript
+const createResponse = await fetch('/api/objectql', {
+  method: 'POST',
+  headers: { 
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + token
+  },
+  body: JSON.stringify({
+    op: 'create',
+    object: 'expense',
+    args: {
+      expense_number: 'EXP-2024-001',
+      amount: 125.50,
+      description: 'Office supplies',
+      receipt: uploadedFile  // File metadata from upload
+    }
+  })
+});
+```
+
+### Attachment Data Format
+
+**Single File:**
+
+```json
+{
+  "id": "file_abc123",
+  "name": "receipt.pdf",
+  "url": "https://cdn.example.com/files/receipt.pdf",
+  "size": 245760,
+  "type": "application/pdf"
+}
+```
+
+**Multiple Files (when `multiple: true`):**
+
+```json
+[
+  {
+    "id": "img_001",
+    "name": "product_front.jpg",
+    "url": "https://cdn.example.com/images/product_front.jpg",
+    "size": 156789,
+    "type": "image/jpeg"
+  },
+  {
+    "id": "img_002",
+    "name": "product_back.jpg",
+    "url": "https://cdn.example.com/images/product_back.jpg",
+    "size": 142356,
+    "type": "image/jpeg"
+  }
+]
+```
+
+### Image-Specific Metadata
+
+Images can include additional metadata like dimensions and thumbnails:
+
+```json
+{
+  "id": "img_abc123",
+  "name": "product_hero.jpg",
+  "url": "https://cdn.example.com/images/product_hero.jpg",
+  "size": 523400,
+  "type": "image/jpeg",
+  "width": 1920,
+  "height": 1080,
+  "thumbnail_url": "https://cdn.example.com/images/product_hero_thumb.jpg"
+}
+```
+
+### Complete Documentation
+
+For comprehensive documentation on file uploads, image handling, batch uploads, validation, and more examples, see:
+
+**[Attachment API Specification](./attachments.md)**
 
 ---
 
@@ -958,8 +1380,8 @@ const response = await fetch('/api/objectql', {
   })
 });
 
-const { data: user } = await response.json();
-// { id: 'user_123', email: 'alice@example.com', ... }
+const user = await response.json();
+// { id: 'user_123', email: 'alice@example.com', '@type': 'users', ... }
 
 // 2. Send verification email (triggered by hook)
 // 3. User verifies email via action
@@ -1014,7 +1436,7 @@ const response = await fetch('/api/objectql', {
   })
 });
 
-const { data } = await response.json();
+const { items } = await response.json();
 // [
 //   { category: 'Electronics', month: '2024-01', revenue: 50000, order_count: 120, avg_order_value: 416.67 },
 //   { category: 'Clothing', month: '2024-01', revenue: 30000, order_count: 250, avg_order_value: 120.00 },
@@ -1244,7 +1666,7 @@ for (const order of orders) {
 - **[Actions Guide](../guide/logic-actions.md)** - Building custom RPC operations
 - **[Server Integration](../guide/server-integration.md)** - Deploying ObjectQL APIs
 - **[Authentication Guide](./authentication.md)** - Securing your APIs
-- **[GraphQL API](./graphql.md)** *(Planned)*
+- **[GraphQL API](./graphql.md)**
 
 ---
 

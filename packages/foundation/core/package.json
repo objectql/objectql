@@ -1,6 +1,7 @@
 {
   "name": "@objectql/core",
-  "version": "1.7.2",
+  "version": "1.7.3",
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -8,9 +9,12 @@
     "test": "jest"
   },
   "dependencies": {
-    "@objectql/types": "workspace:*"
+    "@objectql/types": "workspace:*",
+    "openai": "^4.28.0",
+    "js-yaml": "^4.1.0"
   },
   "devDependencies": {
-    "typescript": "^5.3.0"
+    "typescript": "^5.3.0",
+    "@types/js-yaml": "^4.0.5"
   }
 }

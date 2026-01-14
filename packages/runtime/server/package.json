@@ -1,6 +1,7 @@
 {
   "name": "@objectql/server",
-  "version": "1.7.2",
+  "version": "1.7.3",
+  "license": "MIT",
   "description": "HTTP Server Adapter for ObjectQL",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,6 +12,8 @@
   "dependencies": {
     "@objectql/core": "workspace:*",
     "@objectql/types": "workspace:*",
+    "graphql": "^16.8.1",
+    "@graphql-tools/schema": "^10.0.2",
     "js-yaml": "^4.1.1"
   },
   "devDependencies": {

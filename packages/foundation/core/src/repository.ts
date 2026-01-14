@@ -1,11 +1,16 @@
-import { ObjectQLContext, IObjectQL, ObjectConfig, Driver, UnifiedQuery, HookContext, ActionContext, HookAPI, RetrievalHookContext, MutationHookContext, UpdateHookContext } from '@objectql/types';
+import { ObjectQLContext, IObjectQL, ObjectConfig, Driver, UnifiedQuery, ActionContext, HookAPI, RetrievalHookContext, MutationHookContext, UpdateHookContext, ValidationContext, ValidationError, ValidationRuleResult } from '@objectql/types';
+import { Validator } from './validator';
 
 export class ObjectRepository {
+    private validator: Validator;
+
     constructor(
         private objectName: string,
         private context: ObjectQLContext,
         private app: IObjectQL
-    ) {}
+    ) {
+        this.validator = new Validator();
+    }
 
     private getDriver(): Driver {
         const obj = this.getSchema();
@@ -50,6 +55,79 @@ export class ObjectRepository {
             roles: this.context.roles,
             isSystem: this.context.isSystem
         };
+    }
+
+    /**
+     * Validates a record against field-level and object-level validation rules.
+     * For updates, only fields present in the update payload are validated at the field level,
+     * while object-level rules use the merged record (previousRecord + updates).
+     */
+    private async validateRecord(
+        operation: 'create' | 'update',
+        record: any,
+        previousRecord?: any
+    ): Promise<void> {
+        const schema = this.getSchema();
+        const allResults: ValidationRuleResult[] = [];
+
+        // 1. Validate field-level rules
+        // For updates, only validate fields that are present in the update payload
+        for (const [fieldName, fieldConfig] of Object.entries(schema.fields)) {
+            // Skip field validation for updates if the field is not in the update payload
+            if (operation === 'update' && !(fieldName in record)) {
+                continue;
+            }
+            
+            const value = record[fieldName];
+            const fieldResults = await this.validator.validateField(
+                fieldName,
+                fieldConfig,
+                value,
+                {
+                    record,
+                    previousRecord,
+                    operation,
+                    user: this.getUserFromContext(),
+                    api: this.getHookAPI(),
+                }
+            );
+            allResults.push(...fieldResults);
+        }
+
+        // 2. Validate object-level validation rules
+        if (schema.validation?.rules && schema.validation.rules.length > 0) {
+            // For updates, merge the update data with previous record to get the complete final state
+            const mergedRecord = operation === 'update' && previousRecord
+                ? { ...previousRecord, ...record }
+                : record;
+
+            // Track which fields changed (using shallow comparison for performance)
+            // IMPORTANT: Shallow comparison does not detect changes in nested objects/arrays.
+            // If your validation rules rely on detecting changes in complex nested structures,
+            // you may need to implement custom change tracking in hooks.
+            const changedFields = previousRecord 
+                ? Object.keys(record).filter(key => record[key] !== previousRecord[key])
+                : undefined;
+
+            const validationContext: ValidationContext = {
+                record: mergedRecord,
+                previousRecord,
+                operation,
+                user: this.getUserFromContext(),
+                api: this.getHookAPI(),
+                changedFields,
+            };
+
+            const result = await this.validator.validate(schema.validation.rules, validationContext);
+            allResults.push(...result.results);
+        }
+
+        // 3. Collect errors and throw if any
+        const errors = allResults.filter(r => !r.valid && r.severity === 'error');
+        if (errors.length > 0) {
+            const errorMessage = errors.map(e => e.message).join('; ');
+            throw new ValidationError(errorMessage, errors);
+        }
     }
 
     async find(query: UnifiedQuery = {}): Promise<any[]> {
@@ -129,9 +207,11 @@ export class ObjectRepository {
         await this.app.triggerHook('beforeCreate', this.objectName, hookCtx);
         const finalDoc = hookCtx.data || doc;
 
-        const obj = this.getSchema();
         if (this.context.userId) finalDoc.created_by = this.context.userId;
         if (this.context.spaceId) finalDoc.space_id = this.context.spaceId;
+        
+        // Validate the record before creating
+        await this.validateRecord('create', finalDoc);
         
         const result = await this.getDriver().create(this.objectName, finalDoc, this.getOptions());
         
@@ -155,6 +235,9 @@ export class ObjectRepository {
             isModified: (field) => hookCtx.data ? Object.prototype.hasOwnProperty.call(hookCtx.data, field) : false
         };
         await this.app.triggerHook('beforeUpdate', this.objectName, hookCtx);
+
+        // Validate the update
+        await this.validateRecord('update', hookCtx.data, previousData);
 
         const result = await this.getDriver().update(this.objectName, id, hookCtx.data, this.getOptions(options));
 
@@ -207,27 +290,42 @@ export class ObjectRepository {
     async createMany(data: any[]): Promise<any> {
         const driver = this.getDriver();
         
-        if (!driver.createMany) {
-            // Fallback
-            const results = [];
-            for (const item of data) {
-                results.push(await this.create(item));
-            }
-            return results;
+        // Always use fallback to ensure validation and hooks are executed
+        // This maintains ObjectQL's metadata-driven architecture where
+        // validation rules, hooks, and permissions are enforced consistently
+        const results = [];
+        for (const item of data) {
+            results.push(await this.create(item));
         }
-        return driver.createMany(this.objectName, data, this.getOptions());
+        return results;
     }
 
     async updateMany(filters: any, data: any): Promise<any> {
-        const driver = this.getDriver();
-        if (!driver.updateMany) throw new Error("Driver does not support updateMany");
-        return driver.updateMany(this.objectName, filters, data, this.getOptions());
+        // Find all matching records and update them individually
+        // to ensure validation and hooks are executed
+        const records = await this.find({ filters });
+        let count = 0;
+        for (const record of records) {
+            if (record && record._id) {
+                await this.update(record._id, data);
+                count++;
+            }
+        }
+        return count;
     }
 
     async deleteMany(filters: any): Promise<any> {
-        const driver = this.getDriver();
-        if (!driver.deleteMany) throw new Error("Driver does not support deleteMany");
-        return driver.deleteMany(this.objectName, filters, this.getOptions());
+        // Find all matching records and delete them individually
+        // to ensure hooks are executed
+        const records = await this.find({ filters });
+        let count = 0;
+        for (const record of records) {
+            if (record && record._id) {
+                await this.delete(record._id);
+                count++;
+            }
+        }
+        return count;
     }
 
     async execute(actionName: string, id: string | number | undefined, params: any): Promise<any> {
