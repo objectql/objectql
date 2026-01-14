@@ -1,6 +1,19 @@
 {
   "name": "@objectql/cli",
-  "version": "1.8.1",
+  "version": "1.8.2",
+  "description": "Command-line interface for ObjectQL - Code generation, migrations, REPL, and AI-powered development tools",
+  "keywords": [
+    "objectql",
+    "cli",
+    "command-line",
+    "codegen",
+    "migration",
+    "repl",
+    "ai",
+    "tools",
+    "development",
+    "studio"
+  ],
   "license": "MIT",
   "main": "dist/index.js",
   "bin": {
@@ -9,7 +22,8 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "studio": "node dist/index.js studio"
+    "studio": "node dist/index.js studio",
+    "test": "jest"
   },
   "dependencies": {
     "@objectql/types": "workspace:*",

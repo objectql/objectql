@@ -10,6 +10,7 @@ export interface IObjectQL {
     getConfigs(): Record<string, ObjectConfig>;
     datasource(name: string): Driver;
     init(): Promise<void>;
+    close?(): Promise<void>;
     removePackage(name: string): void;
     metadata: MetadataRegistry; 
 
