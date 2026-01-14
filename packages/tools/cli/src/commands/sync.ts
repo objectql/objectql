@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import chalk from 'chalk';
 import * as yaml from 'js-yaml';
-import { IntrospectedSchema, IntrospectedTable, IntrospectedColumn, ObjectConfig, IObjectQL, FieldConfig } from '@objectql/types';
+import { IntrospectedSchema, IntrospectedTable, IntrospectedColumn, ObjectConfig, IObjectQL, FieldConfig, FieldType } from '@objectql/types';
 
 interface SyncOptions {
     config?: string;
@@ -167,7 +167,7 @@ function generateObjectDefinition(table: IntrospectedTable, schema: Introspected
         } else {
             // Regular field - map SQL type to ObjectQL type
             const fieldType = mapSqlTypeToObjectQL(column.type, column);
-            field.type = fieldType as any; // Type assertion needed as mapSqlTypeToObjectQL returns string
+            field.type = fieldType;
             
             // Add label
             field.label = formatLabel(column.name);
@@ -205,12 +205,12 @@ function generateObjectDefinition(table: IntrospectedTable, schema: Introspected
 /**
  * Map SQL native type to ObjectQL field type
  */
-function mapSqlTypeToObjectQL(sqlType: string, column: IntrospectedColumn): string {
+function mapSqlTypeToObjectQL(sqlType: string, column: IntrospectedColumn): FieldType {
     const type = sqlType.toLowerCase();
     
-    // Integer types
+    // Integer types - map to 'number'
     if (type.includes('int') || type.includes('serial') || type.includes('bigserial')) {
-        return 'integer';
+        return 'number';
     }
     
     // Float/Decimal types
@@ -240,9 +240,9 @@ function mapSqlTypeToObjectQL(sqlType: string, column: IntrospectedColumn): stri
         return 'textarea';
     }
     
-    // JSON types
+    // JSON types - map to 'object'
     if (type.includes('json') || type.includes('jsonb')) {
-        return 'json';
+        return 'object';
     }
     
     // Binary/Blob types

@@ -624,15 +624,16 @@ The sync command automatically maps SQL types to ObjectQL field types:
 
 | SQL Type | ObjectQL Type |
 |----------|---------------|
-| INT, INTEGER, BIGINT | integer |
+| INT, INTEGER, BIGINT, SERIAL | number |
 | FLOAT, DOUBLE, DECIMAL, NUMERIC | number |
 | BOOLEAN, BIT | boolean |
-| VARCHAR, CHAR, TEXT | text |
-| TEXT, CLOB | textarea |
+| VARCHAR, CHAR | text |
+| TEXT, CLOB, LONGTEXT | textarea |
 | TIMESTAMP, DATETIME | datetime |
 | DATE | date |
 | TIME | time |
-| JSON, JSONB | json |
+| JSON, JSONB | object |
+| BLOB, BINARY, BYTEA | file |
 
 **Foreign Key Detection:**
 
