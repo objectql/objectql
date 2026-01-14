@@ -76,9 +76,26 @@ export default defineConfig({
            text: 'AI-Native Ecosystem',
            items: [
              { text: 'Overview', link: '/ai/' },
-             { text: 'Generating Apps (Zero-Shot)', link: '/ai/generating-apps' },
-             { text: 'Building AI Agents', link: '/ai/building-apps' },
+           ]
+         },
+         {
+           text: 'Assisted Development',
+           items: [
              { text: 'AI Coding Assistant', link: '/ai/coding-assistant' },
+             { text: 'Generating Apps', link: '/ai/generating-apps' },
+           ]
+         },
+         {
+           text: 'Agentic Architecture',
+           items: [
+             { text: 'Building AI Agents', link: '/ai/building-apps' },
+           ]
+         },
+         {
+           text: 'Tools & Reference',
+           items: [
+             { text: 'AI CLI', link: '/ai/cli-usage' },
+             { text: 'Agent SDK', link: '/ai/programmatic-api' },
            ]
          }
       ],
