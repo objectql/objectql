@@ -65,8 +65,9 @@ export class ObjectQLError extends Error {
         this.details = error.details;
         
         // Preserve proper stack traces in Node.js environments
-        if (typeof (Error as any).captureStackTrace === 'function') {
-            (Error as any).captureStackTrace(this, ObjectQLError);
+        const ErrorConstructor = Error as unknown as { captureStackTrace?: (target: object, constructor: Function) => void };
+        if (typeof ErrorConstructor.captureStackTrace === 'function') {
+            ErrorConstructor.captureStackTrace(this, ObjectQLError);
         }
     }
 }

@@ -350,14 +350,14 @@ export class MetadataApiClient implements IMetadataApiClient {
         );
     }
 
-    async listByType<T = any>(metadataType: string): Promise<MetadataApiListResponse<T>> {
+    async listByType<T = unknown>(metadataType: string): Promise<MetadataApiListResponse<T>> {
         return this.request<MetadataApiListResponse<T>>(
             'GET',
             `/api/metadata/${metadataType}`
         );
     }
 
-    async getMetadata<T = any>(metadataType: string, id: string): Promise<MetadataApiResponse<T>> {
+    async getMetadata<T = unknown>(metadataType: string, id: string): Promise<MetadataApiResponse<T>> {
         return this.request<MetadataApiResponse<T>>(
             'GET',
             `/api/metadata/${metadataType}/${id}`
