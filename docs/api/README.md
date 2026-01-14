@@ -106,7 +106,7 @@ interface ObjectQLRequest {
   };
   
   // The operation to perform
-  op: 'find' | 'findOne' | 'create' | 'update' | 'delete' | 'count' | 'action';
+  op: 'find' | 'findOne' | 'create' | 'update' | 'delete' | 'count' | 'action' | 'createMany' | 'updateMany' | 'deleteMany';
   
   // The target object/table
   object: string;
@@ -380,6 +380,126 @@ Execute a custom server-side action (RPC-style operation).
 }
 ```
 
+### Bulk Operations
+
+ObjectQL supports efficient bulk operations for creating, updating, and deleting multiple records in a single request.
+
+#### 8. `createMany` - Create Multiple Records
+
+Insert multiple records in a single operation.
+
+**Request:**
+```json
+{
+  "op": "createMany",
+  "object": "tasks",
+  "args": [
+    {
+      "name": "Task 1",
+      "priority": "high",
+      "assignee_id": "user_123"
+    },
+    {
+      "name": "Task 2",
+      "priority": "medium",
+      "assignee_id": "user_456"
+    },
+    {
+      "name": "Task 3",
+      "priority": "low",
+      "assignee_id": "user_789"
+    }
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "items": [
+    {
+      "id": "task_101",
+      "name": "Task 1",
+      "priority": "high",
+      "assignee_id": "user_123",
+      "created_at": "2024-01-15T10:30:00Z"
+    },
+    {
+      "id": "task_102",
+      "name": "Task 2",
+      "priority": "medium",
+      "assignee_id": "user_456",
+      "created_at": "2024-01-15T10:30:00Z"
+    },
+    {
+      "id": "task_103",
+      "name": "Task 3",
+      "priority": "low",
+      "assignee_id": "user_789",
+      "created_at": "2024-01-15T10:30:00Z"
+    }
+  ],
+  "count": 3,
+  "@type": "tasks"
+}
+```
+
+#### 9. `updateMany` - Update Multiple Records
+
+Update all records matching a filter.
+
+**Request:**
+```json
+{
+  "op": "updateMany",
+  "object": "tasks",
+  "args": {
+    "filters": {
+      "status": "pending",
+      "priority": "low"
+    },
+    "data": {
+      "status": "cancelled",
+      "cancelled_at": "2024-01-15T10:30:00Z"
+    }
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "count": 15,
+  "@type": "tasks"
+}
+```
+
+#### 10. `deleteMany` - Delete Multiple Records
+
+Delete all records matching a filter.
+
+**Request:**
+```json
+{
+  "op": "deleteMany",
+  "object": "tasks",
+  "args": {
+    "filters": {
+      "status": "completed",
+      "completed_at": ["<", "2023-01-01"]
+    }
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "count": 42,
+  "@type": "tasks"
+}
+```
+
 ### Advanced Query Features
 
 #### AI Context (Optional)
@@ -449,7 +569,9 @@ For traditional REST clients, ObjectQL can expose a REST-style interface.
 |--------|------|-------------|
 | `GET` | `/api/data/:object` | List records |
 | `GET` | `/api/data/:object/:id` | Get single record |
-| `POST` | `/api/data/:object` | Create record |
+| `POST` | `/api/data/:object` | Create record (or create many if body is an array) |
+| `POST` | `/api/data/:object/bulk-update` | Update many records |
+| `POST` | `/api/data/:object/bulk-delete` | Delete many records |
 | `PUT` | `/api/data/:object/:id` | Update record |
 | `DELETE` | `/api/data/:object/:id` | Delete record |
 
@@ -546,6 +668,118 @@ DELETE /api/data/users/user_456
 {
   "id": "user_456",
   "deleted": true,
+  "@type": "users"
+}
+```
+
+### Bulk Operations (REST)
+
+#### Create Many Records
+
+Send an array in the POST body to create multiple records at once.
+
+```bash
+POST /api/data/users
+Content-Type: application/json
+
+[
+  {
+    "name": "User1",
+    "email": "user1@example.com",
+    "role": "user"
+  },
+  {
+    "name": "User2",
+    "email": "user2@example.com",
+    "role": "user"
+  },
+  {
+    "name": "User3",
+    "email": "user3@example.com",
+    "role": "admin"
+  }
+]
+```
+
+**Response:**
+```json
+{
+  "items": [
+    {
+      "id": "user_101",
+      "name": "User1",
+      "email": "user1@example.com",
+      "role": "user",
+      "created_at": "2024-01-15T10:30:00Z"
+    },
+    {
+      "id": "user_102",
+      "name": "User2",
+      "email": "user2@example.com",
+      "role": "user",
+      "created_at": "2024-01-15T10:30:00Z"
+    },
+    {
+      "id": "user_103",
+      "name": "User3",
+      "email": "user3@example.com",
+      "role": "admin",
+      "created_at": "2024-01-15T10:30:00Z"
+    }
+  ],
+  "count": 3,
+  "@type": "users"
+}
+```
+
+#### Update Many Records
+
+Update all records matching the provided filters.
+
+```bash
+POST /api/data/users/bulk-update
+Content-Type: application/json
+
+{
+  "filters": {
+    "role": "user",
+    "status": "inactive"
+  },
+  "data": {
+    "status": "archived",
+    "archived_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "count": 15,
+  "@type": "users"
+}
+```
+
+#### Delete Many Records
+
+Delete all records matching the provided filters.
+
+```bash
+POST /api/data/users/bulk-delete
+Content-Type: application/json
+
+{
+  "filters": {
+    "status": "archived",
+    "archived_at": ["<", "2023-01-01"]
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "count": 42,
   "@type": "users"
 }
 ```
