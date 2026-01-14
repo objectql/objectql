@@ -30,6 +30,98 @@ export interface BaseSchemaChangeInstruction {
 }
 
 /**
+ * Database impact assessment for a field change.
+ * Describes how the change affects the underlying database schema.
+ */
+export interface DatabaseImpact {
+    /**
+     * Type of database operation required.
+     * - 'alter_column': Modify column properties (type, constraints, default)
+     * - 'rename_column': Rename a column
+     * - 'drop_column': Remove a column
+     * - 'add_column': Add a new column
+     * - 'rebuild_table': Requires full table rebuild (complex changes)
+     * - 'no_change': Schema-level only, no database changes
+     */
+    operation: 'alter_column' | 'rename_column' | 'drop_column' | 'add_column' | 'rebuild_table' | 'no_change';
+    
+    /**
+     * Whether this change requires data migration.
+     * If true, existing records must be updated.
+     */
+    requires_data_migration: boolean;
+    
+    /**
+     * Whether this change may cause data loss.
+     * Examples: type narrowing, dropping columns, shortening text length
+     */
+    may_cause_data_loss: boolean;
+    
+    /**
+     * Estimated risk level for this change.
+     * - 'low': Safe, reversible change (e.g., adding nullable field)
+     * - 'medium': May affect queries or require downtime (e.g., adding index)
+     * - 'high': Requires careful planning (e.g., type change with data migration)
+     * - 'critical': May cause data loss or extended downtime (e.g., dropping column)
+     */
+    risk_level?: 'low' | 'medium' | 'high' | 'critical';
+    
+    /**
+     * Expected downtime for this change.
+     * Format: ISO 8601 duration (e.g., 'PT5M' for 5 minutes, 'PT2H' for 2 hours)
+     */
+    estimated_downtime?: string;
+    
+    /**
+     * Notes about the database impact for human review.
+     */
+    notes?: string;
+}
+
+/**
+ * Database upgrade script information.
+ * Contains the generated DDL/DML statements for applying the migration.
+ */
+export interface UpgradeScript {
+    /**
+     * Target database dialect.
+     * Examples: 'postgresql', 'mysql', 'sqlite', 'mongodb', 'mssql'
+     */
+    dialect: string;
+    
+    /**
+     * SQL or database-specific statements to apply the change (forward migration).
+     * For SQL: DDL statements (ALTER TABLE, CREATE INDEX, etc.)
+     * For MongoDB: Update operations
+     */
+    up_statements: string[];
+    
+    /**
+     * SQL or database-specific statements to rollback the change (reverse migration).
+     * Only present if the change is reversible.
+     */
+    down_statements?: string[];
+    
+    /**
+     * Pre-migration checks or validations to run before applying changes.
+     * Examples: Check for data integrity, verify no duplicate values before adding UNIQUE constraint
+     */
+    pre_checks?: string[];
+    
+    /**
+     * Post-migration validations to ensure the change was successful.
+     * Examples: Verify column exists, check data was migrated correctly
+     */
+    post_checks?: string[];
+    
+    /**
+     * Estimated execution time for this script.
+     * Format: ISO 8601 duration
+     */
+    estimated_execution_time?: string;
+}
+
+/**
  * Instruction to update (modify) a field in an object.
  * Can rename, change type, or update properties of an existing field.
  */
@@ -62,6 +154,19 @@ export interface FieldUpdateInstruction extends BaseSchemaChangeInstruction {
      * Should be a valid JavaScript expression or function body.
      */
     transform_script?: string;
+    
+    /**
+     * Database impact assessment for this field change.
+     * Describes the effect on the underlying database schema.
+     */
+    database_impact?: DatabaseImpact;
+    
+    /**
+     * Generated upgrade scripts for different database dialects.
+     * Maps dialect name to upgrade script.
+     * Example: { postgresql: {...}, mysql: {...} }
+     */
+    upgrade_scripts?: Record<string, UpgradeScript>;
 }
 
 /**
@@ -86,6 +191,19 @@ export interface FieldDeleteInstruction extends BaseSchemaChangeInstruction {
     
     /** Backup location if using 'archive' strategy */
     archive_location?: string;
+    
+    /**
+     * Database impact assessment for this field deletion.
+     * Describes the effect on the underlying database schema.
+     */
+    database_impact?: DatabaseImpact;
+    
+    /**
+     * Generated upgrade scripts for different database dialects.
+     * Maps dialect name to upgrade script.
+     * Example: { postgresql: {...}, mysql: {...} }
+     */
+    upgrade_scripts?: Record<string, UpgradeScript>;
 }
 
 /**
@@ -118,6 +236,19 @@ export interface ObjectUpdateInstruction extends BaseSchemaChangeInstruction {
     
     /** Updated properties (label, description, icon, etc.) */
     changes: ObjectUpdateChanges;
+    
+    /**
+     * Database impact assessment for this object change.
+     * Describes the effect on the underlying database schema.
+     */
+    database_impact?: DatabaseImpact;
+    
+    /**
+     * Generated upgrade scripts for different database dialects.
+     * Maps dialect name to upgrade script.
+     * Example: { postgresql: {...}, mysql: {...} }
+     */
+    upgrade_scripts?: Record<string, UpgradeScript>;
 }
 
 /**
@@ -147,6 +278,19 @@ export interface ObjectDeleteInstruction extends BaseSchemaChangeInstruction {
      * - 'nullify': Set foreign key references to null
      */
     cascade_strategy?: 'cascade' | 'fail' | 'nullify';
+    
+    /**
+     * Database impact assessment for this object deletion.
+     * Describes the effect on the underlying database schema.
+     */
+    database_impact?: DatabaseImpact;
+    
+    /**
+     * Generated upgrade scripts for different database dialects.
+     * Maps dialect name to upgrade script.
+     * Example: { postgresql: {...}, mysql: {...} }
+     */
+    upgrade_scripts?: Record<string, UpgradeScript>;
 }
 
 /**
