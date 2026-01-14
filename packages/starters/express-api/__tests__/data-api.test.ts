@@ -79,12 +79,12 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
-                expect(response.body.data).toBeDefined();
-                expect(response.body.data.name).toBe('John Doe');
-                expect(response.body.data.email).toBe('john@example.com');
-                expect(response.body.data.id).toBeDefined();
+                expect(response.body.id).toBeDefined();
+                expect(response.body.name).toBe('John Doe');
+                expect(response.body.email).toBe('john@example.com');
+                expect(response.body.id).toBeDefined();
                 
-                createdUserId = response.body.data.id;
+                createdUserId = response.body.id;
             });
 
             it('should find all users', async () => {
@@ -98,9 +98,9 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
-                expect(response.body.data).toBeDefined();
-                expect(Array.isArray(response.body.data)).toBe(true);
-                expect(response.body.data.length).toBeGreaterThanOrEqual(1);
+                expect(response.body.items).toBeDefined();
+                expect(Array.isArray(response.body.items)).toBe(true);
+                expect(response.body.items.length).toBeGreaterThanOrEqual(1);
             });
 
             it('should find a user by id', async () => {
@@ -114,9 +114,9 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
-                expect(response.body.data).toBeDefined();
-                expect(response.body.data.id).toBe(createdUserId);
-                expect(response.body.data.name).toBe('John Doe');
+                expect(response.body.id).toBeDefined();
+                expect(response.body.id).toBe(createdUserId);
+                expect(response.body.name).toBe('John Doe');
             });
 
             it('should update a user', async () => {
@@ -135,7 +135,7 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
-                expect(response.body.data).toBeDefined();
+                expect(response.body.id).toBeDefined();
             });
 
             it('should count users', async () => {
@@ -149,9 +149,9 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
-                expect(response.body.data).toBeDefined();
-                expect(typeof response.body.data).toBe('number');
-                expect(response.body.data).toBeGreaterThanOrEqual(0);
+                expect(response.body.count).toBeDefined();
+                expect(typeof response.body.count).toBe('number');
+                expect(response.body.count).toBeGreaterThanOrEqual(0);
             });
 
             it('should delete a user', async () => {
@@ -167,7 +167,7 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
-                expect(response.body.data).toBeDefined();
+                expect(response.body.deleted).toBe(true);
             });
         });
 
@@ -191,14 +191,14 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
-                expect(response.body.data).toBeDefined();
-                expect(response.body.data.title).toBe('Test Task');
-                expect(response.body.data.id).toBeDefined();
+                expect(response.body.id).toBeDefined();
+                expect(response.body.title).toBe('Test Task');
+                expect(response.body.id).toBeDefined();
                 
-                createdTaskId = response.body.data.id;
+                createdTaskId = response.body.id;
             });
 
-            it('should find tasks with filters', async () => {
+            it('should find tasks with filter', async () => {
                 const response = await request(server)
                     .post('/api/objectql')
                     .send({
@@ -211,8 +211,8 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
-                expect(response.body.data).toBeDefined();
-                expect(Array.isArray(response.body.data)).toBe(true);
+                expect(response.body.items).toBeDefined();
+                expect(Array.isArray(response.body.items)).toBe(true);
             });
 
             it('should update task status', async () => {
@@ -232,7 +232,7 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
-                expect(response.body.data).toBeDefined();
+                expect(response.body.id).toBeDefined();
             });
 
             it('should delete task', async () => {
@@ -262,17 +262,17 @@ describe('Data API', () => {
                     .send({
                         name: 'Jane Smith',
                         email: 'jane@example.com',
-                        age: 28,
+                        age: 25,
                         status: 'active'
                     })
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(201);
-                expect(response.body.data).toBeDefined();
-                expect(response.body.data.id).toBeDefined();
-                expect(response.body.data.name).toBe('Jane Smith');
+                expect(response.body.id).toBeDefined();
+                expect(response.body.id).toBeDefined();
+                expect(response.body.name).toBe('Jane Smith');
                 
-                userId = response.body.data.id;
+                userId = response.body.id;
             });
 
             it('should list users via GET /api/data/user', async () => {
@@ -281,12 +281,12 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
-                expect(response.body.data).toBeDefined();
-                expect(Array.isArray(response.body.data)).toBe(true);
-                expect(response.body.data.length).toBeGreaterThanOrEqual(1);
+                expect(response.body.items).toBeDefined();
+                expect(Array.isArray(response.body.items)).toBe(true);
+                expect(response.body.items.length).toBeGreaterThanOrEqual(1);
             });
 
-            it('should get user by id via GET /api/data/user/:id', async () => {
+            it('should update user via PUT /api/data/user/:id', async () => {
                 // Skip this test - there's an issue with the REST GET by ID endpoint
                 // The endpoint returns 200 but with an empty body
                 // This needs investigation in the REST handler or server layer
@@ -297,12 +297,12 @@ describe('Data API', () => {
                 const response = await request(server)
                     .put(`/api/data/user/${userId}`)
                     .send({
-                        age: 29
+                        age: 26
                     })
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
-                expect(response.body.data).toBeDefined();
+                expect(response.body.id).toBeDefined();
             });
 
             it('should delete user via DELETE /api/data/user/:id', async () => {
@@ -320,17 +320,15 @@ describe('Data API', () => {
                     .post('/api/data/task')
                     .send({
                         title: 'REST API Task',
-                        description: 'Created via REST',
-                        status: 'pending',
-                        priority: 'medium'
+                        status: 'pending'
                     })
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(201);
-                expect(response.body.data).toBeDefined();
-                expect(response.body.data.title).toBe('REST API Task');
+                expect(response.body.id).toBeDefined();
+                expect(response.body.title).toBe('REST API Task');
                 
-                taskId = response.body.data.id;
+                taskId = response.body.id;
             });
 
             it('should list tasks via GET /api/data/task', async () => {
@@ -339,20 +337,20 @@ describe('Data API', () => {
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
-                expect(response.body.data).toBeDefined();
-                expect(Array.isArray(response.body.data)).toBe(true);
+                expect(response.body.items).toBeDefined();
+                expect(Array.isArray(response.body.items)).toBe(true);
             });
 
             it('should update task via PUT /api/data/task/:id', async () => {
                 const response = await request(server)
                     .put(`/api/data/task/${taskId}`)
                     .send({
-                        status: 'in-progress'
+                        status: 'done'
                     })
                     .set('Accept', 'application/json');
 
                 expect(response.status).toBe(200);
-                expect(response.body.data).toBeDefined();
+                expect(response.body.id).toBeDefined();
             });
 
             it('should delete task via DELETE /api/data/task/:id', async () => {

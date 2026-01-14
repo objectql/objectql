@@ -64,11 +64,11 @@ describe('Metadata API', () => {
                 .set('Accept', 'application/json');
 
             expect(response.status).toBe(200);
-            expect(response.body.objects).toBeDefined();
-            expect(Array.isArray(response.body.objects)).toBe(true);
-            expect(response.body.objects.length).toBeGreaterThanOrEqual(2);
+            expect(response.body.items).toBeDefined();
+            expect(Array.isArray(response.body.items)).toBe(true);
+            expect(response.body.items.length).toBeGreaterThanOrEqual(2);
             
-            const objectNames = response.body.objects.map((o: any) => o.name);
+            const objectNames = response.body.items.map((o: any) => o.name);
             expect(objectNames).toContain('user');
             expect(objectNames).toContain('task');
         });
@@ -79,8 +79,8 @@ describe('Metadata API', () => {
                 .set('Accept', 'application/json');
 
             expect(response.status).toBe(200);
-            expect(response.body.objects).toBeDefined();
-            expect(Array.isArray(response.body.objects)).toBe(true);
+            expect(response.body.items).toBeDefined();
+            expect(Array.isArray(response.body.items)).toBe(true);
         });
 
         it('should list objects via GET /api/metadata/object', async () => {
@@ -89,8 +89,8 @@ describe('Metadata API', () => {
                 .set('Accept', 'application/json');
 
             expect(response.status).toBe(200);
-            expect(response.body.object).toBeDefined();
-            expect(Array.isArray(response.body.object)).toBe(true);
+            expect(response.body.items).toBeDefined();
+            expect(Array.isArray(response.body.items)).toBe(true);
         });
     });
 
@@ -209,8 +209,8 @@ describe('Metadata API', () => {
                 .set('Accept', 'application/json');
 
             expect(response.status).toBe(200);
-            expect(response.body.actions).toBeDefined();
-            expect(Array.isArray(response.body.actions)).toBe(true);
+            expect(response.body.items).toBeDefined();
+            expect(Array.isArray(response.body.items)).toBe(true);
         });
 
         it('should list object actions via GET /api/metadata/objects/user/actions (legacy path)', async () => {
@@ -219,7 +219,7 @@ describe('Metadata API', () => {
                 .set('Accept', 'application/json');
 
             expect(response.status).toBe(200);
-            expect(response.body.actions).toBeDefined();
+            expect(response.body.items).toBeDefined();
         });
 
         it('should return 404 for actions of non-existent object', async () => {
@@ -238,7 +238,7 @@ describe('Metadata API', () => {
                 .set('Accept', 'application/json');
 
             expect(response.status).toBe(200);
-            expect(response.body.view).toBeDefined();
+            expect(response.body.items).toBeDefined();
         });
 
         it('should handle OPTIONS request for CORS', async () => {
@@ -261,7 +261,7 @@ describe('Metadata API', () => {
                 .get('/api/metadata/object')
                 .set('Accept', 'application/json');
 
-            expect(response1.body.objects.length).toBe(response2.body.object.length);
+            expect(response1.body.items.length).toBe(response2.body.items.length);
         });
 
         it('should return same object metadata from different endpoints', async () => {
