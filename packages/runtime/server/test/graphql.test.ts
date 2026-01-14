@@ -71,9 +71,9 @@ class MockDriver implements Driver {
         const index = items.findIndex(item => item._id === id);
         if (index >= 0) {
             this.data[objectName][index] = { ...items[index], ...data };
-            return 1;
+            return this.data[objectName][index];
         }
-        return 0;
+        return null;
     }
     
     async delete(objectName: string, id: string) {
