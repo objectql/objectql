@@ -3,104 +3,95 @@ layout: home
 
 hero:
   name: ObjectQL
-  text: The Backend for the AI Coding Era
-  tagline: Traditional ORMs were built for humans typing in IDEs. ObjectQL is a structured protocol designed for LLMs to generate perfect, hallucination-free backend logic.
+  text: The Standard Protocol for AI Software Generation
+  tagline: A universal, metadata-driven ORM and protocol designed to empower LLMs to generate enterprise apps without hallucinations.
   image:
     src: /logo.svg
     alt: ObjectQL Logo
   actions:
     - theme: brand
-      text: 🤖 Setup AI Coding Assistant
-      link: /ai/coding-assistant
-    - theme: alt
-      text: 🚀 Quick Start
+      text: 📖 Read the Guide
       link: /guide/getting-started
+    - theme: alt
+      text: 🤖 AI-Native Development
+      link: /ai/
+    - theme: alt
+      text: 🔌 API Reference
+      link: /api/
 
 features:
-  - icon: 🧠
-    title: LLM-Native Protocol
-    details: Stop asking AI to write SQL or complex Method Chains. ObjectQL uses strict JSON ASTs for logic, reducing hallucinations and injection risks to near zero.
-  - icon: 📄
+  - icon: 🛡️
+    title: No Hallucinations
+    details: Schema-first architecture ensures LLMs generate valid queries against a strict contract, eliminating phantom columns and tables.
+  - icon: 📉
+    title: Token Efficient
+    details: Compact YAML/JSON metadata and declarative logic reduce context window usage compared to verbose ORM code generation.
+  - icon: 🧩
     title: Metadata-Driven
-    details: Define your Data Models, Hooks, and Actions in pure YAML/JSON. It's the perfect context format for RAG and Long-term Memory for Agents.
-  - icon: 🔌
+    details: All logic (Schema, Validation, Permissions) is defined in declarative files. Perfect for RAG and Long-term Agent Memory.
+  - icon: 🌍
     title: Universal Runtime
-    details: One protocol running on PostgreSQL, MongoDB, or SQLite. Switch underlying engines without rewriting a single line of business logic.
-  - icon: ⚡
-    title: Federated & Distributed
-    details: Seamlessly aggregate data from local databases and remote microservices into a single unified graph. The "GraphQL Federation" for backend logic.
+    details: Write once, run anywhere. The core protocol abstracts PostgreSQL, MongoDB, and SQLite, running in Node.js, Browser, or Edge.
 ---
 
-## Protocol by Example
+## The Protocol in Action
 
-See how ObjectQL transforms abstract definitions into working software.
+ObjectQL bridges the gap between AI generation and reliable execution.
 
-### 1. Logic & Filtering
+### 1. Declarative Modeling
+
+Define your data model in simple, human and machine-readable YAML.
 
 ::: code-group
 
-```yaml [1. Input: account.object.yml]
+```yaml [account.object.yml]
 name: account
+label: Account
 fields:
-  name: text
-  industry: select
+  name: { type: text, required: true }
+  industry: 
+    type: select
+    options: [tech, finance, retail]
   revenue: currency
-  status: select
+  status: { type: select, options: [active, vip] }
 ```
 
-```bash [2. Request: Complex Query]
+```yaml [account.validation.yml]
+# Cross-field logic without writing code
+rules:
+  vip_revenue_check:
+    when: "status == 'vip'"
+    expect: "revenue > 1000000"
+    message: "VIP accounts require >1M revenue"
+```
+
+:::
+
+### 2. Hallucination-Free Querying
+
+LLMs generate structured JSON queries instead of error-prone SQL strings.
+
+::: code-group
+
+```json [Request (JSON Protocol)]
 {
-  "fields": ["name", "revenue"],
+  "fields": ["name", "revenue", "owner.name"],
   "filters": [
     ["industry", "=", "tech"], 
     "and", 
-    [["revenue", ">", 1000000], "or", ["status", "=", "vip"]]
+    ["revenue", ">", 500000]
   ]
 }
 ```
 
-```sql [3. Output: Optimized SQL]
-SELECT name, revenue 
-FROM account 
-WHERE industry = 'tech' 
-  AND (revenue > 1000000 OR status = 'vip')
-LIMIT 20
+```sql [Generated SQL (Postgres)]
+SELECT t1.name, t1.revenue, t2.name 
+FROM account AS t1
+LEFT JOIN users AS t2 ON t1.owner = t2.id
+WHERE t1.industry = 'tech' 
+  AND t1.revenue > 500000
+```
 :::
-
-### 2. Auto-Joins & Aggregations
-
-ObjectQL automatically handles `JOIN` operations when you group by related fields.
-
-::: code-group
-
-```yaml [1. Input: payment.object.yml]
-name: payment
-fields:
-  amount: currency
-  account: 
-    type: lookup
-    reference_to: account
-```
-
-```json [2. Request: JSON Protocol]
-{
-  "op": "aggregate",
-  "from": "payment",
-  "group": ["account.industry"],
-  "sum": ["amount"]
-}
-```
-
-```sql [3. Output: SQL Generation]
-SELECT t2.industry, SUM(t1.amount)
-FROM payment AS t1
-LEFT JOIN account AS t2 ON t1.account = t2.id
-GROUP BY t2.industry
-```
-
-:::
-
-## The Shift to AI Programming
 
 ## The Shift to AI Programming
 
@@ -122,8 +113,6 @@ ObjectQL abstracts the entire backend into a **Standardized Protocol**:
 1.  **Schema is Data**: `user.object.yml` is easier for AI to read/write than `class User extends Entity`.
 2.  **Logic is Data**: Queries are ASTs like `{ op: 'find', filters: [['age', '>', 18]] }`. 100% deterministic.
 3.  **Self-Describing**: The runtime can introspect any ObjectQL endpoint and explain it to an Agent instantly.
-
-Start building for the future today.
 
 ## Next Steps
 
