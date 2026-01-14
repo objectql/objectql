@@ -1,6 +1,9 @@
 # Browser Example for @objectql/sdk
 
-This example demonstrates how to use `@objectql/sdk` directly in a browser environment without any build tools.
+This example demonstrates how to use `@objectql/sdk` in different environments:
+
+- **`index.html`** - Pure browser example (no build tools)
+- **`example-node.ts`** - Node.js/TypeScript example
 
 ## 🚀 Quick Start
 
@@ -42,6 +45,25 @@ php -S localhost:8080
 ```
 
 Then navigate to `http://localhost:8080` in your browser.
+
+### Running the Node.js Example
+
+```bash
+# Install dependencies (if not already installed)
+cd ../../
+pnpm install
+
+# Run the example
+cd examples/browser
+npx ts-node example-node.ts
+```
+
+Or compile and run:
+
+```bash
+npx tsc example-node.ts
+node example-node.js
+```
 
 ## 📋 Features Demonstrated
 
