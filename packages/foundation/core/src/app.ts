@@ -197,6 +197,15 @@ export class ObjectQL implements IObjectQL {
         return objects;
     }
 
+    async close() {
+        for (const [name, driver] of Object.entries(this.datasources)) {
+            if (driver.disconnect) {
+                console.log(`Closing driver '${name}'...`);
+                await driver.disconnect();
+            }
+        }
+    }
+
     async init() {
         // 0. Init Plugins (This allows plugins to register custom loaders)
         for (const plugin of this.pluginsList) {
