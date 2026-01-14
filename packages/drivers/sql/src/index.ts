@@ -645,7 +645,7 @@ export class SqlDriver implements Driver {
                     [tableName]
                 );
                 
-                if (!tableExistsResult || tableExistsResult.length === 0) {
+                if (!Array.isArray(tableExistsResult) || tableExistsResult.length === 0) {
                     // If the table does not exist, there are no foreign keys to introspect.
                     return foreignKeys;
                 }
@@ -708,10 +708,10 @@ export class SqlDriver implements Driver {
                 
                 // Validate that the sanitized table name exists in the database before using it in PRAGMA
                 const tablesResult = await this.knex.raw("SELECT name FROM sqlite_master WHERE type = 'table'");
-                const tableNames = tablesResult.map((row: any) => row.name);
+                const tableNames = Array.isArray(tablesResult) ? tablesResult.map((row: any) => row.name) : [];
                 
                 if (!tableNames.includes(safeTableName)) {
-                    console.warn('Could not introspect primary keys for SQLite table: table does not exist after sanitization.');
+                    console.warn('Could not introspect primary keys: table name contains invalid characters or table does not exist.');
                     return primaryKeys;
                 }
                 
