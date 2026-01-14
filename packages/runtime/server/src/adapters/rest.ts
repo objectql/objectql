@@ -284,8 +284,10 @@ export function createRESTHandler(app: IObjectQL) {
                     default:
                         statusCode = 500;
                 }
-            } else if (method === 'POST') {
-                statusCode = 201; // Created
+            } else if (method === 'POST' && qlRequest.op === 'create') {
+                statusCode = 201; // Created - only for single create
+            } else if (method === 'POST' && qlRequest.op === 'createMany') {
+                statusCode = 201; // Created - for bulk create
             }
 
             sendJSON(res, statusCode, result);

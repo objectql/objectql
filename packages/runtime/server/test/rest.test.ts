@@ -74,6 +74,63 @@ class MockDriver implements Driver {
         return (this.data[objectName] || []).length;
     }
     
+    async createMany(objectName: string, data: any[]) {
+        const newItems = data.map(item => ({
+            _id: String(this.nextId++),
+            ...item
+        }));
+        if (!this.data[objectName]) {
+            this.data[objectName] = [];
+        }
+        this.data[objectName].push(...newItems);
+        return newItems;
+    }
+    
+    async updateMany(objectName: string, filters: any, data: any) {
+        const items = this.data[objectName] || [];
+        let count = 0;
+        
+        // Simple filter support - just check for exact match
+        items.forEach((item, index) => {
+            let matches = true;
+            if (filters && typeof filters === 'object') {
+                for (const [key, value] of Object.entries(filters)) {
+                    if (item[key] !== value) {
+                        matches = false;
+                        break;
+                    }
+                }
+            }
+            if (matches) {
+                this.data[objectName][index] = { ...item, ...data };
+                count++;
+            }
+        });
+        
+        return count;
+    }
+    
+    async deleteMany(objectName: string, filters: any) {
+        const items = this.data[objectName] || [];
+        const initialLength = items.length;
+        
+        // Simple filter support - just check for exact match
+        this.data[objectName] = items.filter(item => {
+            let matches = true;
+            if (filters && typeof filters === 'object') {
+                for (const [key, value] of Object.entries(filters)) {
+                    if (item[key] !== value) {
+                        matches = false;
+                        break;
+                    }
+                }
+            }
+            return !matches; // Keep items that don't match
+        });
+        
+        return initialLength - this.data[objectName].length;
+    }
+    
     async execute(sql: string) {}
 }
 
@@ -200,5 +257,72 @@ describe('REST API Adapter', () => {
         expect(response.status).toBe(200);
         expect(response.body.meta.page).toBe(2);
         expect(response.body.meta.has_next).toBe(false);
+    });
+
+    // Bulk operations tests
+    describe('Bulk Operations', () => {
+        it('should handle POST /api/data/:object with array - Create many records', async () => {
+            const response = await request(server)
+                .post('/api/data/user')
+                .send([
+                    { name: 'User1', email: 'user1@example.com' },
+                    { name: 'User2', email: 'user2@example.com' },
+                    { name: 'User3', email: 'user3@example.com' }
+                ])
+                .set('Accept', 'application/json');
+
+            expect(response.status).toBe(201);
+            expect(response.body.items).toBeDefined();
+            expect(response.body.items).toHaveLength(3);
+            expect(response.body.count).toBe(3);
+            expect(response.body['@type']).toBe('user');
+            expect(response.body.items[0].name).toBe('User1');
+            expect(response.body.items[0]._id).toBeDefined();
+        });
+
+        it('should handle POST /api/data/:object/bulk-update - Update many records', async () => {
+            // First create some users
+            await request(server)
+                .post('/api/data/user')
+                .send([
+                    { name: 'TestUser1', email: 'test1@example.com', role: 'user' },
+                    { name: 'TestUser2', email: 'test2@example.com', role: 'user' }
+                ]);
+
+            // Now update all users with role 'user'
+            const response = await request(server)
+                .post('/api/data/user/bulk-update')
+                .send({
+                    filters: { role: 'user' },
+                    data: { role: 'admin' }
+                })
+                .set('Accept', 'application/json');
+
+            expect(response.status).toBe(200);
+            expect(response.body.count).toBeGreaterThan(0);
+            expect(response.body['@type']).toBe('user');
+        });
+
+        it('should handle POST /api/data/:object/bulk-delete - Delete many records', async () => {
+            // First create some users
+            await request(server)
+                .post('/api/data/user')
+                .send([
+                    { name: 'ToDelete1', email: 'delete1@example.com', status: 'inactive' },
+                    { name: 'ToDelete2', email: 'delete2@example.com', status: 'inactive' }
+                ]);
+
+            // Now delete all inactive users
+            const response = await request(server)
+                .post('/api/data/user/bulk-delete')
+                .send({
+                    filters: { status: 'inactive' }
+                })
+                .set('Accept', 'application/json');
+
+            expect(response.status).toBe(200);
+            expect(response.body.count).toBeGreaterThan(0);
+            expect(response.body['@type']).toBe('user');
+        });
     });
 });
