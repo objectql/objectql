@@ -10,18 +10,23 @@
   - Added `sideEffects: false` for tree-shaking optimization
   - Added repository, bugs, and homepage metadata
   - Expanded keywords for better discoverability (frontend, react, vue, angular, esm)
+  - **Built-in polyfill for `AbortSignal.timeout()`** - SDK now works in older browsers automatically
+  - Improved timeout handling with fallback mechanism for universal compatibility
   
 - **Documentation Improvements:**
-  - Added detailed browser compatibility notes
-  - Added polyfill guidance for `AbortSignal.timeout()` for older browsers
+  - Added detailed browser compatibility notes (now works in Chrome 90+, Firefox 90+, Safari 15+)
+  - Removed need for manual polyfills - SDK includes automatic polyfill
   - Added React and Vue.js hook examples
   - Added browser example HTML file with interactive demo
+  - Added Node.js example demonstrating cross-runtime compatibility
   - Added package-level documentation comments
+  - Updated examples to use CDN imports for browser usage
 
 - **Examples:**
   - Added `examples/browser/` with standalone HTML example
+  - Added `examples/browser/example-node.ts` for Node.js usage
   - Demonstrates browser usage without build tools
-  - Includes polyfill implementation for older browsers
+  - Shows SDK works identically across all JavaScript runtimes
 
 ## 1.8.1
 

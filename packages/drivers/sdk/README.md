@@ -54,7 +54,11 @@ pnpm add @objectql/sdk @objectql/types
     <div id="users"></div>
 
     <script type="module">
-        import { DataApiClient } from './node_modules/@objectql/sdk/dist/index.js';
+        // Option 1: Using unpkg CDN
+        import { DataApiClient } from 'https://unpkg.com/@objectql/sdk/dist/index.js';
+
+        // Option 2: Using a bundler (Vite, Webpack, etc.)
+        // import { DataApiClient } from '@objectql/sdk';
 
         const client = new DataApiClient({
             baseUrl: 'http://localhost:3000',
@@ -294,44 +298,19 @@ The SDK uses modern JavaScript APIs available in all current browsers:
 * **Promises/async-await** - ES2017+ 
 * **AbortSignal.timeout()** - Chrome 103+, Firefox 100+, Safari 16.4+
 
-### Polyfill for Older Browsers
+### Automatic Polyfill
 
-If you need to support older browsers, add a polyfill for `AbortSignal.timeout`:
+The SDK **automatically includes a polyfill** for `AbortSignal.timeout()` that activates when running in older browsers. You don't need to add any polyfills manually - the SDK works universally out of the box!
 
-```javascript
-// Simple polyfill for AbortSignal.timeout
-if (!AbortSignal.timeout) {
-    AbortSignal.timeout = function(ms) {
-        const controller = new AbortController();
-        setTimeout(() => controller.abort(), ms);
-        return controller.signal;
-    };
-}
-```
+The polyfill is lightweight and only adds the missing functionality when needed, ensuring compatibility with:
+- Chrome 90+
+- Firefox 90+
+- Safari 15+
+- Edge 90+
 
-Or use a timeout implementation without AbortSignal:
-
-```typescript
-// Custom client with manual timeout handling
-class CustomDataApiClient extends DataApiClient {
-    private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), this.timeout);
-
-        try {
-            const response = await fetch(url, {
-                method,
-                headers,
-                body: body ? JSON.stringify(body) : undefined,
-                signal: controller.signal
-            });
-            return await response.json();
-        } finally {
-            clearTimeout(timeoutId);
-        }
-    }
-}
-```
+For even older browsers, you may need to add polyfills for:
+- `fetch` API (via `whatwg-fetch`)
+- `AbortController` (via `abort-controller` package)
 
 ---
 

@@ -75,18 +75,18 @@ The example shows how to:
 - ✅ Create new records
 - ✅ Count records with filters
 - ✅ Handle errors and loading states
-- ✅ Use polyfill for `AbortSignal.timeout` for older browsers
+- ✅ Works in all modern browsers (polyfill built-in!)
 
 ## 🌐 Browser Compatibility
 
 This example works in all modern browsers:
 
-- Chrome 103+
-- Firefox 100+
-- Safari 16.4+
-- Edge 103+
+- Chrome 90+
+- Firefox 90+
+- Safari 15+
+- Edge 90+
 
-For older browsers, the example includes a polyfill for `AbortSignal.timeout`.
+**Note:** The `@objectql/sdk` package automatically includes a polyfill for `AbortSignal.timeout()`, so it works seamlessly in older browsers without any additional configuration!
 
 ## 🔧 Using in Production
 
