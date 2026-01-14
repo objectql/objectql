@@ -14,7 +14,6 @@ export default defineConfig({
     logo: '/logo.svg',
     // Top Navigation
     nav: [
-      { text: 'Tutorials', link: '/tutorials/' },
       { text: 'Guide', link: '/guide/' },
       { text: 'AI-Native', link: '/ai/' },
       { text: 'API Reference', link: '/api/' },
@@ -33,6 +32,15 @@ export default defineConfig({
     sidebar: {
       // Sidebar for Tutorials
       '/tutorials/': [
+        {
+          text: 'Getting Started',
+          items: [
+            { text: 'Introduction', link: '/guide/' },
+            { text: 'Why ObjectQL?', link: '/guide/architecture/why-objectql' },
+            { text: 'Quick Start', link: '/guide/getting-started' },
+            { text: 'IDE Setup', link: '/guide/ide-setup' },
+          ]
+        },
         {
           text: 'Tutorials',
           items: [
@@ -109,6 +117,16 @@ export default defineConfig({
             { text: 'Why ObjectQL?', link: '/guide/architecture/why-objectql' },
             { text: 'Quick Start', link: '/guide/getting-started' },
             { text: 'IDE Setup', link: '/guide/ide-setup' },
+          ]
+        },
+        {
+          text: 'Tutorials',
+          items: [
+            { text: 'Overview', link: '/tutorials/' },
+            { text: '1. Task Manager (Beginner)', link: '/tutorials/task-manager' },
+            { text: '2. Micro-CRM (Intermediate)', link: '/tutorials/crm-system' },
+            { text: '3. Federated Data (Advanced)', link: '/tutorials/federation' },
+            { text: '4. AI Data Agent (AI-Native)', link: '/tutorials/ai-agent' },
           ]
         },
         {
