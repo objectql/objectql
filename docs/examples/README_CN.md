@@ -13,7 +13,8 @@
 ## 快速导航
 
 📖 **核心指南**
-- [如何将附件与记录关联？](./attachment-association-guide-cn.md) - **推荐阅读**
+- [附件字段如何实现多选？](./multiple-file-upload-guide-cn.md) - **多文件上传完整指南**
+- [如何将附件与记录关联？](./attachment-association-guide-cn.md)
 - [如何使用 AWS S3 存储？](./s3-integration-guide-cn.md)
 - [文件上传示例代码](./file-upload-example.md)
 
