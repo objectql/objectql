@@ -9,6 +9,7 @@ interface SyncOptions {
     output?: string;
     tables?: string[];
     force?: boolean;
+    app?: any; // Allow passing app instance directly for testing
 }
 
 /**
@@ -20,10 +21,15 @@ export async function syncDatabase(options: SyncOptions) {
     
     console.log(chalk.blue('🔄 Syncing database schema to ObjectQL...'));
     console.log(chalk.gray(`Output directory: ${outputDir}\n`));
+    
+    let app: any = options.app;
+    const shouldClose = !options.app; // Only close if we loaded it ourselves
 
     try {
-        // Load ObjectQL instance from config
-        const app = await loadObjectQLInstance(options.config);
+        // Load ObjectQL instance from config if not provided
+        if (!app) {
+            app = await loadObjectQLInstance(options.config);
+        }
         
         // Check if driver supports introspection
         const driver = app.datasources?.default;
@@ -109,6 +115,16 @@ export async function syncDatabase(options: SyncOptions) {
             console.error(chalk.gray(error.stack));
         }
         throw error;
+    } finally {
+        // Ensure connection is closed if we opened it
+        if (shouldClose) {
+            if (app && app.close) {
+                 await app.close();
+            } else if (app && app.datasources && app.datasources.default && (app.datasources.default as any).disconnect) {
+                 // Fallback for older versions if close isn't available
+                 await (app.datasources.default as any).disconnect();
+            }
+        }
     }
 }
 
@@ -287,6 +303,15 @@ async function loadObjectQLInstance(configPath?: string): Promise<any> {
     }
 
     const configModule = require(configFile);
+    
+    // Clear cache to support multiple runs in same process (e.g. tests)
+    try {
+        const resolvedPath = require.resolve(configFile);
+        delete require.cache[resolvedPath];
+    } catch (e) {
+        // Ignore resolution errors
+    }
+
     // Support multiple export patterns: default, app, objectql, or db (in order of precedence)
     const app = configModule.default || configModule.app || configModule.objectql || configModule.db;
 

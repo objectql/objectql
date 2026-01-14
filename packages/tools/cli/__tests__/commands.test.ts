@@ -162,10 +162,15 @@ describe('CLI Commands', () => {
 
         beforeEach(async () => {
             // Create a test SQLite database with sample schema
+            const dbPath = path.join(testDir, `test_${Date.now()}.db`);
             const driver = new SqlDriver({
                 client: 'sqlite3',
-                connection: { filename: path.join(testDir, 'test.db') },
-                useNullAsDefault: true
+                connection: { filename: dbPath },
+                useNullAsDefault: true,
+                pool: { 
+                    min: 1, 
+                    max: 1 // Single connection for test
+                }
             });
 
             app = new ObjectQL({
@@ -195,34 +200,13 @@ describe('CLI Commands', () => {
             });
 
             await app.init();
-
-            // Create a config file for the sync command to use
-            configPath = path.join(testDir, 'objectql.config.js');
-            const configContent = `
-                const { ObjectQL } = require('@objectql/core');
-                const { SqlDriver } = require('@objectql/driver-sql');
-                
-                const driver = new SqlDriver({
-                    client: 'sqlite3',
-                    connection: { filename: '${path.join(testDir, 'test.db').replace(/\\/g, '\\\\')}' },
-                    useNullAsDefault: true
-                });
-
-                const app = new ObjectQL({
-                    datasources: { default: driver }
-                });
-
-                module.exports = { default: app };
-            `;
-            fs.writeFileSync(configPath, configContent, 'utf-8');
         });
 
         afterEach(async () => {
-            if (app && app.datasources && app.datasources.default) {
-                const driver = app.datasources.default as any;
-                if (driver.disconnect) {
-                    await driver.disconnect();
-                }
+            try {
+                if (app) await app.close();
+            } catch (e) {
+                // Ignore if already closed
             }
         });
 
@@ -230,7 +214,7 @@ describe('CLI Commands', () => {
             const outputDir = path.join(testDir, 'objects');
 
             await syncDatabase({
-                config: configPath,
+                app: app,
                 output: outputDir
             });
 
@@ -269,7 +253,7 @@ describe('CLI Commands', () => {
             const outputDir = path.join(testDir, 'objects_selective');
 
             await syncDatabase({
-                config: configPath,
+                app: app,
                 output: outputDir,
                 tables: ['users']
             });
@@ -284,7 +268,7 @@ describe('CLI Commands', () => {
 
             // First sync
             await syncDatabase({
-                config: configPath,
+                app: app,
                 output: outputDir
             });
 
@@ -295,7 +279,7 @@ describe('CLI Commands', () => {
 
             // Second sync without force - should skip
             await syncDatabase({
-                config: configPath,
+                app: app,
                 output: outputDir
             });
 
@@ -308,7 +292,7 @@ describe('CLI Commands', () => {
 
             // First sync
             await syncDatabase({
-                config: configPath,
+                app: app,
                 output: outputDir
             });
 
@@ -318,7 +302,7 @@ describe('CLI Commands', () => {
 
             // Second sync with force - should overwrite
             await syncDatabase({
-                config: configPath,
+                app: app,
                 output: outputDir,
                 force: true
             });
