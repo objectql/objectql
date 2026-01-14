@@ -1,6 +1,6 @@
 {
   "name": "@example/tutorial-crm-system",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "private": true,
   "scripts": {
     "start": "tsx index.ts"

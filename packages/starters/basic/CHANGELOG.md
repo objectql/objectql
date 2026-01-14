@@ -1,5 +1,16 @@
 # @example/project-management
 
+## 1.8.1
+
+### Patch Changes
+
+- Patch release with documentation updates and bug fixes
+- Updated dependencies
+  - @objectql/core@1.8.1
+  - @objectql/driver-sql@1.8.1
+  - @objectql/types@1.8.1
+  - @objectql/platform-node@1.8.1
+
 ## 1.8.0
 
 ### Minor Changes

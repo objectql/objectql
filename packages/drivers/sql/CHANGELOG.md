@@ -1,5 +1,13 @@
 # @objectql/driver-sql
 
+## 1.8.1
+
+### Patch Changes
+
+- Patch release with documentation updates and bug fixes
+- Updated dependencies
+  - @objectql/types@1.8.1
+
 ## 1.8.0
 
 ### Minor Changes
