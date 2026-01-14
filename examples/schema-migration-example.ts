@@ -7,6 +7,13 @@
  * These migration instructions express declarative schema changes that
  * can be interpreted by migration tools or AI agents to safely evolve
  * your data model over time.
+ * 
+ * Note: This example uses a relative import path for demonstration purposes
+ * within the monorepo. In your application, import from the package:
+ * 
+ * ```typescript
+ * import { MigrationConfig, ... } from '@objectql/types';
+ * ```
  */
 
 import {

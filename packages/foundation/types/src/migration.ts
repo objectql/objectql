@@ -89,6 +89,21 @@ export interface FieldDeleteInstruction extends BaseSchemaChangeInstruction {
 }
 
 /**
+ * Configuration changes that can be applied to an object.
+ * Used by ObjectUpdateInstruction to modify object metadata.
+ */
+export interface ObjectUpdateChanges {
+    /** Updated human-readable label */
+    label?: string;
+    /** Updated icon string */
+    icon?: string;
+    /** Updated description */
+    description?: string;
+    /** Updated datasource name */
+    datasource?: string;
+}
+
+/**
  * Instruction to update (modify) an object definition.
  * Can rename or change properties of an existing object.
  */
@@ -102,12 +117,7 @@ export interface ObjectUpdateInstruction extends BaseSchemaChangeInstruction {
     new_object_name?: string;
     
     /** Updated properties (label, description, icon, etc.) */
-    changes: {
-        label?: string;
-        icon?: string;
-        description?: string;
-        datasource?: string;
-    };
+    changes: ObjectUpdateChanges;
 }
 
 /**
