@@ -4,6 +4,10 @@
 
 This document specifies how to handle file uploads, image uploads, and attachment field types in ObjectQL APIs.
 
+> **💡 Quick Guides:**
+> - **How to associate attachments with records?** → [Attachment Association Guide (中文)](../examples/attachment-association-guide-cn.md)
+> - **How to integrate S3 storage?** → [S3 Integration Guide (中文)](../examples/s3-integration-guide-cn.md)
+
 ## Table of Contents
 
 1. [Overview](#overview)

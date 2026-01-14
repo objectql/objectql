@@ -10,6 +10,13 @@
 4. **REST API 端点** - `/api/files/upload`、`/api/files/upload/batch`、`/api/files/:fileId`
 5. **完整测试覆盖** - 单元测试和集成测试示例
 
+## 快速导航
+
+📖 **核心指南**
+- [如何将附件与记录关联？](./attachment-association-guide-cn.md) - **推荐阅读**
+- [如何使用 AWS S3 存储？](./s3-integration-guide-cn.md)
+- [文件上传示例代码](./file-upload-example.md)
+
 ## 架构设计
 
 ### 1. 类型定义 (`types.ts`)
