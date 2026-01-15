@@ -8,7 +8,6 @@ import { build } from './commands/build';
 import { test } from './commands/test';
 import { lint } from './commands/lint';
 import { format } from './commands/format';
-import { startStudio } from './commands/studio';
 import { initProject } from './commands/init';
 import { newMetadata } from './commands/new';
 import { i18nExtract, i18nInit, i18nValidate } from './commands/i18n';
@@ -289,22 +288,6 @@ program
     .option('-d, --dir <path>', 'Directory containing schema', '.')
     .action(async (options) => {
         await serve({ port: parseInt(options.port), dir: options.dir });
-    });
-
-// Studio command
-program
-    .command('studio')
-    .alias('ui')
-    .description('Start the ObjectQL Studio')
-    .option('-p, --port <number>', 'Port to listen on', '5555')
-    .option('-d, --dir <path>', 'Directory containing schema', '.')
-    .option('--no-open', 'Do not open browser automatically')
-    .action(async (options) => {
-        await startStudio({ 
-            port: parseInt(options.port), 
-            dir: options.dir,
-            open: options.open
-        });
     });
 
 // AI command - Interactive by default, with specific subcommands for other modes

@@ -51,7 +51,7 @@ export interface GenerateAppResult {
     files: Array<{
         filename: string;
         content: string;
-        type: 'object' | 'validation' | 'form' | 'view' | 'page' | 'menu' | 'action' | 'hook' | 'permission' | 'workflow' | 'report' | 'data' | 'application' | 'typescript' | 'test' | 'other';
+        type: 'object' | 'validation' | 'action' | 'hook' | 'permission' | 'workflow' | 'data' | 'application' | 'typescript' | 'test' | 'other';
     }>;
     /** Any errors encountered */
     errors?: string[];
@@ -464,8 +464,7 @@ export class ObjectQLAgent {
         const fileTypes = new Set(currentFiles.map(f => f.type));
         
         const allTypes = [
-            'object', 'validation', 'form', 'view', 'page', 
-            'menu', 'action', 'hook', 'permission', 'workflow', 'report', 'data'
+            'object', 'validation', 'action', 'hook', 'permission', 'workflow', 'data'
         ];
         
         const missingTypes = allTypes.filter(t => !fileTypes.has(t as any));
@@ -478,16 +477,8 @@ export class ObjectQLAgent {
             suggestions.push('Add permissions to control access');
         }
         
-        if (!fileTypes.has('menu')) {
-            suggestions.push('Create a menu for navigation');
-        }
-        
         if (!fileTypes.has('workflow') && fileTypes.has('object')) {
             suggestions.push('Add workflows for approval processes');
-        }
-        
-        if (!fileTypes.has('report') && fileTypes.has('object')) {
-            suggestions.push('Generate reports for analytics');
         }
 
         return suggestions;
@@ -512,14 +503,7 @@ Follow ObjectQL metadata standards for ALL metadata types:
   - beforeCreate, afterCreate, beforeUpdate, afterUpdate, beforeDelete, afterDelete
 - Workflows (*.workflow.yml): approval processes, automation
 
-**3. Presentation Layer:**
-- Pages (*.page.yml): composable UI pages with layouts
-- Views (*.view.yml): list views, kanban, calendar displays
-- Forms (*.form.yml): data entry forms with field layouts
-- Reports (*.report.yml): tabular, summary, matrix reports
-- Menus (*.menu.yml): navigation structure
-
-**4. Security Layer:**
+**3. Security Layer:**
 - Permissions (*.permission.yml): access control rules
 - Application (*.application.yml): app-level configuration
 
@@ -696,7 +680,6 @@ Include:
 - 2-3 core objects with essential fields
 - Basic relationships between objects
 - Simple validation rules
-- At least one form and view per object
 - At least one action with TypeScript implementation
 - At least one hook with TypeScript implementation
 
@@ -708,21 +691,15 @@ Output: Provide each file separately with clear filename headers (e.g., "# filen
 Include ALL necessary metadata types WITH implementations:
 1. **Objects**: All entities with comprehensive fields
 2. **Validations**: Business rules and constraints
-3. **Forms**: Create and edit forms for each object
-4. **Views**: List views for browsing data
-5. **Pages**: Dashboard and detail pages
-6. **Menus**: Navigation structure
-7. **Actions WITH TypeScript implementations**: Common operations (approve, export, etc.) - Generate BOTH .yml metadata AND .action.ts implementation files
-8. **Hooks WITH TypeScript implementations**: Lifecycle triggers - Generate .hook.ts implementation files
-9. **Permissions**: Basic access control
-10. **Data**: Sample seed data (optional)
-11. **Workflows**: Approval processes if applicable
-12. **Reports**: Key reports for analytics
-13. **Tests**: Generate test files (.test.ts) for actions and hooks to validate business logic
+3. **Actions WITH TypeScript implementations**: Common operations (approve, export, etc.) - Generate BOTH .yml metadata AND .action.ts implementation files
+4. **Hooks WITH TypeScript implementations**: Lifecycle triggers - Generate .hook.ts implementation files
+5. **Permissions**: Basic access control
+6. **Data**: Sample seed data (optional)
+7. **Workflows**: Approval processes if applicable
+8. **Tests**: Generate test files (.test.ts) for actions and hooks to validate business logic
 
 Consider:
 - Security and permissions from the start
-- User experience in form/view design
 - Business processes and workflows
 - Data integrity and validation
 - Complete TypeScript implementations for all actions and hooks
@@ -863,15 +840,10 @@ Provide feedback in the specified format.`;
     private inferFileType(filename: string): GenerateAppResult['files'][0]['type'] {
         if (filename.includes('.object.yml')) return 'object';
         if (filename.includes('.validation.yml')) return 'validation';
-        if (filename.includes('.form.yml')) return 'form';
-        if (filename.includes('.view.yml')) return 'view';
-        if (filename.includes('.page.yml')) return 'page';
-        if (filename.includes('.menu.yml')) return 'menu';
         if (filename.includes('.action.yml')) return 'action';
         if (filename.includes('.hook.yml')) return 'hook';
         if (filename.includes('.permission.yml')) return 'permission';
         if (filename.includes('.workflow.yml')) return 'workflow';
-        if (filename.includes('.report.yml')) return 'report';
         if (filename.includes('.data.yml')) return 'data';
         if (filename.includes('.application.yml') || filename.includes('.app.yml')) return 'application';
         if (filename.includes('.action.ts') || filename.includes('.hook.ts')) return 'typescript';

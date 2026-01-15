@@ -3,7 +3,6 @@ export * from './utils';
 export * from './openapi';
 export * from './server';
 export * from './metadata';
-export * from './studio';
 export * from './storage';
 export * from './file-handler';
 // We export createNodeHandler from root for convenience, 
