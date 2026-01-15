@@ -3,9 +3,6 @@ name: "Pull Request Labeler"
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - '**/*'
-      - '.github/labeler.yml'
 
 permissions:
   contents: read
