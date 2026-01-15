@@ -1,0 +1,35 @@
+{
+  "name": "@objectql/driver-memory",
+  "version": "0.1.0",
+  "description": "In-memory driver for ObjectQL - Fast, zero-dependency storage for testing and development",
+  "keywords": [
+    "objectql",
+    "driver",
+    "memory",
+    "in-memory",
+    "testing",
+    "development",
+    "database",
+    "adapter"
+  ],
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@objectql/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.0.0",
+    "jest": "^29.0.0",
+    "typescript": "^5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/objectstack-ai/objectql.git",
+    "directory": "packages/drivers/memory"
+  }
+}
