@@ -7,3 +7,4 @@ export * from './object';
 export * from './validator';
 export * from './util';
 export * from './ai-agent';
+export * from './formula-engine';
