@@ -45,14 +45,23 @@ ObjectQL is organized as a Monorepo to ensure modularity and universal compatibi
 
 ## ⚡ Quick Start
 
-### 1. Installation
+### 1. Setup Development Environment
+
+```bash
+# For contributors: Setup automatic pnpm-lock.yaml merge conflict resolution
+./scripts/setup-merge-driver.sh
+```
+
+📖 **Having issues with pnpm-lock.yaml merge conflicts?** See [pnpm Lock Conflict Resolution Guide](./docs/pnpm-lock-conflict-resolution.md)
+
+### 2. Installation
 
 ```bash
 # Install core and a driver (e.g., Postgres or SQLite)
 npm install @objectql/core @objectql/driver-sql sqlite3
 ```
 
-### 2. The Universal Script
+### 3. The Universal Script
 
 ObjectQL can run in a single file without complex configuration.
 

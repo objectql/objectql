@@ -1,0 +1,2 @@
+# Auto-resolve pnpm lockfile conflicts using a custom merge driver
+pnpm-lock.yaml merge=pnpm-merge-driver

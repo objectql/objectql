@@ -1,6 +1,11 @@
 {
   "name": "objectql-monorepo",
   "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=10.0.0"
+  },
   "scripts": {
     "build": "tsc -b && pnpm -r run build",
     "check-versions": "node scripts/check-versions.js",
