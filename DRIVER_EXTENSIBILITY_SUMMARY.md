@@ -2,11 +2,11 @@
 
 ## Overview
 
-This implementation adds comprehensive documentation and examples for extending ObjectQL with additional database types, directly addressing the question: **"我还可以支持哪些数据库类型？"** (What other database types can I support?)
+This implementation adds comprehensive documentation and examples for extending ObjectQL with additional database types, directly addressing the question: "What other database types can I support?"
 
 ## What Was Added
 
-### 📚 Documentation (English)
+### 📚 Documentation
 
 1. **`docs/guide/drivers/extensibility.md`**
    - Comprehensive list of 30+ potential database types
@@ -23,17 +23,9 @@ This implementation adds comprehensive documentation and examples for extending 
    - Best practices and testing strategies
    - Publishing guidelines
 
-### 📚 Documentation (Chinese)
-
-3. **`docs/guide/drivers/extensibility-zh.md`**
-   - Direct answer to the user's question in Chinese
-   - Summary table of all database types
-   - Quick links to detailed documentation
-   - Getting started guide
-
 ### 💻 Reference Implementation
 
-4. **`packages/drivers/redis/` - Redis Driver Example**
+3. **`packages/drivers/redis/` - Redis Driver Example**
    - Fully functional driver implementation (413 LOC)
    - Complete package setup (package.json, tsconfig.json, jest.config.js)
    - Comprehensive README with:
