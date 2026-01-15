@@ -23,7 +23,6 @@ This document tracks implementation progress against the documented standard pro
 | **Runtime Engine (`@objectql/core`)** | ✅ Production | 80% |
 | **Data Drivers** | ✅ Production | 75% |
 | **Server Runtime** | ✅ Production | 75% |
-| **Presentation Layer** | ⚠️ Partial | 40% |
 | **Business Process Layer** | ⚠️ Partial | 35% |
 
 ---
@@ -72,8 +71,6 @@ Drivers (SQL/Mongo/SDK)
 | **[hook.md](docs/spec/hook.md)** | `hook.ts` | ✅ **Complete** | 6 hook contexts: beforeCreate/afterCreate, beforeUpdate/afterUpdate, beforeDelete/afterDelete, beforeFind/afterFind |
 | **[action.md](docs/spec/action.md)** | `action.ts` | ✅ **Complete** | `ActionConfig`, `ActionDefinition`, Record/Global action types |
 | **[permission.md](docs/spec/permission.md)** | `permission.ts` | ✅ **Complete** | Object/Field/Record permissions, RBAC, Row-Level Security, Field Masking, Audit Config |
-| **[page.md](docs/spec/page.md)** | `page.ts` | ✅ **Complete** | `PageConfig`, `PageComponent`, Layout types (dashboard, wizard, canvas), Component data sources |
-| **[menu.md](docs/spec/menu.md)** | `menu.ts` | ✅ **Complete** | `MenuConfig`, `MenuItem`, Menu types (sidebar, top, context) |
 | **[query-language.md](docs/spec/query-language.md)** | `query.ts` | ✅ **Complete** | `UnifiedQuery`, `FilterExpression`, Aggregation, Joins, Sorting |
 | **[app.md](docs/spec/app.md)** | `application.ts` | ✅ **Basic** | `AppConfig` - basic structure implemented |
 | **[data.md](docs/spec/data.md)** | `field.ts`, `api.ts` | ✅ **Complete** | `AttachmentData`, `ImageAttachmentData`, API response types |
@@ -83,9 +80,6 @@ Drivers (SQL/Mongo/SDK)
 | Spec Document | Expected File | Status | Priority |
 |--------------|---------------|--------|----------|
 | **[workflow.md](docs/spec/workflow.md)** | `workflow.ts` | ❌ **Missing** | 🔴 High |
-| **[form.md](docs/spec/form.md)** | `form.ts` | ❌ **Missing** | 🟡 Medium |
-| **[view.md](docs/spec/view.md)** | `view.ts` | ❌ **Missing** | 🟡 Medium |
-| **[report.md](docs/spec/report.md)** | `report.ts` | ❌ **Missing** | 🟢 Low |
 
 ### Supporting Infrastructure (Present)
 
@@ -133,7 +127,6 @@ Drivers (SQL/Mongo/SDK)
 - ✅ **Event System** - beforeCreate, afterUpdate hooks
 - ✅ **Permission Checking** - RBAC integration
 - ⚠️ **Workflow Engine** - Not yet implemented
-- ⚠️ **Report Generator** - Not yet implemented
 
 ---
 
@@ -270,104 +263,9 @@ Drivers (SQL/Mongo/SDK)
 - ❌ `objectql validate` - Metadata validation (not implemented)
 - ❌ `objectql introspect` - Database introspection (not implemented)
 
-### 7.2 Studio (`@objectql/studio`)
-
-**Package:** `packages/tools/studio`  
-**Status:** ⚠️ **Early Stage**  
-**Implementation:** **20%**
-
-**Purpose:** Visual metadata editor (similar to Salesforce Setup)
-
-**Features:**
-- ⚠️ Object designer (basic)
-- ❌ Form builder (not implemented)
-- ❌ Workflow designer (not implemented)
-- ❌ Permission editor (not implemented)
-
 ---
 
-## 8. Presentation Layer (UI Metadata)
-
-**Status:** ⚠️ **Partially Implemented**  
-**Overall:** **40%**
-
-### Page Metadata (`page.md`)
-
-**Type Definition:** ✅ Complete (`packages/foundation/types/src/page.ts`)  
-**Runtime Support:** ⚠️ Partial
-
-**Implemented:**
-- ✅ `PageConfig` interface
-- ✅ Layout types: dashboard, wizard, canvas, two-column
-- ✅ Component types: data_grid, form, chart, metric
-- ✅ Data source bindings
-- ✅ Component actions
-
-**Missing:**
-- ❌ Page renderer (Object UI responsibility)
-- ❌ Component library
-- ❌ Layout engine
-
-### View Metadata (`view.md`)
-
-**Type Definition:** ❌ Missing (`packages/foundation/types/src/view.ts` not found)  
-**Runtime Support:** ❌ Not Implemented
-
-**Documented Types (in spec):**
-- List views (tabular)
-- Grid views (inline editing)
-- Kanban boards
-- Calendar views
-- Timeline views
-- Card layouts
-
-**Required Work:**
-- ❌ Create `view.ts` type definitions
-- ❌ View configuration parser
-- ❌ View renderer integration
-
-### Form Metadata (`form.md`)
-
-**Type Definition:** ❌ Missing (`packages/foundation/types/src/form.ts` not found)  
-**Runtime Support:** ❌ Not Implemented
-
-**Documented Features (in spec):**
-- Multi-column layouts
-- Sections and tabs
-- Wizard forms
-- Conditional logic
-- Field-level validation
-- Quick create forms
-
-**Required Work:**
-- ❌ Create `form.ts` type definitions
-- ❌ Form layout engine
-- ❌ Conditional logic processor
-- ❌ Form renderer integration
-
-### Report Metadata (`report.md`)
-
-**Type Definition:** ❌ Missing (`packages/foundation/types/src/report.ts` not found)  
-**Runtime Support:** ❌ Not Implemented
-
-**Documented Types (in spec):**
-- Tabular reports
-- Summary reports (grouped)
-- Matrix reports (pivot)
-- Chart reports
-- Dashboards
-- Scheduled reports
-
-**Required Work:**
-- ❌ Create `report.ts` type definitions
-- ❌ Report query builder
-- ❌ Aggregation engine
-- ❌ Export engine (PDF, Excel, CSV)
-- ❌ Scheduling system
-
----
-
-## 9. Business Process Layer
+## 8. Business Process Layer
 
 **Status:** ⚠️ **Partially Implemented**  
 **Overall:** **35%**
@@ -398,7 +296,7 @@ Drivers (SQL/Mongo/SDK)
 
 ---
 
-## 10. Documentation Status
+## 9. Documentation Status
 
 ### Specification Documents (Complete)
 
@@ -410,14 +308,8 @@ Drivers (SQL/Mongo/SDK)
 | `docs/spec/hook.md` | ✅ Excellent | All hook types covered |
 | `docs/spec/action.md` | ✅ Excellent | Record/Global actions |
 | `docs/spec/permission.md` | ✅ Excellent | RBAC, field, record-level |
-| `docs/spec/page.md` | ✅ Excellent | Layouts, components, AI context |
-| `docs/spec/menu.md` | ✅ Good | Navigation structure |
 | `docs/spec/query-language.md` | ✅ Excellent | JSON-DSL, filters, aggregations |
 | `docs/spec/workflow.md` | ✅ Excellent | Process automation, approvals |
-| `docs/spec/form.md` | ✅ Excellent | Layout, conditional logic |
-| `docs/spec/view.md` | ✅ Excellent | All view types documented |
-| `docs/spec/report.md` | ✅ Excellent | Reports, dashboards, charts |
-| `docs/spec/app.md` | ✅ Good | Application container |
 
 ### API Documentation
 
@@ -444,7 +336,7 @@ Drivers (SQL/Mongo/SDK)
 
 ---
 
-## 11. Testing Status
+## 10. Testing Status
 
 ### Test Coverage
 
@@ -460,7 +352,7 @@ Drivers (SQL/Mongo/SDK)
 
 ---
 
-## 12. Roadmap & Priorities
+## 11. Roadmap & Priorities
 
 ### Immediate Priorities (Q1 2026)
 
@@ -470,33 +362,15 @@ Drivers (SQL/Mongo/SDK)
    - Basic automation triggers
    - **Estimated:** 4-6 weeks
 
-2. **🟡 Form Type Definitions** (form.md → form.ts)
-   - TypeScript interfaces
-   - Layout engine types
-   - Conditional logic types
-   - **Estimated:** 1-2 weeks
-
-3. **🟡 View Type Definitions** (view.md → view.ts)
-   - All view types (list, kanban, calendar)
-   - Column configuration types
-   - Filter/sort metadata
-   - **Estimated:** 1-2 weeks
-
 ### Medium-Term (Q2 2026)
 
-4. **🟢 Report Engine** (report.md → report.ts)
-   - Report type definitions
-   - Aggregation engine
-   - Export system (PDF, Excel)
-   - **Estimated:** 3-4 weeks
-
-5. **🟡 GraphQL API** (documented but not implemented)
+2. **🟡 GraphQL API** (documented but not implemented)
    - Schema generation from metadata
    - Query/Mutation resolvers
    - Subscription support
    - **Estimated:** 2-3 weeks
 
-6. **🟡 CLI Enhancements**
+3. **🟡 CLI Enhancements**
    - `objectql validate` command
    - `objectql introspect` command
    - Better error messages
@@ -504,14 +378,7 @@ Drivers (SQL/Mongo/SDK)
 
 ### Long-Term (Q3-Q4 2026)
 
-7. **🟢 Studio (Visual Editor)**
-   - Object designer
-   - Form builder
-   - Workflow designer
-   - Permission editor
-   - **Estimated:** 12+ weeks
-
-8. **🟢 Advanced Features**
+4. **🟢 Advanced Features**
    - WebSocket real-time API
    - Rate limiting
    - Caching layer
@@ -520,30 +387,27 @@ Drivers (SQL/Mongo/SDK)
 
 ---
 
-## 13. Known Issues & Technical Debt
+## 12. Known Issues & Technical Debt
 
 ### High Priority
 
 1. **Missing Workflow Types** - Blocking enterprise adoption
-2. **No View/Form Type Definitions** - UI metadata incomplete
-3. **CLI Missing Validation** - No metadata validation command
-4. **Limited Test Coverage for SDK** - Client reliability concerns
+2. **CLI Missing Validation** - No metadata validation command
+3. **Limited Test Coverage for SDK** - Client reliability concerns
 
 ### Medium Priority
 
-5. **No GraphQL Implementation** - Despite having documentation
-6. **Authentication is Placeholder** - JWT/token validation not complete
-7. **No Rate Limiting** - Production scalability concern
-8. **Studio is Incomplete** - Visual tools limited
+4. **No GraphQL Implementation** - Despite having documentation
+5. **Authentication is Placeholder** - JWT/token validation not complete
+6. **No Rate Limiting** - Production scalability concern
 
 ### Low Priority
 
-9. **Report Engine Missing** - Analytics limited
-10. **No WebSocket Support** - Real-time features unavailable
+7. **No WebSocket Support** - Real-time features unavailable
 
 ---
 
-## 14. Compliance Matrix
+## 13. Compliance Matrix
 
 ### Architecture Principles
 
@@ -567,16 +431,11 @@ Drivers (SQL/Mongo/SDK)
 | `*.hook.ts` | ✅ 100% | Supported |
 | `*.action.ts` | ✅ 100% | Supported |
 | `*.app.yml` | ✅ 100% | Supported |
-| `*.page.yml` | ✅ 100% | Type defined, renderer pending |
-| `*.menu.yml` | ✅ 100% | Supported |
 | `*.workflow.yml` | ❌ 0% | **Not implemented** |
-| `*.form.yml` | ❌ 0% | **Not implemented** |
-| `*.view.yml` | ❌ 0% | **Not implemented** |
-| `*.report.yml` | ❌ 0% | **Not implemented** |
 
 ---
 
-## 15. Conclusion
+## 14. Conclusion
 
 ObjectQL has achieved **70% implementation** of the documented standard protocol. The **foundation is solid** with:
 
@@ -589,12 +448,10 @@ ObjectQL has achieved **70% implementation** of the documented standard protocol
 
 ⚠️ **Gaps:**
 - Workflow engine (critical for enterprise)
-- Form/View/Report type definitions (UI layer incomplete)
 - GraphQL/WebSocket APIs (documented but not implemented)
-- Visual tooling (Studio at 20%)
 
 🎯 **Recommendation:**
-Focus on **Workflow Engine** (workflow.ts) as the highest priority, followed by **Form** and **View** type definitions to complete the UI metadata layer.
+Focus on **Workflow Engine** (workflow.ts) as the highest priority to complete the business process layer.
 
 ---
 

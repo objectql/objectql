@@ -192,7 +192,6 @@ For a complete status report on ObjectQL's implementation against the documented
 **Current Status:** 70% Complete (v1.8.4)
 - ✅ Core Protocol & Runtime: 85%
 - ✅ Data Drivers (SQL/Mongo): 75%
-- ⚠️ UI Metadata Layer: 40%
 - ⚠️ Workflow Engine: 35%
 
 ---
