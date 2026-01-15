@@ -1,5 +1,11 @@
 # @example/audit-plugin
 
+## 0.2.2
+
+### Patch Changes
+
+- Maintenance release with bug fixes and minor improvements
+
 ## 0.2.1
 
 ### Patch Changes

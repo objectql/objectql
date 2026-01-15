@@ -1,5 +1,14 @@
 # @example/hello-world
 
+## 1.0.4
+
+### Patch Changes
+
+- Maintenance release with bug fixes and minor improvements
+- Updated dependencies
+  - @objectql/driver-sql@1.8.4
+  - @objectql/core@1.8.4
+
 ## 1.0.3
 
 ### Patch Changes

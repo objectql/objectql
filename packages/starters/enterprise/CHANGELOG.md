@@ -1,5 +1,16 @@
 # @objectql/starter-enterprise
 
+## 1.8.4
+
+### Patch Changes
+
+- Maintenance release with bug fixes and minor improvements
+- Updated dependencies
+  - @objectql/driver-sql@1.8.4
+  - @objectql/core@1.8.4
+  - @objectql/platform-node@1.8.4
+  - @objectql/types@1.8.4
+
 ## 1.8.3
 
 ### Patch Changes
