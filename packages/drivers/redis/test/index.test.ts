@@ -12,16 +12,25 @@ describe('RedisDriver', () => {
     const TEST_OBJECT = 'test_users';
 
     beforeAll(async () => {
+        let d: RedisDriver | undefined;
         // Skip tests if Redis is not available
         try {
-            driver = new RedisDriver({ 
-                url: process.env.REDIS_URL || 'redis://localhost:6379'
+            d = new RedisDriver({ 
+                url: process.env.REDIS_URL || 'redis://127.0.0.1:6379'
             });
             
             // Verify connection by attempting a simple operation
-            await driver.count('_test_connection', []);
+            await d.count('_test_connection', []);
+            driver = d;
         } catch (error) {
             console.warn('Redis not available, skipping tests');
+            if (d) {
+                try {
+                    await d.disconnect();
+                } catch (e) {
+                    // Ignore disconnect error
+                }
+            }
         }
     });
 
