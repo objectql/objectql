@@ -9,6 +9,10 @@
  * - *.app.yml
  * - *.page.yml
  * - *.menu.yml
+ * 
+ * Dependencies:
+ * - Requires 'js-yaml' from devDependencies
+ * - Run 'pnpm install' before executing this script
  */
 
 const yaml = require('js-yaml');
@@ -73,7 +77,7 @@ async function validateFiles() {
   const results = await Promise.allSettled(
     files.map(async (file) => {
       const content = await fs.promises.readFile(file, 'utf8');
-      yaml.load(content);
+      yaml.load(content, { schema: yaml.DEFAULT_SAFE_SCHEMA });
       return file;
     })
   );

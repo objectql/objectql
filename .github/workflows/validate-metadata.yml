@@ -10,6 +10,7 @@ on:
       - '**/*.app.yml'
       - '**/*.page.yml'
       - '**/*.menu.yml'
+      - 'scripts/validate-yaml.js'
   pull_request:
     branches: [ "main" ]
     paths:
@@ -19,6 +20,7 @@ on:
       - '**/*.app.yml'
       - '**/*.page.yml'
       - '**/*.menu.yml'
+      - 'scripts/validate-yaml.js'
 
 jobs:
   validate:
