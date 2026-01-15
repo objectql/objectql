@@ -1,8 +1,10 @@
-import { ObjectQLContext, IObjectQL, ObjectConfig, Driver, UnifiedQuery, ActionContext, HookAPI, RetrievalHookContext, MutationHookContext, UpdateHookContext, ValidationContext, ValidationError, ValidationRuleResult } from '@objectql/types';
+import { ObjectQLContext, IObjectQL, ObjectConfig, Driver, UnifiedQuery, ActionContext, HookAPI, RetrievalHookContext, MutationHookContext, UpdateHookContext, ValidationContext, ValidationError, ValidationRuleResult, FormulaContext } from '@objectql/types';
 import { Validator } from './validator';
+import { FormulaEngine } from './formula-engine';
 
 export class ObjectRepository {
     private validator: Validator;
+    private formulaEngine: FormulaEngine;
 
     constructor(
         private objectName: string,
@@ -10,6 +12,7 @@ export class ObjectRepository {
         private app: IObjectQL
     ) {
         this.validator = new Validator();
+        this.formulaEngine = new FormulaEngine();
     }
 
     private getDriver(): Driver {
@@ -130,6 +133,74 @@ export class ObjectRepository {
         }
     }
 
+    /**
+     * Evaluate formula fields for a record
+     * Adds computed formula field values to the record
+     */
+    private evaluateFormulas(record: any): any {
+        const schema = this.getSchema();
+        const now = new Date();
+        
+        // Build formula context
+        const formulaContext: FormulaContext = {
+            record,
+            system: {
+                today: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+                now: now,
+                year: now.getFullYear(),
+                month: now.getMonth() + 1,
+                day: now.getDate(),
+                hour: now.getHours(),
+                minute: now.getMinutes(),
+                second: now.getSeconds(),
+            },
+            current_user: {
+                id: this.context.userId || '',
+                // TODO: Retrieve actual user name from user object if available
+                name: undefined,
+                email: undefined,
+                role: this.context.roles?.[0],
+            },
+            is_new: false,
+            record_id: record._id || record.id,
+        };
+
+        // Evaluate each formula field
+        for (const [fieldName, fieldConfig] of Object.entries(schema.fields)) {
+            if (fieldConfig.type === 'formula' && fieldConfig.formula) {
+                const result = this.formulaEngine.evaluate(
+                    fieldConfig.formula,
+                    formulaContext,
+                    fieldConfig.data_type || 'text',
+                    { strict: true }
+                );
+
+                if (result.success) {
+                    record[fieldName] = result.value;
+                } else {
+                    // In case of error, set to null and log for diagnostics
+                    record[fieldName] = null;
+                    // Formula evaluation should not throw here, but we need observability
+                    // This logging is intentionally minimal and side-effect free
+                    // eslint-disable-next-line no-console
+                    console.error(
+                        '[ObjectQL][FormulaEngine] Formula evaluation failed',
+                        {
+                            objectName: this.objectName,
+                            fieldName,
+                            recordId: formulaContext.record_id,
+                            formula: fieldConfig.formula,
+                            error: result.error,
+                            stack: result.stack,
+                        }
+                    );
+                }
+            }
+        }
+
+        return record;
+    }
+
     async find(query: UnifiedQuery = {}): Promise<any[]> {
         const hookCtx: RetrievalHookContext = {
             ...this.context,
@@ -145,7 +216,10 @@ export class ObjectRepository {
         // TODO: Apply basic filters like spaceId
         const results = await this.getDriver().find(this.objectName, hookCtx.query || {}, this.getOptions());
         
-        hookCtx.result = results;
+        // Evaluate formulas for each result
+        const resultsWithFormulas = results.map(record => this.evaluateFormulas(record));
+        
+        hookCtx.result = resultsWithFormulas;
         await this.app.triggerHook('afterFind', this.objectName, hookCtx);
 
         return hookCtx.result as any[];
@@ -166,7 +240,10 @@ export class ObjectRepository {
             
             const result = await this.getDriver().findOne(this.objectName, idOrQuery, hookCtx.query, this.getOptions());
 
-            hookCtx.result = result;
+            // Evaluate formulas if result exists
+            const resultWithFormulas = result ? this.evaluateFormulas(result) : result;
+
+            hookCtx.result = resultWithFormulas;
             await this.app.triggerHook('afterFind', this.objectName, hookCtx);
             return hookCtx.result;
         } else {
