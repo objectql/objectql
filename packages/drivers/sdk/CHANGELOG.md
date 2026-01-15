@@ -1,5 +1,23 @@
 # @objectql/sdk
 
+## 1.8.4
+
+### Patch Changes
+
+- Release version 1.8.4 - Framework-wide patch update
+
+  This patch release includes improvements, bug fixes, and enhanced functionality across all ObjectQL packages. Key highlights:
+  - Enhanced protocol stability and type definitions
+  - Improved driver compatibility and performance
+  - Updated documentation and examples
+  - Better developer experience with tooling improvements
+  - Foundation for future Redis driver integration (example available at 0.1.0)
+
+  All core packages are synchronized at version 1.8.4 as part of the "fixed" versioning strategy.
+
+- Updated dependencies
+  - @objectql/types@1.8.4
+
 ## 1.8.3
 
 ### Patch Changes
