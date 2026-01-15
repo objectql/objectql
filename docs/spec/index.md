@@ -18,14 +18,6 @@ This section contains the complete metadata specifications for the ObjectQL plat
 *   [**Actions (RPC)**](./action.md) - Custom server-side functions and APIs ✅
 *   [**Workflows & Processes**](./workflow.md) - Automated business processes and approval chains ⚠️ *Spec complete, implementation pending*
 
-### Presentation Layer
-*   [**Applications**](./app.md) - Application container and simple metadata ✅
-*   [**Pages**](./page.md) - Composable UI pages with layouts, components, and interactions ✅
-*   [**Menus & Navigation**](./menu.md) - Application structure and navigation hierarchy ✅
-*   [**Views & Layouts**](./view.md) - Data presentation configurations (list, grid, kanban, calendar) ⚠️ *Spec complete, implementation pending*
-*   [**Forms**](./form.md) - Data entry and editing interfaces ⚠️ *Spec complete, implementation pending*
-*   [**Reports & Dashboards**](./report.md) - Analytics and BI ⚠️ *Spec complete, implementation pending*
-
 ## Security & Access Control
 
 *   [**Permissions**](./permission.md) - Role-based access control, field-level security, and record-level rules ✅
