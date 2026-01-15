@@ -42,16 +42,9 @@ jobs:
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
       timeout-minutes: 5
-
-    - name: Build packages
-      run: pnpm run build
-      timeout-minutes: 10
       
     - name: Validate YAML syntax
       run: |
         echo "Checking YAML syntax for metadata files..."
-        find . -type f \( -name "*.object.yml" -o -name "*.validation.yml" -o -name "*.permission.yml" -o -name "*.app.yml" -o -name "*.page.yml" -o -name "*.menu.yml" \) | while read file; do
-          echo "Validating: $file"
-          node -e "const yaml = require('js-yaml'); const fs = require('fs'); try { yaml.load(fs.readFileSync('$file', 'utf8')); console.log('✓ Valid'); } catch(e) { console.error('✗ Invalid:', e.message); process.exit(1); }"
-        done
+        pnpm exec node scripts/validate-yaml.js
       timeout-minutes: 5
