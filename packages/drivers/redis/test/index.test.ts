@@ -131,6 +131,9 @@ describe('RedisDriver', () => {
                 email: 'alice@example.com'
             });
 
+            // Wait a bit to ensure updated_at is different
+            await new Promise(resolve => setTimeout(resolve, 10));
+
             const updated = await driver.update(TEST_OBJECT, created.id, {
                 email: 'alice.new@example.com'
             });
