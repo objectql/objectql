@@ -31,7 +31,14 @@ This driver is perfect for:
 ## Installation
 
 ```bash
+# Using pnpm (recommended)
+pnpm add @objectql/driver-memory
+
+# Using npm
 npm install @objectql/driver-memory
+
+# Using yarn
+yarn add @objectql/driver-memory
 ```
 
 Or if you're using the ObjectQL monorepo:

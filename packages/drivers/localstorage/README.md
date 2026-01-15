@@ -31,7 +31,14 @@ This driver is perfect for:
 ## Installation
 
 ```bash
+# Using pnpm (recommended)
+pnpm add @objectql/driver-localstorage
+
+# Using npm
 npm install @objectql/driver-localstorage
+
+# Using yarn
+yarn add @objectql/driver-localstorage
 ```
 
 ## Basic Usage
