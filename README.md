@@ -147,6 +147,18 @@ ObjectQL's driver architecture supports custom database implementations. Potenti
 
 ---
 
+## 🔍 Query Approaches
+
+ObjectQL supports three distinct query interfaces, each optimized for different scenarios:
+
+* **JSON-DSL (Core):** AI-friendly protocol, server-side logic, cross-driver compatibility
+* **REST API:** Simple CRUD operations, mobile apps, third-party integrations  
+* **GraphQL:** Complex data graphs, modern SPAs, efficient multi-table fetching
+
+**Looking for best practices?** Check out the [Query Best Practices Guide](./docs/guide/query-best-practices.md) for detailed comparisons, performance strategies, and optimization techniques.
+
+---
+
 ## 🛠️ Validation & Logic
 
 ObjectQL includes a powerful validation engine that runs universally.
