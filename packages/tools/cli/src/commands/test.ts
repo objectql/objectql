@@ -1,4 +1,5 @@
 import * as path from 'path';
+import * as fs from 'fs';
 import chalk from 'chalk';
 import { spawn } from 'child_process';
 
@@ -21,7 +22,6 @@ export async function test(options: TestOptions) {
     let testCommand = 'npm test';
     
     try {
-        const fs = require('fs');
         if (fs.existsSync(packageJsonPath)) {
             const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
             

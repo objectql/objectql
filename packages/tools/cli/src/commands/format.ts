@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import chalk from 'chalk';
 import * as yaml from 'js-yaml';
+import glob from 'fast-glob';
 
 interface FormatOptions {
     dir?: string;
@@ -20,7 +21,6 @@ export async function format(options: FormatOptions) {
     let errorCount = 0;
     
     try {
-        const glob = require('fast-glob');
         const files = await glob(['**/*.yml', '**/*.yaml'], { 
             cwd: rootDir,
             ignore: ['node_modules/**', 'dist/**', 'build/**']
@@ -37,29 +37,34 @@ export async function format(options: FormatOptions) {
                 // Parse to validate YAML
                 yaml.load(content);
                 
-                // Format with Prettier (using require instead of import for better compatibility)
-                const prettierFormat = require('prettier').format;
-                const formatted = await prettierFormat(content, {
-                    parser: 'yaml',
-                    printWidth: 80,
-                    tabWidth: 2,
-                    singleQuote: true
-                });
-                
-                if (content !== formatted) {
-                    if (options.check) {
-                        console.log(chalk.yellow(`  ⚠️  ${file} needs formatting`));
-                        formattedCount++;
+                // Format with Prettier - use dynamic import for better compatibility
+                try {
+                    const prettier = await import('prettier');
+                    const formatted = await prettier.format(content, {
+                        parser: 'yaml',
+                        printWidth: 80,
+                        tabWidth: 2,
+                        singleQuote: true
+                    });
+                    
+                    if (content !== formatted) {
+                        if (options.check) {
+                            console.log(chalk.yellow(`  ⚠️  ${file} needs formatting`));
+                            formattedCount++;
+                        } else {
+                            fs.writeFileSync(filePath, formatted, 'utf-8');
+                            console.log(chalk.green(`  ✅ ${file}`));
+                            formattedCount++;
+                        }
                     } else {
-                        fs.writeFileSync(filePath, formatted, 'utf-8');
-                        console.log(chalk.green(`  ✅ ${file}`));
-                        formattedCount++;
+                        unchangedCount++;
+                        if (!options.check) {
+                            console.log(chalk.gray(`  ✓  ${file}`));
+                        }
                     }
-                } else {
-                    unchangedCount++;
-                    if (!options.check) {
-                        console.log(chalk.gray(`  ✓  ${file}`));
-                    }
+                } catch (prettierError: any) {
+                    console.error(chalk.red(`  ❌ ${file}: Prettier error - ${prettierError.message}`));
+                    errorCount++;
                 }
             } catch (e: any) {
                 console.error(chalk.red(`  ❌ ${file}: ${e.message}`));

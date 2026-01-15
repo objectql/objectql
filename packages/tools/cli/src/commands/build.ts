@@ -3,6 +3,7 @@ import { ObjectLoader } from '@objectql/platform-node';
 import { generateTypes } from './generate';
 import * as path from 'path';
 import * as fs from 'fs';
+import glob from 'fast-glob';
 import chalk from 'chalk';
 
 interface BuildOptions {
@@ -71,7 +72,6 @@ export async function build(options: BuildOptions) {
         ];
         
         let fileCount = 0;
-        const glob = require('fast-glob');
         const files = await glob(metadataPatterns, { cwd: rootDir });
         
         for (const file of files) {
