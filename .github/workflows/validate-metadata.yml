@@ -1,0 +1,57 @@
+name: Validate Metadata Files
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - '**/*.object.yml'
+      - '**/*.validation.yml'
+      - '**/*.permission.yml'
+      - '**/*.app.yml'
+      - '**/*.page.yml'
+      - '**/*.menu.yml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '**/*.object.yml'
+      - '**/*.validation.yml'
+      - '**/*.permission.yml'
+      - '**/*.app.yml'
+      - '**/*.page.yml'
+      - '**/*.menu.yml'
+
+jobs:
+  validate:
+    name: Validate YAML Metadata
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: pnpm/action-setup@v3
+      with:
+        version: 10
+
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      timeout-minutes: 5
+
+    - name: Build packages
+      run: pnpm run build
+      timeout-minutes: 10
+      
+    - name: Validate YAML syntax
+      run: |
+        echo "Checking YAML syntax for metadata files..."
+        find . -type f \( -name "*.object.yml" -o -name "*.validation.yml" -o -name "*.permission.yml" -o -name "*.app.yml" -o -name "*.page.yml" -o -name "*.menu.yml" \) | while read file; do
+          echo "Validating: $file"
+          node -e "const yaml = require('js-yaml'); const fs = require('fs'); try { yaml.load(fs.readFileSync('$file', 'utf8')); console.log('✓ Valid'); } catch(e) { console.error('✗ Invalid:', e.message); process.exit(1); }"
+        done
+      timeout-minutes: 5
