@@ -433,7 +433,163 @@ fields:
 
 ### Development Tools
 
+#### `dev` (alias: `d`)
+
+Start development server with hot reload support. This is the recommended command for local development.
+
+```bash
+# Start development server (port 3000)
+objectql dev
+
+# Specify options
+objectql dev --dir ./src --port 8080
+
+# Disable file watching
+objectql dev --no-watch
+```
+
+The development server provides:
+- **Swagger UI**: `http://localhost:<port>/swagger` - Interactive API documentation
+- **API Endpoint**: `http://localhost:<port>/` - Main API endpoint
+- **OpenAPI Spec**: `http://localhost:<port>/openapi.json` - Machine-readable API spec
+
+**Options:**
+- `-p, --port <number>` - Port to listen on [default: "3000"]
+- `-d, --dir <path>` - Directory containing schema [default: "."]
+- `--no-watch` - Disable file watching (future feature)
+
+#### `start`
+
+Start production server. Loads configuration from `objectql.config.ts/js` if available.
+
+```bash
+# Start production server
+objectql start
+
+# Specify options
+objectql start --port 8080 --dir ./dist
+
+# Use custom config file
+objectql start --config ./config/production.config.ts
+```
+
+**Options:**
+- `-p, --port <number>` - Port to listen on [default: "3000"]
+- `-d, --dir <path>` - Directory containing schema [default: "."]
+- `-c, --config <path>` - Path to objectql.config.ts/js
+
+**Environment Variables:**
+- `DATABASE_FILE` - Path to SQLite database file (default: "./objectql.db")
+
+#### `build` (alias: `b`)
+
+Build project and prepare for production deployment. Validates metadata, generates TypeScript types, and copies files to dist folder.
+
+```bash
+# Build project
+objectql build
+
+# Build with custom output directory
+objectql build --output ./build
+
+# Build without type generation
+objectql build --no-types
+
+# Build without validation
+objectql build --no-validate
+```
+
+**Options:**
+- `-d, --dir <path>` - Source directory [default: "."]
+- `-o, --output <path>` - Output directory [default: "./dist"]
+- `--no-types` - Skip TypeScript type generation
+- `--no-validate` - Skip metadata validation
+
+**Build Steps:**
+1. Validates all metadata files
+2. Generates TypeScript type definitions (if enabled)
+3. Copies all metadata files (.yml) to dist folder
+
+#### `test` (alias: `t`)
+
+Run tests for the ObjectQL project. Automatically detects and runs Jest tests if configured.
+
+```bash
+# Run all tests
+objectql test
+
+# Run tests in watch mode
+objectql test --watch
+
+# Run tests with coverage report
+objectql test --coverage
+
+# Specify project directory
+objectql test --dir ./src
+```
+
+**Options:**
+- `-d, --dir <path>` - Project directory [default: "."]
+- `-w, --watch` - Watch mode (re-run tests on file changes)
+- `--coverage` - Generate coverage report
+
+**Requirements:**
+- Jest must be installed and configured in package.json
+- Falls back to `npm test` if Jest is not detected
+
+#### `lint` (alias: `l`)
+
+Validate metadata files for correctness and best practices.
+
+```bash
+# Lint all metadata files
+objectql lint
+
+# Lint specific directory
+objectql lint --dir ./src/objects
+
+# Auto-fix issues (future feature)
+objectql lint --fix
+```
+
+**Options:**
+- `-d, --dir <path>` - Directory to lint [default: "."]
+- `--fix` - Automatically fix issues (future feature)
+
+**Validation Rules:**
+- Object and field names must be lowercase with underscores
+- All objects should have labels
+- All fields should have labels
+- No empty objects (objects must have at least one field)
+
+#### `format` (alias: `fmt`)
+
+Format metadata files using Prettier for consistent styling.
+
+```bash
+# Format all YAML files
+objectql format
+
+# Format specific directory
+objectql format --dir ./src
+
+# Check formatting without modifying files
+objectql format --check
+```
+
+**Options:**
+- `-d, --dir <path>` - Directory to format [default: "."]
+- `--check` - Check if files are formatted without modifying them
+
+**Formatting Rules:**
+- Uses Prettier with YAML parser
+- Print width: 80 characters
+- Tab width: 2 spaces
+- Single quotes for strings
+
 #### `serve` (alias: `s`)
+
+*Note: This is an alias for the `dev` command, kept for backwards compatibility. Use `objectql dev` for new projects.*
 
 Start a lightweight development server with an in-memory database. Perfect for rapid prototyping without setting up a backend project.
 
