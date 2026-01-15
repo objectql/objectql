@@ -37,6 +37,7 @@ describe('Utility Functions', () => {
             const schema: IntrospectedSchema = {
                 tables: {
                     users: {
+                        name: 'users',
                         columns: [
                             {
                                 name: 'name',
@@ -51,7 +52,8 @@ describe('Utility Functions', () => {
                                 isUnique: true
                             }
                         ],
-                        foreignKeys: []
+                        foreignKeys: [],
+                        primaryKeys: ['id']
                     }
                 }
             };
@@ -69,13 +71,15 @@ describe('Utility Functions', () => {
             const schema: IntrospectedSchema = {
                 tables: {
                     tasks: {
+                        name: 'tasks',
                         columns: [
                             { name: 'id', type: 'INTEGER', nullable: false, isUnique: true },
                             { name: 'title', type: 'VARCHAR', nullable: false, isUnique: false },
                             { name: 'created_at', type: 'TIMESTAMP', nullable: true, isUnique: false },
                             { name: 'updated_at', type: 'TIMESTAMP', nullable: true, isUnique: false }
                         ],
-                        foreignKeys: []
+                        foreignKeys: [],
+                        primaryKeys: ['id']
                     }
                 }
             };
@@ -92,11 +96,13 @@ describe('Utility Functions', () => {
             const schema: IntrospectedSchema = {
                 tables: {
                     tasks: {
+                        name: 'tasks',
                         columns: [
                             { name: 'id', type: 'INTEGER', nullable: false, isUnique: true },
                             { name: 'title', type: 'VARCHAR', nullable: false, isUnique: false }
                         ],
-                        foreignKeys: []
+                        foreignKeys: [],
+                        primaryKeys: ['id']
                     }
                 }
             };
@@ -113,12 +119,16 @@ describe('Utility Functions', () => {
             const schema: IntrospectedSchema = {
                 tables: {
                     users: {
+                        name: 'users',
                         columns: [{ name: 'name', type: 'VARCHAR', nullable: false, isUnique: false }],
-                        foreignKeys: []
+                        foreignKeys: [],
+                        primaryKeys: ['id']
                     },
                     migrations: {
+                        name: 'migrations',
                         columns: [{ name: 'version', type: 'INTEGER', nullable: false, isUnique: false }],
-                        foreignKeys: []
+                        foreignKeys: [],
+                        primaryKeys: ['id']
                     }
                 }
             };
@@ -135,16 +145,28 @@ describe('Utility Functions', () => {
             const schema: IntrospectedSchema = {
                 tables: {
                     users: {
+
+                        name: 'users',
+
                         columns: [{ name: 'name', type: 'VARCHAR', nullable: false, isUnique: false }],
-                        foreignKeys: []
+                        foreignKeys: [],
+                    primaryKeys: ['id']
                     },
                     tasks: {
+
+                        name: 'tasks',
+
                         columns: [{ name: 'title', type: 'VARCHAR', nullable: false, isUnique: false }],
-                        foreignKeys: []
+                        foreignKeys: [],
+                    primaryKeys: ['id']
                     },
                     logs: {
+
+                        name: 'logs',
+
                         columns: [{ name: 'message', type: 'TEXT', nullable: false, isUnique: false }],
-                        foreignKeys: []
+                        foreignKeys: [],
+                    primaryKeys: ['id']
                     }
                 }
             };
@@ -163,6 +185,9 @@ describe('Utility Functions', () => {
             const schema: IntrospectedSchema = {
                 tables: {
                     test_types: {
+
+                        name: 'test_types',
+
                         columns: [
                             { name: 'text_field', type: 'VARCHAR', nullable: false, isUnique: false },
                             { name: 'long_text', type: 'TEXT', nullable: false, isUnique: false },
@@ -173,7 +198,8 @@ describe('Utility Functions', () => {
                             { name: 'datetime_field', type: 'TIMESTAMP', nullable: false, isUnique: false },
                             { name: 'json_field', type: 'JSON', nullable: false, isUnique: false }
                         ],
-                        foreignKeys: []
+                        foreignKeys: [],
+                    primaryKeys: ['id']
                     }
                 }
             };
@@ -195,11 +221,15 @@ describe('Utility Functions', () => {
             const schema: IntrospectedSchema = {
                 tables: {
                     test: {
+
+                        name: 'test',
+
                         columns: [
                             { name: 'required_field', type: 'VARCHAR', nullable: false, isUnique: false },
                             { name: 'optional_field', type: 'VARCHAR', nullable: true, isUnique: false }
                         ],
-                        foreignKeys: []
+                        foreignKeys: [],
+                    primaryKeys: ['id']
                     }
                 }
             };
@@ -215,11 +245,15 @@ describe('Utility Functions', () => {
             const schema: IntrospectedSchema = {
                 tables: {
                     test: {
+
+                        name: 'test',
+
                         columns: [
                             { name: 'email', type: 'VARCHAR', nullable: false, isUnique: true },
                             { name: 'name', type: 'VARCHAR', nullable: false, isUnique: false }
                         ],
-                        foreignKeys: []
+                        foreignKeys: [],
+                    primaryKeys: ['id']
                     }
                 }
             };
@@ -235,6 +269,9 @@ describe('Utility Functions', () => {
             const schema: IntrospectedSchema = {
                 tables: {
                     tasks: {
+
+                        name: 'tasks',
+
                         columns: [
                             { name: 'title', type: 'VARCHAR', nullable: false, isUnique: false },
                             { name: 'user_id', type: 'INTEGER', nullable: false, isUnique: false }
@@ -261,6 +298,9 @@ describe('Utility Functions', () => {
             const schema: IntrospectedSchema = {
                 tables: {
                     test: {
+
+                        name: 'test',
+
                         columns: [
                             { 
                                 name: 'short_text', 
@@ -270,7 +310,8 @@ describe('Utility Functions', () => {
                                 maxLength: 100 
                             }
                         ],
-                        foreignKeys: []
+                        foreignKeys: [],
+                    primaryKeys: ['id']
                     }
                 }
             };
@@ -285,6 +326,9 @@ describe('Utility Functions', () => {
             const schema: IntrospectedSchema = {
                 tables: {
                     test: {
+
+                        name: 'test',
+
                         columns: [
                             { 
                                 name: 'status', 
@@ -294,7 +338,8 @@ describe('Utility Functions', () => {
                                 defaultValue: 'active' 
                             }
                         ],
-                        foreignKeys: []
+                        foreignKeys: [],
+                    primaryKeys: ['id']
                     }
                 }
             };
@@ -318,16 +363,28 @@ describe('Utility Functions', () => {
             const schema: IntrospectedSchema = {
                 tables: {
                     users: {
+
+                        name: 'users',
+
                         columns: [{ name: 'name', type: 'VARCHAR', nullable: false, isUnique: false }],
-                        foreignKeys: []
+                        foreignKeys: [],
+                    primaryKeys: ['id']
                     },
                     tasks: {
+
+                        name: 'tasks',
+
                         columns: [{ name: 'title', type: 'VARCHAR', nullable: false, isUnique: false }],
-                        foreignKeys: []
+                        foreignKeys: [],
+                    primaryKeys: ['id']
                     },
                     projects: {
+
+                        name: 'projects',
+
                         columns: [{ name: 'name', type: 'VARCHAR', nullable: false, isUnique: false }],
-                        foreignKeys: []
+                        foreignKeys: [],
+                    primaryKeys: ['id']
                     }
                 }
             };
@@ -340,6 +397,9 @@ describe('Utility Functions', () => {
             const schema: IntrospectedSchema = {
                 tables: {
                     numbers: {
+
+                        name: 'numbers',
+
                         columns: [
                             { name: 'int_field', type: 'INT', nullable: false, isUnique: false },
                             { name: 'bigint_field', type: 'BIGINT', nullable: false, isUnique: false },
@@ -349,7 +409,8 @@ describe('Utility Functions', () => {
                             { name: 'real_field', type: 'REAL', nullable: false, isUnique: false },
                             { name: 'double_field', type: 'DOUBLE PRECISION', nullable: false, isUnique: false }
                         ],
-                        foreignKeys: []
+                        foreignKeys: [],
+                    primaryKeys: ['id']
                     }
                 }
             };
@@ -370,10 +431,14 @@ describe('Utility Functions', () => {
             const schema: IntrospectedSchema = {
                 tables: {
                     times: {
+
+                        name: 'times',
+
                         columns: [
                             { name: 'time_field', type: 'TIME', nullable: false, isUnique: false }
                         ],
-                        foreignKeys: []
+                        foreignKeys: [],
+                    primaryKeys: ['id']
                     }
                 }
             };
@@ -386,10 +451,14 @@ describe('Utility Functions', () => {
             const schema: IntrospectedSchema = {
                 tables: {
                     test: {
+
+                        name: 'test',
+
                         columns: [
                             { name: 'unknown_field', type: 'CUSTOM_TYPE', nullable: false, isUnique: false }
                         ],
-                        foreignKeys: []
+                        foreignKeys: [],
+                    primaryKeys: ['id']
                     }
                 }
             };
