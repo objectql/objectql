@@ -29,8 +29,8 @@ ObjectQL uses a **unified `id` field** as the primary key across all database dr
 | **GraphQL** | Modern frontends with complex data requirements | `POST /api/graphql` | [Read Guide](./graphql.md) |
 | **Metadata** | Admin interfaces, schema discovery | `/api/metadata/*` | [Read Guide](./metadata.md) |
 
-> **🚀 Choosing the right API style?**  
-> Check out the [Query Syntax Alternatives & Optimization Guide](../guide/query-syntax-alternatives.md) for a detailed comparison, performance benchmarks, and decision frameworks to help you pick the best approach for your use case.
+> **🚀 Want to optimize your queries?**  
+> Check out the [Query Best Practices Guide](../guide/query-best-practices.md) for performance optimization strategies, detailed comparisons, and recommendations to help you choose the best approach for your use case.
 
 ## Quick Links
 

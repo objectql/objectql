@@ -1,6 +1,6 @@
-# Query Syntax Alternatives & Optimization Guide
+# Query Best Practices
 
-This guide evaluates the current ObjectQL query approaches and provides recommendations for different use cases, along with optimization strategies to maximize performance and developer experience.
+This guide provides best practices, performance optimization strategies, and recommendations for querying data in ObjectQL across different query interfaces (JSON-DSL, REST, GraphQL).
 
 ---
 
