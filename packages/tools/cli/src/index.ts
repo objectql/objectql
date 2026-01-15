@@ -2,6 +2,12 @@ import { Command } from 'commander';
 import { generateTypes } from './commands/generate';
 import { startRepl } from './commands/repl';
 import { serve } from './commands/serve';
+import { dev } from './commands/dev';
+import { start } from './commands/start';
+import { build } from './commands/build';
+import { test } from './commands/test';
+import { lint } from './commands/lint';
+import { format } from './commands/format';
 import { startStudio } from './commands/studio';
 import { initProject } from './commands/init';
 import { newMetadata } from './commands/new';
@@ -181,11 +187,104 @@ program
         await startRepl(options.config);
     });
 
-// Serve command
+// Dev command - Start development server
+program
+    .command('dev')
+    .alias('d')
+    .description('Start development server with hot reload')
+    .option('-p, --port <number>', 'Port to listen on', '3000')
+    .option('-d, --dir <path>', 'Directory containing schema', '.')
+    .option('--no-watch', 'Disable file watching')
+    .action(async (options) => {
+        await dev({ 
+            port: parseInt(options.port), 
+            dir: options.dir,
+            watch: options.watch
+        });
+    });
+
+// Start command - Production server
+program
+    .command('start')
+    .description('Start production server')
+    .option('-p, --port <number>', 'Port to listen on', '3000')
+    .option('-d, --dir <path>', 'Directory containing schema', '.')
+    .option('-c, --config <path>', 'Path to objectql.config.ts/js')
+    .action(async (options) => {
+        await start({ 
+            port: parseInt(options.port), 
+            dir: options.dir,
+            config: options.config
+        });
+    });
+
+// Build command - Build project for production
+program
+    .command('build')
+    .alias('b')
+    .description('Build project and generate types')
+    .option('-d, --dir <path>', 'Source directory', '.')
+    .option('-o, --output <path>', 'Output directory', './dist')
+    .option('--no-types', 'Skip TypeScript type generation')
+    .option('--no-validate', 'Skip metadata validation')
+    .action(async (options) => {
+        await build({
+            dir: options.dir,
+            output: options.output,
+            types: options.types,
+            validate: options.validate
+        });
+    });
+
+// Test command - Run tests
+program
+    .command('test')
+    .alias('t')
+    .description('Run tests')
+    .option('-d, --dir <path>', 'Project directory', '.')
+    .option('-w, --watch', 'Watch mode')
+    .option('--coverage', 'Generate coverage report')
+    .action(async (options) => {
+        await test({
+            dir: options.dir,
+            watch: options.watch,
+            coverage: options.coverage
+        });
+    });
+
+// Lint command - Validate metadata
+program
+    .command('lint')
+    .alias('l')
+    .description('Validate metadata files')
+    .option('-d, --dir <path>', 'Directory to lint', '.')
+    .option('--fix', 'Automatically fix issues')
+    .action(async (options) => {
+        await lint({
+            dir: options.dir,
+            fix: options.fix
+        });
+    });
+
+// Format command - Format metadata files
+program
+    .command('format')
+    .alias('fmt')
+    .description('Format metadata files with Prettier')
+    .option('-d, --dir <path>', 'Directory to format', '.')
+    .option('--check', 'Check if files are formatted without modifying')
+    .action(async (options) => {
+        await format({
+            dir: options.dir,
+            check: options.check
+        });
+    });
+
+// Serve command (kept for backwards compatibility)
 program
     .command('serve')
     .alias('s')
-    .description('Start a development server')
+    .description('Start a development server (alias for dev)')
     .option('-p, --port <number>', 'Port to listen on', '3000')
     .option('-d, --dir <path>', 'Directory containing schema', '.')
     .action(async (options) => {
