@@ -50,7 +50,7 @@ async function createNewFile(context: vscode.ExtensionContext, fileType: 'object
   const fileName = await vscode.window.showInputBox({
     prompt: `Enter ${fileType} name (without extension)`,
     placeHolder: `my_${fileType}`,
-    validateInput: (value) => {
+    validateInput: (value: string) => {
       if (!value) {
         return 'Name cannot be empty';
       }
@@ -337,7 +337,7 @@ function configureYamlLanguageServer() {
     vscode.window.showInformationMessage(
       'ObjectQL extension works best with YAML language support. Please install "Red Hat YAML" extension if not already installed.',
       'Install'
-    ).then(selection => {
+    ).then((selection: string | undefined) => {
       if (selection === 'Install') {
         vscode.commands.executeCommand('workbench.extensions.search', 'redhat.vscode-yaml');
       }
@@ -353,7 +353,7 @@ function showWelcomeMessage(context: vscode.ExtensionContext) {
     'Welcome to ObjectQL! Create your first object definition with "ObjectQL: New Object Definition" command.',
     'Get Started',
     'Documentation'
-  ).then(selection => {
+  ).then((selection: string | undefined) => {
     if (selection === 'Get Started') {
       vscode.commands.executeCommand('objectql.newObject');
     } else if (selection === 'Documentation') {
