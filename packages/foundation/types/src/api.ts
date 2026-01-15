@@ -367,6 +367,8 @@ export interface DataApiClientConfig {
     headers?: Record<string, string>;
     /** Request timeout in milliseconds */
     timeout?: number;
+    /** Custom data API path (defaults to /api/data) */
+    dataPath?: string;
 }
 
 /**
@@ -381,6 +383,8 @@ export interface MetadataApiClientConfig {
     headers?: Record<string, string>;
     /** Request timeout in milliseconds */
     timeout?: number;
+    /** Custom metadata API path (defaults to /api/metadata) */
+    metadataPath?: string;
 }
 
 /**

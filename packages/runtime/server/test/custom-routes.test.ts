@@ -66,7 +66,7 @@ class MockDriver implements Driver {
     }
     
     async createMany(objectName: string, data: any[]) {
-        return data.map(item => this.create(objectName, item));
+        return Promise.all(data.map(item => this.create(objectName, item)));
     }
     
     async updateMany(objectName: string, filters: any, data: any) {

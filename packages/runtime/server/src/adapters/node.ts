@@ -5,6 +5,7 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { generateOpenAPI } from '../openapi';
 import { createFileUploadHandler, createBatchFileUploadHandler, createFileDownloadHandler } from '../file-handler';
 import { LocalFileStorage } from '../storage';
+import { escapeRegexPath } from '../types';
 
 /**
  * Options for createNodeHandler
@@ -116,7 +117,7 @@ export function createNodeHandler(app: IObjectQL, options?: NodeHandlerOptions) 
 
         // 2. REST API: {dataPath}/:object and {dataPath}/:object/:id
         // Regex to match {dataPath}/objectName(/id)?
-        const escapedDataPath = routes.data.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const escapedDataPath = escapeRegexPath(routes.data);
         const restMatch = pathName.match(new RegExp(`^${escapedDataPath}/([^/]+)(?:/(.+))?$`));
         
         if (restMatch) {
@@ -204,7 +205,7 @@ export function createNodeHandler(app: IObjectQL, options?: NodeHandlerOptions) 
         }
         
         // GET {filesPath}/:fileId - Download file
-        const escapedFilesPath = routes.files.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const escapedFilesPath = escapeRegexPath(routes.files);
         const fileMatch = pathName.match(new RegExp(`^${escapedFilesPath}/([^/]+)$`));
         if (fileMatch && method === 'GET') {
             const fileId = fileMatch[1];

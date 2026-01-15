@@ -2,6 +2,7 @@ import { IObjectQL, ApiRouteConfig, resolveApiRoutes } from '@objectql/types';
 import { ObjectQLServer } from '../server';
 import { ObjectQLRequest, ErrorCode } from '../types';
 import { IncomingMessage, ServerResponse } from 'http';
+import { escapeRegexPath } from '../types';
 
 /**
  * Parse query string parameters
@@ -115,7 +116,7 @@ export function createRESTHandler(app: IObjectQL, options?: RESTHandlerOptions) 
             const method = req.method || 'GET';
 
             // Parse URL: {dataPath}/:object or {dataPath}/:object/:id or {dataPath}/:object/bulk-*
-            const escapedPath = dataPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const escapedPath = escapeRegexPath(dataPath);
             const match = url.match(new RegExp(`^${escapedPath}/([^/\\?]+)(?:/([^/\\?]+))?(\\?.*)?$`));
 
             if (!match) {

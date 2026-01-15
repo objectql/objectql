@@ -179,7 +179,7 @@ export class DataApiClient implements IDataApiClient {
     private timeout: number;
     private dataPath: string;
 
-    constructor(config: DataApiClientConfig & { dataPath?: string }) {
+    constructor(config: DataApiClientConfig) {
         this.baseUrl = config.baseUrl.replace(/\/$/, '');
         this.token = config.token;
         this.headers = config.headers || {};
@@ -340,7 +340,7 @@ export class MetadataApiClient implements IMetadataApiClient {
     private timeout: number;
     private metadataPath: string;
 
-    constructor(config: MetadataApiClientConfig & { metadataPath?: string }) {
+    constructor(config: MetadataApiClientConfig) {
         this.baseUrl = config.baseUrl.replace(/\/$/, '');
         this.token = config.token;
         this.headers = config.headers || {};

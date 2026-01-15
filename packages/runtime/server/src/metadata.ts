@@ -1,6 +1,7 @@
 import { IObjectQL, ApiRouteConfig, resolveApiRoutes } from '@objectql/types';
 import { IncomingMessage, ServerResponse } from 'http';
 import { ErrorCode } from './types';
+import { escapeRegexPath } from './types';
 
 function readBody(req: IncomingMessage): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -70,7 +71,7 @@ export function createMetadataHandler(app: IObjectQL, options?: MetadataHandlerO
             
             // Generic List: {metadataPath}/:type
             // Also handles legacy {metadataPath} (defaults to objects)
-            const escapedPath = metadataPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const escapedPath = escapeRegexPath(metadataPath);
             const listMatch = url.match(new RegExp(`^${escapedPath}/([^/]+)$`));
             const isRootMetadata = url === metadataPath;
             
