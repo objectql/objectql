@@ -13,6 +13,13 @@ interface StartOptions {
     config?: string;
 }
 
+// Flexible config type that handles both ObjectQLConfig and custom config formats
+interface LoadedConfig {
+    datasources?: Record<string, any>;
+    datasource?: Record<string, any>;
+    [key: string]: any;
+}
+
 /**
  * Start production server
  * Loads configuration from objectql.config.ts/js if available
@@ -24,7 +31,7 @@ export async function start(options: StartOptions) {
     console.log(chalk.gray(`Loading schema from: ${rootDir}`));
 
     // Try to load configuration
-    let config: any = null;
+    let config: LoadedConfig | null = null;
     const configPath = options.config || path.join(process.cwd(), 'objectql.config.ts');
     
     if (fs.existsSync(configPath)) {
@@ -34,17 +41,17 @@ export async function start(options: StartOptions) {
             if (configPath.endsWith('.ts')) {
                 require('ts-node/register');
             }
-            config = require(configPath);
-            if (config.default) {
-                config = config.default;
-            }
+            const loadedModule = require(configPath);
+            // Handle both default export and direct export
+            config = loadedModule.default || loadedModule;
         } catch (e: any) {
             console.warn(chalk.yellow(`⚠️  Failed to load config: ${e.message}`));
         }
     }
 
     // Initialize datasource from config or use default SQLite
-    const datasourceConfig = config?.datasource?.default || {
+    // Note: Config files may use 'datasource' (singular) while ObjectQLConfig uses 'datasources' (plural)
+    const datasourceConfig = config?.datasources?.default || config?.datasource?.default || {
         client: 'sqlite3',
         connection: {
             filename: process.env.DATABASE_FILE || './objectql.db'

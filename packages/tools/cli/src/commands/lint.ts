@@ -1,5 +1,6 @@
 import { ObjectQL } from '@objectql/core';
 import { ObjectLoader } from '@objectql/platform-node';
+import { ObjectConfig, FieldConfig } from '@objectql/types';
 import * as path from 'path';
 import chalk from 'chalk';
 
@@ -34,7 +35,7 @@ export async function lint(options: LintOptions) {
         
         // Validate each object
         for (const obj of objects) {
-            const objectConfig = obj as any;
+            const objectConfig = obj as ObjectConfig;
             const name = objectConfig.name;
             console.log(chalk.cyan(`Checking object: ${name}`));
             
@@ -66,7 +67,7 @@ export async function lint(options: LintOptions) {
                     hasErrors = true;
                 }
                 
-                const fieldConfig = field as any;
+                const fieldConfig = field as FieldConfig;
                 // Check for required label on fields
                 if (!fieldConfig.label) {
                     console.log(chalk.yellow(`  ⚠️  Field "${fieldName}" missing label`));
