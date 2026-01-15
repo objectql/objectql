@@ -35,6 +35,5 @@ jobs:
           use-verbose-mode: 'no'
           config-file: '.github/markdown-link-check-config.json'
           folder-path: '.'
-          file-path: './README.md'
           max-depth: -1
           check-modified-files-only: 'no'

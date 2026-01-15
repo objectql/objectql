@@ -62,7 +62,7 @@ jobs:
       continue-on-error: true
 
     - name: Store benchmark result
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/main' && hashFiles('benchmark-results.json') != ''
       uses: benchmark-action/github-action-benchmark@v1
       with:
         name: ObjectQL Benchmarks
