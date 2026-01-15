@@ -5,6 +5,7 @@
 ### Patch Changes
 
 - Release version 1.8.4 with latest improvements and bug fixes
+- **Note**: Version synchronized with other ObjectQL packages per fixed versioning policy
 - Updated dependencies
   - @objectql/types@1.8.4
 
