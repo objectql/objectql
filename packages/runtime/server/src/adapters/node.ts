@@ -25,9 +25,11 @@ export function createNodeHandler(app: IObjectQL, options?: NodeHandlerOptions) 
     const routes = resolveApiRoutes(options?.routes);
     
     // Initialize file storage
+    const filesPath = routes.files.startsWith('/') ? routes.files : `/${routes.files}`;
+    const defaultBaseUrl = process.env.OBJECTQL_BASE_URL || `http://localhost:3000${filesPath}`;
     const fileStorage = options?.fileStorage || new LocalFileStorage({
         baseDir: process.env.OBJECTQL_UPLOAD_DIR || './uploads',
-        baseUrl: process.env.OBJECTQL_BASE_URL || `http://localhost:3000${routes.files}`
+        baseUrl: defaultBaseUrl
     });
     
     // Create file handlers
