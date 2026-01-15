@@ -36,6 +36,8 @@ ObjectQL is organized as a Monorepo to ensure modularity and universal compatibi
 | **`@objectql/core`** | Universal | **The Engine.** The runtime logic, validation, and repository pattern. |
 | **`@objectql/driver-sql`** | Node.js | Adapter for SQL databases (Postgres, MySQL, SQLite) via Knex. |
 | **`@objectql/driver-mongo`** | Node.js | Adapter for MongoDB. |
+| **`@objectql/driver-memory`** | Universal | **In-Memory Driver.** Zero dependencies, perfect for testing and browser apps. |
+| **`@objectql/driver-localstorage`** | Browser | **Browser Storage.** Persistent client-side storage using LocalStorage. |
 | **`@objectql/sdk`** | Universal | **Remote Driver.** Connects to an ObjectQL server via HTTP. |
 | **`@objectql/platform-node`**| Node.js | Utilities for loading YAML files from the filesystem. |
 
@@ -129,6 +131,55 @@ ObjectQL isolates the "What" (Query) from the "How" (Execution).
 * **The Magic:** You can run ObjectQL in the **Browser**.
 * Instead of connecting to a DB, it connects to an ObjectQL Server API.
 * The API usage remains exactly the same (`repo.find(...)`), but it runs over HTTP.
+
+#### Memory Driver (`@objectql/driver-memory`)
+
+* **Zero dependencies** - Pure JavaScript implementation
+* **Universal** - Works in Node.js, Browser, Edge environments
+* Perfect for testing, prototyping, and client-side state management
+* See [Browser Demo](./examples/browser-demo/) for live examples
+
+#### LocalStorage Driver (`@objectql/driver-localstorage`)
+
+* **Browser-native persistence** - Data survives page refreshes
+* Built on Web Storage API
+* Perfect for offline apps, PWAs, and user preferences
+* See [LocalStorage Demo](./examples/browser-localstorage-demo/) for examples
+
+### Browser Support 🌐
+
+ObjectQL runs **natively in web browsers** with zero backend required! This makes it perfect for:
+
+- 🚀 **Rapid Prototyping** - Build UIs without server setup
+- 📱 **Offline-First Apps** - PWAs with client-side data
+- 🎓 **Educational Tools** - Interactive learning experiences
+- 🧪 **Testing** - Browser-based test environments
+
+**Try it now:** Check out our interactive [Browser Demo](./examples/browser-demo/) and [LocalStorage Demo](./examples/browser-localstorage-demo/)!
+
+```javascript
+// Running ObjectQL in the browser - it's that simple!
+import { ObjectQL } from '@objectql/core';
+import { MemoryDriver } from '@objectql/driver-memory';
+
+const driver = new MemoryDriver();
+const app = new ObjectQL({ datasources: { default: driver } });
+
+app.registerObject({
+  name: 'tasks',
+  fields: {
+    title: { type: 'text', required: true },
+    completed: { type: 'boolean', defaultValue: false }
+  }
+});
+
+await app.init();
+
+// Use it just like on the server!
+const ctx = app.createContext({ isSystem: true });
+const tasks = ctx.object('tasks');
+await tasks.create({ title: 'Build awesome app!' });
+```
 
 ### Extensibility
 
