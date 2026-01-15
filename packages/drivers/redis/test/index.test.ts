@@ -13,6 +13,10 @@ describe('RedisDriver', () => {
 
     beforeAll(async () => {
         let d: RedisDriver | undefined;
+        // Suppress console.error solely for the connection probe to avoid noise
+        // when Redis is intentionaly missing (e.g. in some local envs)
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
         // Skip tests if Redis is not available
         try {
             d = new RedisDriver({ 
@@ -31,6 +35,9 @@ describe('RedisDriver', () => {
                     // Ignore disconnect error
                 }
             }
+        } finally {
+            // Restore console.error
+            consoleErrorSpy.mockRestore();
         }
     });
 
