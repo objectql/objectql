@@ -367,6 +367,8 @@ export interface DataApiClientConfig {
     headers?: Record<string, string>;
     /** Request timeout in milliseconds */
     timeout?: number;
+    /** Custom data API path (defaults to /api/data) */
+    dataPath?: string;
 }
 
 /**
@@ -381,6 +383,8 @@ export interface MetadataApiClientConfig {
     headers?: Record<string, string>;
     /** Request timeout in milliseconds */
     timeout?: number;
+    /** Custom metadata API path (defaults to /api/metadata) */
+    metadataPath?: string;
 }
 
 /**
@@ -492,4 +496,80 @@ export interface IMetadataApiClient {
      * @param id - Unique identifier
      */
     getMetadata<T = unknown>(metadataType: string, id: string): Promise<MetadataApiResponse<T>>;
+}
+
+// ============================================================================
+// Route Configuration Types
+// ============================================================================
+
+/**
+ * Configuration for API route paths
+ * Allows customization of all API endpoints during initialization
+ */
+export interface ApiRouteConfig {
+    /**
+     * Base path for JSON-RPC endpoint
+     * @default '/api/objectql'
+     */
+    rpc?: string;
+    
+    /**
+     * Base path for REST data API
+     * @default '/api/data'
+     */
+    data?: string;
+    
+    /**
+     * Base path for metadata API
+     * @default '/api/metadata'
+     */
+    metadata?: string;
+    
+    /**
+     * Base path for file operations
+     * @default '/api/files'
+     */
+    files?: string;
+}
+
+/**
+ * Complete API route configuration with defaults applied
+ */
+export interface ResolvedApiRouteConfig {
+    /** JSON-RPC endpoint path */
+    rpc: string;
+    
+    /** REST data API base path */
+    data: string;
+    
+    /** Metadata API base path */
+    metadata: string;
+    
+    /** File operations base path */
+    files: string;
+}
+
+/**
+ * Default API route configuration
+ */
+export const DEFAULT_API_ROUTES: ResolvedApiRouteConfig = {
+    rpc: '/api/objectql',
+    data: '/api/data',
+    metadata: '/api/metadata',
+    files: '/api/files'
+};
+
+/**
+ * Resolve API route configuration by merging user config with defaults
+ * All paths are normalized to start with '/'
+ */
+export function resolveApiRoutes(config?: ApiRouteConfig): ResolvedApiRouteConfig {
+    const normalizePath = (path: string): string => path.startsWith('/') ? path : `/${path}`;
+    
+    return {
+        rpc: normalizePath(config?.rpc ?? DEFAULT_API_ROUTES.rpc),
+        data: normalizePath(config?.data ?? DEFAULT_API_ROUTES.data),
+        metadata: normalizePath(config?.metadata ?? DEFAULT_API_ROUTES.metadata),
+        files: normalizePath(config?.files ?? DEFAULT_API_ROUTES.files)
+    };
 }
