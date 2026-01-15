@@ -14,6 +14,8 @@ ObjectQL provides **three distinct query interfaces**, each optimized for differ
 | **REST API** | Simple CRUD, mobile apps | Low | ⭐⭐⭐⭐ | ⭐⭐⭐ |
 | **GraphQL** | Complex data graphs, modern SPAs | High | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
 
+*Rating scale: ⭐ = lowest, ⭐⭐⭐⭐⭐ = highest*
+
 ---
 
 ## 2. JSON-DSL Query Protocol (Recommended Default)
@@ -117,11 +119,17 @@ await app.object('order').find({
 
 **Bad:**
 ```typescript
-// Multiple round trips
+// Multiple round trips (N+1 query problem)
 const tasks = await app.object('task').find({});
+const enrichedTasks = [];
 for (const task of tasks) {
-  task.project = await app.object('project').findOne(task.project_id);
-  task.assignee = await app.object('user').findOne(task.assignee_id);
+  const project = await app.object('project').findOne(task.project_id);
+  const assignee = await app.object('user').findOne(task.assignee_id);
+  enrichedTasks.push({
+    ...task,
+    project,
+    assignee
+  });
 }
 ```
 
@@ -408,11 +416,14 @@ query GetDashboardData {
 When building custom resolvers, use DataLoader pattern to batch database queries:
 
 ```typescript
-// Bad: N+1 queries
+// Bad: N+1 queries (inefficient)
 const tasks = await taskRepo.find();
-for (const task of tasks) {
-  task.assignee = await userRepo.findOne(task.assignee_id);
-}
+const tasksWithAssignee = await Promise.all(
+  tasks.map(async (task) => ({
+    ...task,
+    assignee: await userRepo.findOne(task.assignee_id),
+  })),
+);
 
 // Good: Batched loading (1+1 queries)
 const tasks = await taskRepo.find();
@@ -421,9 +432,10 @@ const users = await userRepo.find({
   filters: [['id', 'in', userIds]]
 });
 const userMap = new Map(users.map(u => [u.id, u]));
-tasks.forEach(task => {
-  task.assignee = userMap.get(task.assignee_id);
-});
+const tasksWithAssigneeBatched = tasks.map((task) => ({
+  ...task,
+  assignee: userMap.get(task.assignee_id),
+}));
 ```
 
 ---
@@ -549,6 +561,8 @@ async function autoAssign(task: any) {
 ```
 
 **Why NOT SQL strings:**
+
+*Example of AI hallucination:*
 ```sql
 -- AI might hallucinate invalid syntax
 SELECT * FROM tasks WHERE due_date < NOW() 
@@ -801,7 +815,6 @@ query {
 - [Querying Guide](./querying.md) - Step-by-step query examples
 - [GraphQL API Documentation](../api/graphql.md) - GraphQL setup and usage
 - [REST API Documentation](../api/rest.md) - REST endpoint reference
-- [Performance Tuning](./performance.md) - Advanced optimization strategies
 
 ---
 
