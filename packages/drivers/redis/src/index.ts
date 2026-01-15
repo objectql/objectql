@@ -11,6 +11,9 @@
  * - RedisJSON module for native JSON queries
  * - RedisSearch for indexed queries
  * - Secondary indexes using Redis Sets
+ * 
+ * Note: This example implements only the core required methods from the Driver interface.
+ * Optional methods like introspectSchema(), aggregate(), transactions, etc. are not implemented.
  */
 
 import { Driver } from '@objectql/types';

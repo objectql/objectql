@@ -18,8 +18,8 @@ describe('RedisDriver', () => {
                 url: process.env.REDIS_URL || 'redis://localhost:6379'
             });
             
-            // Wait for connection
-            await new Promise(resolve => setTimeout(resolve, 100));
+            // Verify connection by attempting a simple operation
+            await driver.count('_test_connection', []);
         } catch (error) {
             console.warn('Redis not available, skipping tests');
         }

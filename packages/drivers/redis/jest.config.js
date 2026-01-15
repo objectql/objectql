@@ -4,6 +4,6 @@ module.exports = {
   testMatch: ['**/test/**/*.test.ts'],
   collectCoverageFrom: ['src/**/*.ts'],
   moduleNameMapper: {
-    '^@objectql/types$': '<rootDir>/../../../packages/foundation/types/src',
+    '^@objectql/types$': '<rootDir>/../../foundation/types/src',
   }
 };
