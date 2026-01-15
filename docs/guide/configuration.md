@@ -11,8 +11,8 @@ import { ObjectQL } from '@objectql/core';
 export const db = new ObjectQL({
     connection: 'sqlite://data.db', // 1. Infrastructure
     modules: [
-         '@objectql/starter-basic', // 2. External Module (NPM)
-         './src/modules/billing'    // 3. Local Module
+         '@my-org/module-crm',    // 2. External Module (NPM)
+         './src/modules/billing'  // 3. Local Module
     ],
     // source: ... (Deprecated, use modules)
     plugins: [] // 4. Extensions

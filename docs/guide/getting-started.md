@@ -86,7 +86,7 @@ async function main() {
         // Load schema from local directories OR npm packages
         modules: [
             'src/objects',           // Local Module
-            '@objectql/starter-auth' // External Module (NPM)
+            '@objectql/module-auth'  // External Module (NPM)
         ]
     });
 
