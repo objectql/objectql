@@ -9,28 +9,24 @@ import chalk from 'chalk';
 
 const CONSOLE_HTML = `
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ObjectQL Swagger UI</title>
-  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css" />
-  <style>
-    body { margin: 0; padding: 0; }
-  </style>
-</head>
-<body>
-<div id="swagger-ui"></div>
-<script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js" crossorigin></script>
-<script>
-  window.onload = () => {
-    window.ui = SwaggerUIBundle({
-      url: '/openapi.json',
-      dom_id: '#swagger-ui',
-    });
-  };
-</script>
-</body>
+<html>
+  <head>
+    <title>ObjectQL API Reference (Scalar)</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body { margin: 0; }
+    </style>
+  </head>
+  <body>
+    <script
+      id="api-reference"
+      data-url="/openapi.json"
+      data-proxy-url="https://proxy.scalar.com"
+      data-configuration='{"theme": "deepSpace"}'
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+  </body>
 </html>
 `;
 
