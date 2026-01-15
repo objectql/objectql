@@ -9,7 +9,6 @@
  */
 
 import { ValidationCondition } from './validation';
-import { FieldConfig } from './field';
 
 /**
  * Form types supported by ObjectQL
