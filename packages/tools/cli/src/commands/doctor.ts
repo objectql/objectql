@@ -1,6 +1,4 @@
 import chalk from 'chalk';
-import { loadObjectQLInstance } from '../utils/loader'; // Assuming utils exist or will be needed
-// Note: We might need to abstract loader if not exists, but for now let's focus on structure
 
 export async function doctorCommand() {
     console.log(chalk.blue('🩺 ObjectQL Doctor'));

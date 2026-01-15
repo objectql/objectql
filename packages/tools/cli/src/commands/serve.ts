@@ -143,11 +143,38 @@ export async function serve(options: {
         await internalHandler(req, res);
     });
     
-    server.listen(options.port, () => {
-        console.log(chalk.green(`\n🚀 Server ready at http://localhost:${options.port}`));
-        console.log(chalk.green(`📚 Swagger UI:   http://localhost:${options.port}/swagger`));
-        console.log(chalk.blue(`📖 OpenAPI Spec:  http://localhost:${options.port}/openapi.json`));
-        console.log(chalk.gray('\nTry a curl command:'));
-        console.log(`curl -X POST http://localhost:${options.port} -H "Content-Type: application/json" -d '{"op": "find", "object": "YourObject", "args": {}}'`);
-    });
+    // Auto-port detection logic
+    const startPort = options.port;
+    const tryListen = (port: number, attempt = 0) => {
+        if (attempt > 10) {
+            console.error(chalk.red(`❌ Unable to find a free port after 10 attempts.`));
+            process.exit(1);
+        }
+
+        const onError = (e: any) => {
+            if (e.code === 'EADDRINUSE') {
+                console.log(chalk.yellow(`⚠️  Port ${port} is in use, trying ${port + 1}...`));
+                // Wait a tick before retrying to let the socket cleanup if needed, though usually not needed for EADDRINUSE on listen
+                setTimeout(() => {
+                    server.close(); // Ensure previous attempt is closed
+                    tryListen(port + 1, attempt + 1);
+                }, 100);
+            } else {
+                console.error(chalk.red('❌ Server error:'), e);
+            }
+        };
+
+        server.once('error', onError);
+
+        server.listen(port, () => {
+            server.removeListener('error', onError);
+            console.log(chalk.green(`\n🚀 Server ready at http://localhost:${port}`));
+            console.log(chalk.green(`📚 Swagger UI:   http://localhost:${port}/swagger`));
+            console.log(chalk.blue(`📖 OpenAPI Spec:  http://localhost:${port}/openapi.json`));
+            console.log(chalk.gray('\nTry a curl command:'));
+            console.log(`curl -X POST http://localhost:${port} -H "Content-Type: application/json" -d '{"op": "find", "object": "YourObject", "args": {}}'`);
+        });
+    };
+
+    tryListen(startPort);
 }
