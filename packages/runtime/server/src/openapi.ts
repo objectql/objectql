@@ -1,4 +1,4 @@
-import { IObjectQL, ObjectConfig, FieldType, FieldConfig, ApiRouteConfig, resolveApiRoutes } from '@objectql/types';
+import { IObjectQL, ObjectConfig, FieldConfig, ApiRouteConfig, resolveApiRoutes } from '@objectql/types';
 
 interface OpenAPISchema {
     openapi: string;

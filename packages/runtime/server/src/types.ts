@@ -171,16 +171,3 @@ export interface FileStorageOptions {
     /** User ID who uploaded the file */
     userId?: string;
 }
-
-/**
- * Utility functions for route handling
- */
-
-/**
- * Escapes special regex characters in a path string for use in RegExp
- * @param path - The path string to escape
- * @returns Escaped path string safe for use in RegExp
- */
-export function escapeRegexPath(path: string): string {
-    return path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}

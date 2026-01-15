@@ -561,12 +561,15 @@ export const DEFAULT_API_ROUTES: ResolvedApiRouteConfig = {
 
 /**
  * Resolve API route configuration by merging user config with defaults
+ * All paths are normalized to start with '/'
  */
 export function resolveApiRoutes(config?: ApiRouteConfig): ResolvedApiRouteConfig {
+    const normalizePath = (path: string): string => path.startsWith('/') ? path : `/${path}`;
+    
     return {
-        rpc: config?.rpc ?? DEFAULT_API_ROUTES.rpc,
-        data: config?.data ?? DEFAULT_API_ROUTES.data,
-        metadata: config?.metadata ?? DEFAULT_API_ROUTES.metadata,
-        files: config?.files ?? DEFAULT_API_ROUTES.files
+        rpc: normalizePath(config?.rpc ?? DEFAULT_API_ROUTES.rpc),
+        data: normalizePath(config?.data ?? DEFAULT_API_ROUTES.data),
+        metadata: normalizePath(config?.metadata ?? DEFAULT_API_ROUTES.metadata),
+        files: normalizePath(config?.files ?? DEFAULT_API_ROUTES.files)
     };
 }

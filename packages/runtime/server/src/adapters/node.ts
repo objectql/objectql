@@ -5,7 +5,7 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { generateOpenAPI } from '../openapi';
 import { createFileUploadHandler, createBatchFileUploadHandler, createFileDownloadHandler } from '../file-handler';
 import { LocalFileStorage } from '../storage';
-import { escapeRegexPath } from '../types';
+import { escapeRegexPath } from '../utils';
 
 /**
  * Options for createNodeHandler
@@ -25,8 +25,7 @@ export function createNodeHandler(app: IObjectQL, options?: NodeHandlerOptions) 
     const routes = resolveApiRoutes(options?.routes);
     
     // Initialize file storage
-    const filesPath = routes.files.startsWith('/') ? routes.files : `/${routes.files}`;
-    const defaultBaseUrl = process.env.OBJECTQL_BASE_URL || `http://localhost:3000${filesPath}`;
+    const defaultBaseUrl = process.env.OBJECTQL_BASE_URL || `http://localhost:3000${routes.files}`;
     const fileStorage = options?.fileStorage || new LocalFileStorage({
         baseDir: process.env.OBJECTQL_UPLOAD_DIR || './uploads',
         baseUrl: defaultBaseUrl

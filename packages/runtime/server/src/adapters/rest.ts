@@ -2,7 +2,7 @@ import { IObjectQL, ApiRouteConfig, resolveApiRoutes } from '@objectql/types';
 import { ObjectQLServer } from '../server';
 import { ObjectQLRequest, ErrorCode } from '../types';
 import { IncomingMessage, ServerResponse } from 'http';
-import { escapeRegexPath } from '../types';
+import { escapeRegexPath } from '../utils';
 
 /**
  * Parse query string parameters
