@@ -45,7 +45,20 @@ ObjectQL is organized as a Monorepo to ensure modularity and universal compatibi
 
 ## ⚡ Quick Start
 
-### 1. Installation
+### 0. Use the Generator (Recommended)
+
+The fastest way to start is using the CLI to scaffold a new project.
+
+```bash
+# Create a new project
+npm create @objectql@latest my-app
+
+# Choose a template when prompted (hello-world or starter)
+```
+
+### 1. Manual Installation
+
+If you prefer to install manually:
 
 ```bash
 # Install core and a driver (e.g., Postgres or SQLite)

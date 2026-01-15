@@ -12,29 +12,26 @@
 
 The fastest way to get started is using the CLI to scaffold a project.
 
-### 1. Minimal Setup (Hello World)
+### 1. Create a New Project
 
-Create a single-file project to learn the basics.
+The easiest way to start is using the generator.
 
 ```bash
-# Initialize a new project
-npx @objectql/cli init --template hello-world --name my-first-app
+# Standard Setup (Recommended) - Full Project Tracker Demo
+npm create @objectql@latest my-app -- --template starter
 
-# Enter directory
-cd my-first-app
-
-# Start the app
-npm start
+# Minimal Setup - Single File
+npm create @objectql@latest my-app -- --template hello-world
 ```
 
-This will create an `index.ts` file that defines a schema, initializes an in-memory SQLite database, and runs some queries.
+This will create a new project with all necessary dependencies.
 
 ### 2. Standard Setup (Project Tracker)
 
-For building real applications, use the `starter` template. This sets up a proper folder structure with YAML metadata, TypeScript logic hooks, and relationship management.
+For building real applications, use the `showcase` template. This sets up a proper folder structure with YAML metadata, TypeScript logic hooks, and relationship management.
 
 ```bash
-npx @objectql/cli init --template starter --name project-tracker
+npm create @objectql@latest project-tracker -- --template showcase
 ```
 
 This structure follows our **Best Practices**:

@@ -16,10 +16,10 @@ You can then run it via `npx objectql` or add scripts to your `package.json`.
 
 ### 2.1 `init` (Create Project)
 
-Create a new ObjectQL project from a starter template.
+The recommended way to create a new ObjectQL project is using the initialization package.
 
 ```bash
-npx objectql init [options]
+npm create @objectql@latest [name] [options]
 ```
 
 **Options:**
@@ -27,15 +27,19 @@ npx objectql init [options]
 | Option | Alias | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `--template <template>` | `-t` | `starter` | Template to use (`starter`, `hello-world`). |
-| `--name <name>` | `-n` | - | Project name. |
-| `--dir <path>` | `-d` | - | Target directory. |
 | `--skip-install` | | `false` | Skip dependency installation. |
 | `--skip-git` | | `false` | Skip git initialization. |
 
 **Example:**
 
 ```bash
-npx objectql init -t starter -n my-app
+npm create @objectql@latest my-app -- --template showcase
+```
+
+Alternatively, if you already have the CLI installed globally or in a project, you can use the legacy `init` command:
+
+```bash
+npx objectql init [options]
 ```
 
 ### 2.2 `generate` (Type Generation)

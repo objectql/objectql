@@ -13,7 +13,7 @@ program
   .name('create-objectql')
   .description('Scaffold a new ObjectQL project')
   .argument('[directory]', 'Directory to create the project in')
-  .option('-t, --template <name>', 'Template to use (hello-world, starter)', 'starter')
+  .option('-t, --template <name>', 'Template to use (hello-world, starter)')
   .action(async (directory, options) => {
     console.log(chalk.bold.blue('⚡ ObjectStack AI - Project Scaffolder'));
 
@@ -33,14 +33,23 @@ program
     // 2. Resolve Template Source (Embedded)
     // The templates are located in ../templates relative to the dist/bin.js file
     // dist/bin.js -> ../templates -> package-root/templates
-    // Map 'project-tracker' to 'starter' if needed, or rely on correct copying
     let templateName = options.template;
-    if (templateName === 'basic') templateName = 'starter';
-    // If user says "starter", we expect "project-tracker" to be copied to "starter" folder, OR we adjust here.
-    // Let's assume we copy "project-tracker" to "starter" in build script.
+
+    if (!templateName) {
+      const response = await prompt<{ template: string }>({
+        type: 'select',
+        name: 'template',
+        message: 'Select a starter template:',
+        choices: [
+          { message: 'Standard Project (Recommended)', name: 'starter' },
+          { message: 'Minimal (Hello World)', name: 'hello-world' }
+        ]
+      });
+      templateName = response.template;
+    }
     
-    // Fallback mapping if build script copies to original names
-    if (templateName === 'starter') templateName = 'project-tracker';
+    // Legacy mapping or aliasing if needed
+    if (templateName === 'project-tracker') templateName = 'starter';
 
     const templatePath = path.resolve(__dirname, '../templates', templateName);
 
