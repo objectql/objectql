@@ -110,11 +110,9 @@ For a `complete` application, you get:
 1. **Metadata Files (YAML)**
    - `*.object.yml` - Data entities
    - `*.validation.yml` - Validation rules
-   - `*.form.yml` - Data entry forms
-   - `*.view.yml` - List views
-   - `*.page.yml` - UI pages
-   - `*.menu.yml` - Navigation
    - `*.permission.yml` - Access control
+   - `*.workflow.yml` - Automation
+   - `*.data.yml` - Seed data
 
 2. **TypeScript Implementation Files**
    - `*.action.ts` - Custom business operations

@@ -263,10 +263,11 @@ export async function aiValidate(options: ValidateOptions): Promise<void> {
     const patterns = [
         '**/*.object.yml',
         '**/*.validation.yml',
-        '**/*.form.yml',
-        '**/*.view.yml',
-        '**/*.page.yml',
         '**/*.action.yml',
+        '**/*.hook.yml',
+        '**/*.permission.yml',
+        '**/*.workflow.yml',
+        '**/*.data.yml',
     ];
 
     const files = await glob(patterns, {

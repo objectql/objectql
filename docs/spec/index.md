@@ -18,14 +18,6 @@ This section contains the complete metadata specifications for the ObjectQL plat
 *   [**Actions (RPC)**](./action.md) - Custom server-side functions and APIs ✅
 *   [**Workflows & Processes**](./workflow.md) - Automated business processes and approval chains ⚠️ *Spec complete, implementation pending*
 
-### Presentation Layer
-*   [**Applications**](./app.md) - Application container and simple metadata ✅
-*   [**Pages**](./page.md) - Composable UI pages with layouts, components, and interactions ✅
-*   [**Menus & Navigation**](./menu.md) - Application structure and navigation hierarchy ✅
-*   [**Views & Layouts**](./view.md) - Data presentation configurations (list, grid, kanban, calendar) ⚠️ *Spec complete, implementation pending*
-*   [**Forms**](./form.md) - Data entry and editing interfaces ⚠️ *Spec complete, implementation pending*
-*   [**Reports & Dashboards**](./report.md) - Analytics and BI ⚠️ *Spec complete, implementation pending*
-
 ## Security & Access Control
 
 *   [**Permissions**](./permission.md) - Role-based access control, field-level security, and record-level rules ✅
@@ -60,29 +52,13 @@ src/
   workflows/           # Business processes
     *.workflow.yml     # Workflow definitions
   
-  pages/              # UI pages
-    *.page.yml         # Page definitions
-  
-  views/              # UI presentation
-    *.view.yml         # View configurations
-    *.form.yml         # Form layouts
-  
-  reports/            # Analytics
-    *.report.yml       # Report definitions
-    *.dashboard.yml    # Dashboard configurations
-
   data/               # Initial Seeding
     *.data.yml         # Seed data
-  
-  navigation/         # App structure
-    *.menu.yml         # Menu definitions
 ```
 
 ## Getting Started
 
 1. **Start with Objects**: Define your data model using [Objects & Fields](./object.md)
 2. **Add Business Logic**: Implement validation, hooks, and actions
-3. **Design UI**: Create views, forms, and navigation
-4. **Secure Your App**: Configure permissions and access rules
-5. **Build Workflows**: Automate processes and approvals
-6. **Create Reports**: Add analytics and dashboards
+3. **Secure Your App**: Configure permissions and access rules
+4. **Build Workflows**: Automate processes and approvals

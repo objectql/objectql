@@ -2,7 +2,7 @@ import express from 'express';
 import { ObjectQL } from '@objectql/core';
 import { SqlDriver } from '@objectql/driver-sql';
 import { ObjectLoader } from '@objectql/platform-node';
-import { createNodeHandler, createMetadataHandler, createStudioHandler, createRESTHandler } from '@objectql/server';
+import { createNodeHandler, createMetadataHandler, createRESTHandler } from '@objectql/server';
 import * as path from 'path';
 
 async function main() {
@@ -29,7 +29,6 @@ app.init().then(async () => {
     const objectQLHandler = createNodeHandler(app);
     const restHandler = createRESTHandler(app);
     const metadataHandler = createMetadataHandler(app);
-    const studioHandler = createStudioHandler();
 
     // 4. Setup Express
     const server = express();
@@ -51,7 +50,6 @@ app.init().then(async () => {
     server.all('/api/objectql*', objectQLHandler);
     server.all('/api/data/*', restHandler);
     server.all('/api/metadata*', metadataHandler);
-    server.get('/studio*', studioHandler);
 
     // Create some sample data
     const ctx = app.createContext({ isSystem: true });
@@ -66,7 +64,6 @@ app.init().then(async () => {
 
     server.listen(port, () => {
         console.log(`\n🚀 ObjectQL Server running on http://localhost:${port}`);
-        console.log(`\n📊 Console UI: http://localhost:${port}/console`);
         console.log(`\n🔌 APIs:`);
         console.log(`  - JSON-RPC:  http://localhost:${port}/api/objectql`);
         console.log(`  - REST:      http://localhost:${port}/api/data`);

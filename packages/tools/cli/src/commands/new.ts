@@ -11,16 +11,11 @@ interface NewOptions {
 
 const METADATA_TYPES = [
     'object',
-    'view',
-    'form',
-    'page',
     'action',
     'hook',
     'permission',
     'validation',
     'workflow',
-    'report',
-    'menu',
     'data'
 ];
 
@@ -34,35 +29,6 @@ const TEMPLATES: Record<string, any> = {
                 required: true
             }
         }
-    },
-    view: {
-        label: '{{label}} View',
-        object: '{{objectName}}',
-        columns: [
-            { field: 'name', label: 'Name' }
-        ]
-    },
-    form: {
-        label: '{{label}} Form',
-        object: '{{objectName}}',
-        layout: {
-            sections: [
-                {
-                    label: 'Basic Information',
-                    fields: ['name']
-                }
-            ]
-        }
-    },
-    page: {
-        label: '{{label}} Page',
-        type: 'standard',
-        components: [
-            {
-                type: 'title',
-                text: '{{label}}'
-            }
-        ]
     },
     action: {
         label: '{{label}} Action',
@@ -115,24 +81,6 @@ const TEMPLATES: Record<string, any> = {
                 type: 'field_update',
                 field: 'status',
                 value: 'draft'
-            }
-        ]
-    },
-    report: {
-        label: '{{label}} Report',
-        type: 'tabular',
-        object: '{{objectName}}',
-        columns: [
-            { field: 'name', label: 'Name' }
-        ]
-    },
-    menu: {
-        label: '{{label}} Menu',
-        items: [
-            {
-                label: 'Home',
-                page: 'home',
-                icon: 'home'
             }
         ]
     },

@@ -14,8 +14,6 @@ In ObjectQL, **metadata** is machine-readable configuration that describes:
 2. **How to validate it** (Validation Rules, Constraints)
 3. **Who can access it** (Permissions, Security)
 4. **What business logic to execute** (Hooks, Actions, Workflows)
-5. **How to present it** (Pages, Views, Forms, Reports)
-6. **How to navigate it** (Menus, Dashboards)
 
 ## Complete Metadata Taxonomy
 
@@ -200,179 +198,7 @@ steps:
       field: manager_id
 ```
 
-### 3. Presentation Layer
-
-#### [Pages](./page.md)
-**Purpose**: Define composable UI pages with layouts, components, and interactions.
-
-**What you define**:
-- Page layouts (dashboard, wizard, canvas, two-column)
-- UI components (data grids, forms, charts, metrics)
-- Data source bindings
-- Component actions (navigate, submit, open modal)
-- Responsive configurations
-- Page-level permissions and state
-- AI context for page understanding
-
-**Example**:
-```yaml
-name: dashboard
-label: Project Dashboard
-layout: dashboard
-
-components:
-  - id: total_projects
-    type: metric
-    label: Total Projects
-    data_source:
-      object: projects
-      query: { op: count }
-    grid: { x: 0, y: 0, w: 3, h: 2 }
-  
-  - id: tasks_grid
-    type: data_grid
-    data_source:
-      object: tasks
-      fields: [name, status, due_date]
-      sort: [[created_at, desc]]
-    grid: { x: 0, y: 2, w: 12, h: 6 }
-```
-
-#### [Views & Layouts](./view.md)
-**Purpose**: Define how data is displayed to users.
-
-**What you define**:
-- List views (tabular data)
-- Grid views (inline editing)
-- Kanban boards (drag & drop)
-- Calendar views (events, timeline)
-- Card layouts (mobile-friendly)
-- Column configurations
-- Default filters and sorting
-
-**Example** (`task_list.view.yml`):
-```yaml
-# File: task_list.view.yml
-# View name is inferred from filename!
-
-type: list
-object: tasks  # Still specify which object to display
-config:
-  columns:
-    - field: name
-      width: 300
-      sortable: true
-    - field: status
-      renderer: badge
-  default_filters:
-    - field: status
-      operator: "!="
-      value: completed
-```
-
-#### [Forms](./form.md)
-**Purpose**: Define data entry and editing interfaces.
-
-**What you define**:
-- Form layouts (sections, tabs, columns)
-- Field configurations (labels, help text, defaults)
-- Conditional logic (show/hide based on values)
-- Validation rules
-- Wizard forms (multi-step)
-- Quick create forms
-
-**Example** (`project_form.form.yml`):
-```yaml
-# File: project_form.form.yml
-# Form name is inferred from filename!
-
-type: edit
-object: projects
-layout:
-  sections:
-    - name: basic_info
-      label: Basic Information
-      columns: 2
-      fields:
-        - name
-        - status
-        - owner
-conditional_logic:
-  - condition:
-      field: status
-      operator: "="
-      value: completed
-    actions:
-      - show_fields: [completion_date]
-```
-
-#### [Reports & Dashboards](./report.md)
-**Purpose**: Analytics, visualization, and business intelligence.
-
-**What you define**:
-- Tabular reports (data lists)
-- Summary reports (grouped with totals)
-- Matrix reports (pivot tables)
-- Charts (bar, line, pie, etc.)
-- Dashboards (KPIs, charts, metrics)
-- Scheduled reports
-- Export formats
-
-**Example** (`sales_by_region.report.yml`):
-```yaml
-# File: sales_by_region.report.yml
-# Report name is inferred from filename!
-
-type: summary
-object: orders
-groupings:
-  - field: customer.region
-    label: Region
-aggregations:
-  - function: sum
-    field: amount
-    label: Total Sales
-  - function: count
-    field: id
-    label: Order Count
-chart:
-  enabled: true
-  type: bar
-```
-
-#### [Menus & Navigation](./menu.md)
-**Purpose**: Define application structure and navigation.
-
-**What you define**:
-- Menu hierarchies
-- Navigation items
-- Quick actions
-- Breadcrumbs
-- Favorites
-- Search integration
-- Role-based menu visibility
-
-**Example** (`sales_crm.app.yml`):
-```yaml
-name: main_navigation
-type: sidebar
-items:
-  - name: sales
-    label: Sales
-    icon: currency
-    type: section
-    items:
-      - name: leads
-        label: Leads
-        path: /sales/leads
-        object: leads
-      - name: opportunities
-        label: Opportunities
-        path: /sales/opportunities
-        object: opportunities
-```
-
-### 4. Security & Access Control
+### 3. Security & Access Control
 
 #### [Permissions](./permission.md)
 **Purpose**: Control who can access what data and operations.
@@ -451,21 +277,6 @@ src/
   workflows/                 # Business processes
     order_approval.workflow.yml
     customer_onboarding.workflow.yml
-  
-  views/                     # Presentation
-    customer_list.view.yml
-    customer_kanban.view.yml
-  
-  forms/                     # Data entry
-    customer_form.form.yml
-    quick_customer.form.yml
-  
-  reports/                   # Analytics
-    sales_summary.report.yml
-    sales_dashboard.dashboard.yml
-  
-  navigation/                # App structure
-    main_menu.menu.yml
 ```
 
 ## Development Workflow
@@ -481,19 +292,13 @@ src/
 2. Create custom actions
 3. Design workflows and approvals
 
-### 3. UI Phase
-1. Design views for different contexts
-2. Create forms for data entry
-3. Build reports and dashboards
-4. Configure navigation menus
-
-### 4. Testing Phase
+### 3. Testing Phase
 1. Test with different user roles
 2. Validate business rules
 3. Check permission enforcement
 4. Performance testing
 
-### 5. Deployment
+### 4. Deployment
 1. Commit metadata to Git
 2. Deploy to ObjectOS runtime
 3. Monitor and iterate
@@ -511,10 +316,7 @@ ObjectQL provides a universal loader and generic API for all metadata types.
 | Type | Extension | Identifier Source | Example |
 |---|---|---|---|
 | Object | `*.object.yml` | Filename = Object name | `project.object.yml` → object: `project` |
-| View | `*.view.yml` | Filename = View name | `task_list.view.yml` → view: `task_list` |
-| Form | `*.form.yml` | Filename = Form name | `project_form.form.yml` → form: `project_form` |
 | Application | `*.app.yml` | Filename = App name | `crm.app.yml` → app: `crm` |
-| Report | `*.report.yml` | Filename = Report name | `sales_summary.report.yml` → report: `sales_summary` |
 | Workflow | `*.workflow.yml` | Filename = Workflow name | `approval.workflow.yml` → workflow: `approval` |
 | Permission | `*.permission.yml` | Filename = Object name | `project.permission.yml` → applies to: `project` |
 | Validation | `*.validation.yml` | Filename = Object name | `project.validation.yml` → applies to: `project` |
@@ -530,9 +332,9 @@ ObjectQL provides a universal loader and generic API for all metadata types.
 All metadata types can be queried via the REST API:
 
 - `GET /api/metadata/:type`
-  - List all entries for a specific type (e.g. `/api/metadata/view`)
+  - List all entries for a specific type (e.g. `/api/metadata/object`)
 - `GET /api/metadata/:type/:id`
-  - Get the JSON content of a specific entry (e.g. `/api/metadata/view/task_list`)
+  - Get the JSON content of a specific entry (e.g. `/api/metadata/object/customer`)
 - `POST /api/metadata/:type/:id`
   - Update metadata content (if supported by storage)
 
@@ -566,17 +368,9 @@ function CustomerList() {
 fields:
   name: { type: text }
   email: { type: email }
-
-# customer_list.view.yml
-# View name comes from filename!
-type: list
-object: customer
-columns:
-  - name
-  - email
 ```
 
-**Result**: ObjectOS automatically generates API, UI, validation, and security - all from metadata!
+**Result**: ObjectOS automatically generates API, validation, and security - all from metadata!
 
 ## Benefits
 
