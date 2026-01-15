@@ -96,6 +96,79 @@ await repo.update(user.id, { email: 'alice.new@example.com' });
 await repo.delete(user.id);
 ```
 
+## Browser Usage
+
+The Memory Driver works seamlessly in web browsers! Perfect for prototyping, client-side apps, and offline experiences.
+
+### Quick Start in Browser
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ObjectQL in Browser</title>
+</head>
+<body>
+    <h1>ObjectQL Browser Demo</h1>
+    <script type="module">
+        import { ObjectQL } from '@objectql/core';
+        import { MemoryDriver } from '@objectql/driver-memory';
+        
+        // Initialize
+        const driver = new MemoryDriver();
+        const app = new ObjectQL({
+            datasources: { default: driver }
+        });
+        
+        // Define schema
+        app.registerObject({
+            name: 'tasks',
+            fields: {
+                title: { type: 'text', required: true },
+                completed: { type: 'boolean', defaultValue: false }
+            }
+        });
+        
+        await app.init();
+        
+        // Use it!
+        const ctx = app.createContext({ isSystem: true });
+        const tasks = ctx.object('tasks');
+        
+        await tasks.create({ title: 'Learn ObjectQL in Browser!' });
+        const allTasks = await tasks.find({});
+        console.log('Tasks:', allTasks);
+    </script>
+</body>
+</html>
+```
+
+### Interactive Browser Demo
+
+See the **[Browser Demo](../../../examples/browser-demo/)** for a complete interactive example with:
+- 🎨 Beautiful UI with live CRUD operations
+- 🖥️ Browser console debugging
+- 📊 Real-time statistics
+- ✨ Sample data generation
+
+### Browser Compatibility
+
+- ✅ Chrome/Edge 90+
+- ✅ Firefox 88+
+- ✅ Safari 14+
+- ✅ All modern browsers with ES6+ support
+
+### Browser vs Node.js
+
+| Feature | Browser | Node.js |
+|---------|---------|---------|
+| **Performance** | ⚡ Fast | ⚡ Fast |
+| **Persistence** | ❌ Lost on refresh | ❌ Lost on process exit |
+| **Use Case** | Prototyping, Client state | Testing, Dev, Edge |
+| **Data Limit** | RAM (GB) | RAM (GB) |
+
+**For persistent browser storage**, use the [LocalStorage Driver](../localstorage/README.md).
+
 ## Configuration Options
 
 ### Basic Configuration

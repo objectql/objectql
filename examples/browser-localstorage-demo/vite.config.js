@@ -3,6 +3,13 @@ import { resolve } from 'path';
 
 export default defineConfig({
   root: '.',
+  resolve: {
+    alias: {
+      '@objectql/core': resolve(__dirname, '../../packages/foundation/core/src/index.ts'),
+      '@objectql/driver-localstorage': resolve(__dirname, '../../packages/drivers/localstorage/src/index.ts'),
+      '@objectql/types': resolve(__dirname, '../../packages/foundation/types/src/index.ts')
+    }
+  },
   build: {
     outDir: 'dist',
     rollupOptions: {
@@ -13,9 +20,6 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true
-  },
-  optimizeDeps: {
-    include: ['@objectql/core', '@objectql/driver-memory', '@objectql/types']
+    open: false
   }
 });
