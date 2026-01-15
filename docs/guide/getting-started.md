@@ -8,23 +8,43 @@
 2.  **Universal Protocol**: The query language is a JSON AST, making it easy for frontends or AI agents to generate queries.
 3.  **Action & Hook System**: Built-in support for "Button Actions" (RPC) and "Triggers" (Hooks), allowing you to model **Behavior** alongside **Data**.
 
-## Quick Start: The "Hello World"
+## Quick Start
 
-You can experience ObjectQL with a single file. No YAML, no complex config.
+The fastest way to get started is using the CLI to scaffold a project.
 
-### 1. Minimal Setup
+### 1. Minimal Setup (Hello World)
 
-Install the core and SQLite driver (for zero-config database).
+Create a single-file project to learn the basics.
 
 ```bash
-npm install @objectql/core @objectql/driver-sql sqlite3
-# or
-pnpm add @objectql/core @objectql/driver-sql sqlite3
+# Initialize a new project
+npx @objectql/cli init --template hello-world --name my-first-app
+
+# Enter directory
+cd my-first-app
+
+# Start the app
+npm start
 ```
 
-### 2. The Universal Script
+This will create an `index.ts` file that defines a schema, initializes an in-memory SQLite database, and runs some queries.
 
-Create `index.ts`. This script defines the schema, boots the engine, and runs queries in one go.
+### 2. Standard Setup (Project Tracker)
+
+For building real applications, use the `starter` template. This sets up a proper folder structure with YAML metadata, TypeScript logic hooks, and relationship management.
+
+```bash
+npx @objectql/cli init --template starter --name project-tracker
+```
+
+This structure follows our **Best Practices**:
+*   **`src/objects/*.object.yml`**: Data definitions.
+*   **`src/hooks/*.hook.ts`**: Business logic.
+*   **`src/index.ts`**: Application entry point.
+
+## Manual Setup (The Hard Way)
+
+If you prefer to set up manually or add ObjectQL to an existing project:
 
 ```typescript
 import { ObjectQL } from '@objectql/core';

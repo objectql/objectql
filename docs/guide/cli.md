@@ -26,7 +26,7 @@ npx objectql init [options]
 
 | Option | Alias | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `--template <template>` | `-t` | `basic` | Template to use (`basic`, `express-api`, `enterprise`). |
+| `--template <template>` | `-t` | `starter` | Template to use (`starter`, `hello-world`). |
 | `--name <name>` | `-n` | - | Project name. |
 | `--dir <path>` | `-d` | - | Target directory. |
 | `--skip-install` | | `false` | Skip dependency installation. |
@@ -35,7 +35,7 @@ npx objectql init [options]
 **Example:**
 
 ```bash
-npx objectql init -t express-api -n my-app
+npx objectql init -t starter -n my-app
 ```
 
 ### 2.2 `generate` (Type Generation)
