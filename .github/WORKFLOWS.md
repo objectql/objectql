@@ -4,7 +4,7 @@ This document describes all the GitHub Actions workflows configured for the Obje
 
 ## Core CI/CD Workflows
 
-### 🔨 [ci.yml](.github/workflows/ci.yml)
+### 🔨 [ci.yml](workflows/ci.yml)
 **Purpose:** Main continuous integration pipeline  
 **Triggers:** Push to `main`, Pull Requests  
 **What it does:**
@@ -14,7 +14,7 @@ This document describes all the GitHub Actions workflows configured for the Obje
 - Runs test suite across all packages
 - Sets up Redis and MongoDB for driver tests
 
-### 📊 [coverage.yml](.github/workflows/coverage.yml) ✨ NEW
+### 📊 [coverage.yml](workflows/coverage.yml) ✨ NEW
 **Purpose:** Test coverage tracking and reporting  
 **Triggers:** Push to `main`, Pull Requests  
 **What it does:**
@@ -23,7 +23,7 @@ This document describes all the GitHub Actions workflows configured for the Obje
 - Provides coverage insights on PRs
 - Tracks coverage trends over time
 
-### ✅ [typecheck.yml](.github/workflows/typecheck.yml)
+### ✅ [typecheck.yml](workflows/typecheck.yml)
 **Purpose:** TypeScript type checking  
 **Triggers:** Push to `main`, Pull Requests  
 **What it does:**
@@ -33,7 +33,7 @@ This document describes all the GitHub Actions workflows configured for the Obje
 
 ## Release & Publishing
 
-### 🚀 [release.yml](.github/workflows/release.yml)
+### 🚀 [release.yml](workflows/release.yml)
 **Purpose:** Automated package publishing  
 **Triggers:** Push to `main`  
 **What it does:**
@@ -42,7 +42,7 @@ This document describes all the GitHub Actions workflows configured for the Obje
 - Publishes packages to npm when merged
 - Requires NPM_TOKEN secret
 
-### 📝 [changelog-preview.yml](.github/workflows/changelog-preview.yml) ✨ NEW
+### 📝 [changelog-preview.yml](workflows/changelog-preview.yml) ✨ NEW
 **Purpose:** Preview changelog before release  
 **Triggers:** Pull Requests  
 **What it does:**
@@ -52,7 +52,7 @@ This document describes all the GitHub Actions workflows configured for the Obje
 
 ## Code Quality & Security
 
-### 🔒 [codeql.yml](.github/workflows/codeql.yml)
+### 🔒 [codeql.yml](workflows/codeql.yml)
 **Purpose:** Security scanning with CodeQL  
 **Triggers:** Push to `main`, Pull Requests, Weekly schedule  
 **What it does:**
@@ -60,7 +60,7 @@ This document describes all the GitHub Actions workflows configured for the Obje
 - Runs security analysis
 - Creates security alerts for issues found
 
-### 🔍 [dependency-review.yml](.github/workflows/dependency-review.yml)
+### 🔍 [dependency-review.yml](workflows/dependency-review.yml)
 **Purpose:** Dependency security review  
 **Triggers:** Pull Requests  
 **What it does:**
@@ -69,7 +69,7 @@ This document describes all the GitHub Actions workflows configured for the Obje
 - Fails on moderate or higher severity issues
 - Comments on PRs with findings
 
-### ✓ [validate-metadata.yml](.github/workflows/validate-metadata.yml)
+### ✓ [validate-metadata.yml](workflows/validate-metadata.yml)
 **Purpose:** Validate ObjectQL metadata files  
 **Triggers:** Changes to `*.object.yml`, `*.validation.yml`, etc.  
 **What it does:**
@@ -79,7 +79,7 @@ This document describes all the GitHub Actions workflows configured for the Obje
 
 ## Documentation
 
-### 📚 [deploy-docs.yml](.github/workflows/deploy-docs.yml)
+### 📚 [deploy-docs.yml](workflows/deploy-docs.yml)
 **Purpose:** Deploy documentation to GitHub Pages  
 **Triggers:** Push to `main` (docs changes), Manual dispatch  
 **What it does:**
@@ -87,7 +87,7 @@ This document describes all the GitHub Actions workflows configured for the Obje
 - Deploys to GitHub Pages
 - Makes docs available at objectql.org
 
-### 🔗 [link-checker.yml](.github/workflows/link-checker.yml) ✨ NEW
+### 🔗 [link-checker.yml](workflows/link-checker.yml) ✨ NEW
 **Purpose:** Check for broken links in documentation  
 **Triggers:** Push/PR with doc changes, Weekly schedule, Manual  
 **What it does:**
@@ -98,7 +98,7 @@ This document describes all the GitHub Actions workflows configured for the Obje
 
 ## Repository Automation
 
-### 🏷️ [labeler.yml](.github/workflows/labeler.yml)
+### 🏷️ [labeler.yml](workflows/labeler.yml)
 **Purpose:** Auto-label PRs based on files changed  
 **Triggers:** Pull Requests (opened, synchronized, reopened)  
 **What it does:**
@@ -106,7 +106,7 @@ This document describes all the GitHub Actions workflows configured for the Obje
 - Based on file paths changed
 - Helps with PR organization and filtering
 
-### 📏 [pr-size-labeler.yml](.github/workflows/pr-size-labeler.yml) ✨ NEW
+### 📏 [pr-size-labeler.yml](workflows/pr-size-labeler.yml) ✨ NEW
 **Purpose:** Label PRs by size  
 **Triggers:** Pull Requests (opened, synchronized, reopened)  
 **What it does:**
@@ -115,7 +115,7 @@ This document describes all the GitHub Actions workflows configured for the Obje
 - Ignores lock files and markdown
 - Encourages smaller, reviewable PRs
 
-### 👋 [welcome.yml](.github/workflows/welcome.yml) ✨ NEW
+### 👋 [welcome.yml](workflows/welcome.yml) ✨ NEW
 **Purpose:** Welcome first-time contributors  
 **Triggers:** First issue or PR from a new contributor  
 **What it does:**
@@ -123,7 +123,7 @@ This document describes all the GitHub Actions workflows configured for the Obje
 - Provides PR checklist for first-time contributors
 - Links to documentation and guidelines
 
-### 🗑️ [stale.yml](.github/workflows/stale.yml)
+### 🗑️ [stale.yml](workflows/stale.yml)
 **Purpose:** Manage stale issues and PRs  
 **Triggers:** Daily schedule, Manual dispatch  
 **What it does:**
@@ -132,7 +132,7 @@ This document describes all the GitHub Actions workflows configured for the Obje
 - Exempts labeled issues: `pinned`, `security`, `roadmap`
 - Helps keep issue tracker organized
 
-### 🧹 [cleanup-runs.yml](.github/workflows/cleanup-runs.yml) ✨ NEW
+### 🧹 [cleanup-runs.yml](workflows/cleanup-runs.yml) ✨ NEW
 **Purpose:** Clean up old workflow runs  
 **Triggers:** Weekly schedule (Sunday), Manual dispatch  
 **What it does:**
@@ -143,7 +143,7 @@ This document describes all the GitHub Actions workflows configured for the Obje
 
 ## Dependency Management
 
-### 🤖 [auto-approve-dependabot.yml](.github/workflows/auto-approve-dependabot.yml) ✨ NEW
+### 🤖 [auto-approve-dependabot.yml](workflows/auto-approve-dependabot.yml) ✨ NEW
 **Purpose:** Streamline Dependabot PR approvals  
 **Triggers:** Dependabot Pull Requests  
 **What it does:**
@@ -154,7 +154,7 @@ This document describes all the GitHub Actions workflows configured for the Obje
 
 ## Performance Testing
 
-### ⚡ [benchmark.yml](.github/workflows/benchmark.yml) ✨ NEW
+### ⚡ [benchmark.yml](workflows/benchmark.yml) ✨ NEW
 **Purpose:** Track performance benchmarks  
 **Triggers:** Push to `main`, Pull Requests, Manual  
 **What it does:**
@@ -167,10 +167,10 @@ This document describes all the GitHub Actions workflows configured for the Obje
 
 ## Configuration Files
 
-### [labeler.yml](.github/labeler.yml)
+### [labeler.yml](labeler.yml)
 Configuration for the PR auto-labeler, mapping file paths to labels.
 
-### [markdown-link-check-config.json](.github/markdown-link-check-config.json) ✨ NEW
+### [markdown-link-check-config.json](markdown-link-check-config.json) ✨ NEW
 Configuration for the link checker, including patterns to ignore (localhost, example.com).
 
 ---
