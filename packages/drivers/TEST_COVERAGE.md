@@ -6,7 +6,9 @@ This document describes the comprehensive test coverage for ObjectQL database dr
 
 The test suite ensures all database drivers implement the `Driver` interface correctly and handle edge cases properly.
 
-## SQL Driver (SqlDriver)
+## Official Production Drivers
+
+### SQL Driver (SqlDriver)
 
 Location: `packages/drivers/sql/test/`
 
@@ -132,7 +134,63 @@ Location: `packages/drivers/mongo/test/`
 
 ### Total MongoDB Driver Tests: 42 tests
 
-## Running Tests
+---
+
+## Example Driver Implementations
+
+### Redis Driver (RedisDriver) - Example/Template
+
+Location: `packages/drivers/redis/test/`
+
+**Status:** ⚠️ **Example Implementation Only** - Not for production use
+
+The Redis driver is provided as a **reference implementation** to demonstrate how to create custom ObjectQL drivers. It shows the complete pattern but has performance limitations.
+
+#### Test Files
+
+1. **index.test.ts** - Basic functionality (20+ tests)
+   - Connection management
+   - CRUD operations (Create, Read, Update, Delete)
+   - Query filtering (equality, comparison, OR logic, contains)
+   - Query options (sorting, pagination, field projection)
+   - Count operations
+
+#### Purpose
+
+- Educational reference for driver developers
+- Template for creating new database drivers
+- Demonstrates ObjectQL driver interface implementation
+- Shows filter, sort, and pagination logic
+
+#### Known Limitations
+
+- Uses Redis KEYS command (scans all keys - inefficient for production)
+- All filtering and sorting done in-memory
+- Not suitable for large datasets (> 10K records)
+- No transaction support
+- No aggregation support
+
+#### Production Recommendations
+
+For production Redis support, enhance with:
+- RedisJSON module for native JSON queries
+- RedisSearch for indexed queries
+- Secondary indexes using Redis Sets
+- Cursor-based pagination
+- Connection pooling
+
+### Total Redis Driver Tests: ~20 tests (Example only)
+
+---
+
+## Test Coverage Summary
+
+| Driver | Files | Tests | Status |
+|--------|-------|-------|--------|
+| SQL (SqlDriver) | 3 | 54 | ✅ All Passing (Production) |
+| MongoDB (MongoDriver) | 2 | 42 | ✅ All Passing (Production, 39 skip without MongoDB) |
+| Redis (RedisDriver) | 1 | ~20 | ⚠️ Example/Template Only |
+| **Production Total** | **5** | **96** | **✅** |
 
 ### Run all driver tests
 ```bash

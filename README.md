@@ -112,21 +112,38 @@ main();
 
 ObjectQL isolates the "What" (Query) from the "How" (Execution).
 
-### SQL Driver (`@objectql/driver-sql`)
+### Official Drivers
+
+#### SQL Driver (`@objectql/driver-sql`)
 
 * Supports PostgreSQL, MySQL, SQLite, SQL Server.
 * **Smart Hybrid Mode:** Automatically maps defined fields to SQL columns and undefined fields to a `_jsonb` column. This gives you the speed of SQL with the flexibility of NoSQL.
 
-### Mongo Driver (`@objectql/driver-mongo`)
+#### Mongo Driver (`@objectql/driver-mongo`)
 
 * Native translation to Aggregation Pipelines.
 * High performance for massive datasets.
 
-### SDK / Remote Driver (`@objectql/sdk`)
+#### SDK / Remote Driver (`@objectql/sdk`)
 
 * **The Magic:** You can run ObjectQL in the **Browser**.
 * Instead of connecting to a DB, it connects to an ObjectQL Server API.
 * The API usage remains exactly the same (`repo.find(...)`), but it runs over HTTP.
+
+### Extensibility
+
+ObjectQL's driver architecture supports custom database implementations. Potential databases include:
+
+* **Key-Value Stores:** Redis, Memcached, etcd
+* **Search Engines:** Elasticsearch, OpenSearch, Algolia
+* **Graph Databases:** Neo4j, ArangoDB
+* **Time-Series:** InfluxDB, TimescaleDB
+* **Cloud Databases:** DynamoDB, Firestore, Cosmos DB
+
+**Want to add support for your database?** Check out:
+* [Driver Extensibility Guide](./docs/guide/drivers/extensibility.md) - Lists potential databases and their implementation complexity
+* [Implementing Custom Drivers](./docs/guide/drivers/implementing-custom-driver.md) - Step-by-step guide with code examples
+* [Redis Driver Example](./packages/drivers/redis/) - Reference implementation
 
 ---
 
