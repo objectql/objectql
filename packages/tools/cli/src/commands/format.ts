@@ -4,6 +4,9 @@ import chalk from 'chalk';
 import * as yaml from 'js-yaml';
 import glob from 'fast-glob';
 
+// Naming convention regex
+const VALID_NAME_REGEX = /^[a-z][a-z0-9_]*$/;
+
 interface FormatOptions {
     dir?: string;
     check?: boolean;
@@ -19,6 +22,15 @@ export async function format(options: FormatOptions) {
     let formattedCount = 0;
     let unchangedCount = 0;
     let errorCount = 0;
+    
+    // Load Prettier once at the start
+    let prettier: any;
+    try {
+        prettier = await import('prettier');
+    } catch (e) {
+        console.error(chalk.red('❌ Prettier is not installed. Install it with: npm install --save-dev prettier'));
+        process.exit(1);
+    }
     
     try {
         const files = await glob(['**/*.yml', '**/*.yaml'], { 
@@ -37,15 +49,13 @@ export async function format(options: FormatOptions) {
                 // Parse to validate YAML
                 yaml.load(content);
                 
-                // Format with Prettier - use dynamic import for better compatibility
-                try {
-                    const prettier = await import('prettier');
-                    const formatted = await prettier.format(content, {
-                        parser: 'yaml',
-                        printWidth: 80,
-                        tabWidth: 2,
-                        singleQuote: true
-                    });
+                // Format with Prettier
+                const formatted = await prettier.format(content, {
+                    parser: 'yaml',
+                    printWidth: 80,
+                    tabWidth: 2,
+                    singleQuote: true
+                });
                     
                     if (content !== formatted) {
                         if (options.check) {
@@ -62,10 +72,6 @@ export async function format(options: FormatOptions) {
                             console.log(chalk.gray(`  ✓  ${file}`));
                         }
                     }
-                } catch (prettierError: any) {
-                    console.error(chalk.red(`  ❌ ${file}: Prettier error - ${prettierError.message}`));
-                    errorCount++;
-                }
             } catch (e: any) {
                 console.error(chalk.red(`  ❌ ${file}: ${e.message}`));
                 errorCount++;

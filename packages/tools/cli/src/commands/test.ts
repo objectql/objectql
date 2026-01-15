@@ -23,10 +23,11 @@ export async function test(options: TestOptions) {
     
     try {
         if (fs.existsSync(packageJsonPath)) {
-            const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-            
-            // Check if jest is configured
-            if (packageJson.devDependencies?.jest || packageJson.dependencies?.jest || packageJson.jest) {
+            try {
+                const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+                
+                // Check if jest is configured
+                if (packageJson.devDependencies?.jest || packageJson.dependencies?.jest || packageJson.jest) {
                 const jestArgs = ['jest'];
                 
                 if (options.watch) {
@@ -77,6 +78,9 @@ export async function test(options: TestOptions) {
                 });
                 
                 return;
+            }
+            } catch (parseError: any) {
+                console.error(chalk.yellow(`⚠️  Failed to parse package.json: ${parseError.message}`));
             }
         }
         

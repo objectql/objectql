@@ -34,7 +34,10 @@ export async function start(options: StartOptions) {
             if (configPath.endsWith('.ts')) {
                 require('ts-node/register');
             }
-            config = require(configPath).default || require(configPath);
+            config = require(configPath);
+            if (config.default) {
+                config = config.default;
+            }
         } catch (e: any) {
             console.warn(chalk.yellow(`⚠️  Failed to load config: ${e.message}`));
         }

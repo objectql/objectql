@@ -3,6 +3,9 @@ import { ObjectLoader } from '@objectql/platform-node';
 import * as path from 'path';
 import chalk from 'chalk';
 
+// Naming convention regex
+const VALID_NAME_REGEX = /^[a-z][a-z0-9_]*$/;
+
 interface LintOptions {
     dir?: string;
     fix?: boolean;
@@ -36,7 +39,7 @@ export async function lint(options: LintOptions) {
             console.log(chalk.cyan(`Checking object: ${name}`));
             
             // Check naming convention (lowercase with underscores)
-            if (!/^[a-z][a-z0-9_]*$/.test(name)) {
+            if (!VALID_NAME_REGEX.test(name)) {
                 console.log(chalk.red(`  ❌ Invalid name format: "${name}" should be lowercase with underscores`));
                 hasErrors = true;
             }
@@ -58,7 +61,7 @@ export async function lint(options: LintOptions) {
             
             // Validate field names
             for (const [fieldName, field] of Object.entries(objectConfig.fields || {})) {
-                if (!/^[a-z][a-z0-9_]*$/.test(fieldName)) {
+                if (!VALID_NAME_REGEX.test(fieldName)) {
                     console.log(chalk.red(`  ❌ Invalid field name: "${fieldName}" should be lowercase with underscores`));
                     hasErrors = true;
                 }
