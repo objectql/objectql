@@ -31,19 +31,13 @@ program
 
 program
     .command('init')
-    .description('Create a new ObjectQL project')
-    .option('-t, --template <template>', 'Template to use (basic, express-api, enterprise)', 'basic')
-    .option('-n, --name <name>', 'Project name')
-    .option('-d, --dir <path>', 'Target directory')
-    .option('--skip-install', 'Skip dependency installation')
-    .option('--skip-git', 'Skip git initialization')
-    .action(async (options) => {
-        try {
-            await initProject(options);
-        } catch (error) {
-            console.error(error);
-            process.exit(1);
-        }
+    .description('Create a new ObjectQL project (Deprecated)')
+    .action(async () => {
+        console.log(chalk.red('\n⚠️  DEPRECATED: The "objectql init" command has been removed.'));
+        console.log(chalk.white('Please use the standard initializer instead:\n'));
+        console.log(chalk.cyan('  npm create @objectql@latest <my-app>'));
+        console.log('');
+        process.exit(1);
     });
 
 program
