@@ -19,10 +19,16 @@
       "pattern": "^https://objectql.org"
     },
     {
+      "pattern": "^https://www.objectql.org"
+    },
+    {
       "pattern": "^https://www.npmjs.com/package/@objectql/"
     },
     {
       "pattern": "^https://github.com/.*/releases/tag/.*%40"
+    },
+    {
+      "pattern": "^mailto:"
     }
   ],
   "replacementPatterns": [],
