@@ -45,68 +45,53 @@ ObjectQL is organized as a Monorepo to ensure modularity and universal compatibi
 
 ## ⚡ Quick Start
 
-### 1. Installation
+### 1. Create a New Project
+
+The fastest way to start is using the CLI to scaffold a new project.
 
 ```bash
-# Install core and a driver (e.g., Postgres or SQLite)
-npm install @objectql/core @objectql/driver-sql sqlite3
+# Generate a new project
+npm create @objectql@latest my-app
+
+# Choose 'starter' for a complete example or 'hello-world' for minimal setup
 ```
 
-### 2. The Universal Script
+### 2. Install VS Code Extension (Critical 🚨)
 
-ObjectQL can run in a single file without complex configuration.
+For the best experience, install the official extension. It provides **Intelligent IntelliSense** and **Real-time Validation** for your YAML models.
 
-```typescript
-import { ObjectQL } from '@objectql/core';
-import { SqlDriver } from '@objectql/driver-sql';
+*   Search for **"ObjectQL"** in the VS Code Marketplace.
+*   Or open your new project, and VS Code will recommend it automatically via `.vscode/extensions.json`.
 
-async function main() {
-  // 1. Initialize Driver (In-Memory SQLite)
-  const driver = new SqlDriver({
-    client: 'sqlite3',
-    connection: { filename: ':memory:' }, 
-    useNullAsDefault: true
-  });
+### 3. Define Metadata (The "Object")
 
-  // 2. Initialize Engine
-  const app = new ObjectQL({
-    datasources: { default: driver }
-  });
+ObjectQL uses **YAML** as the source of truth. Create a file `src/objects/story.object.yml`:
 
-  // 3. Define Schema (The "Object")
-  // In a real app, this would be loaded from a .yml file
-  app.registerObject({
-    name: "users",
-    fields: {
-      name: { type: "text", required: true },
-      email: { type: "email", unique: true },
-      role: { 
-        type: "select", 
-        options: ["admin", "user"], 
-        defaultValue: "user" 
-      }
-    }
-  });
-
-  await app.init();
-
-  // 4. Enjoy Type-Safe(ish) CRUD
-  const ctx = app.createContext({ isSystem: true });
-  const repo = ctx.object('users');
-
-  // Create
-  await repo.create({ name: 'Alice', email: 'alice@example.com' });
-
-  // Find
-  const users = await repo.find({
-    filters: [['role', '=', 'user']]
-  });
-  
-  console.log(users);
-}
-
-main();
+```yaml
+name: story
+label: User Story
+fields:
+  title:
+    type: text
+    required: true
+  status:
+    type: select
+    options: [draft, active, done]
+    default: draft
+  points:
+    type: number
+    scale: 0
+    default: 1
 ```
+
+### 4. Run & Play
+
+Start the development server. ObjectQL will automatically load your YAML files and generate the database schema.
+
+```bash
+npm run dev
+```
+
 
 ---
 
@@ -210,6 +195,33 @@ ObjectQL supports three distinct query interfaces, each optimized for different 
 
 ---
 
+## 🛠️ Developer Tools
+
+### VSCode Extension
+
+Enhance your ObjectQL development experience with our official VSCode extension.
+
+**Features:**
+- 🎯 Intelligent IntelliSense for `.object.yml`, `.validation.yml`, `.permission.yml`, `.app.yml`
+- ✅ Real-time JSON Schema validation with inline errors
+- 📝 30+ code snippets for objects, fields, validations, hooks, and actions
+- ⚡ Quick commands to create new ObjectQL files from templates
+- 🎨 Custom file icons and syntax highlighting
+- 🔍 Context-aware auto-completion
+
+**Installation:**
+```bash
+cd packages/tools/vscode-objectql
+npm install
+npm run compile
+npm run package
+# Then install the generated .vsix file in VS Code
+```
+
+See [`packages/tools/vscode-objectql/README.md`](./packages/tools/vscode-objectql/README.md) for detailed documentation.
+
+---
+
 ## 🛠️ Validation & Logic
 
 ObjectQL includes a powerful validation engine that runs universally.
@@ -244,6 +256,44 @@ For a complete status report on ObjectQL's implementation against the documented
 - ✅ Core Protocol & Runtime: 85%
 - ✅ Data Drivers (SQL/Mongo): 75%
 - ⚠️ Workflow Engine: 35%
+
+---
+
+## 🛠️ Development & Contributing
+
+If you fork or clone the repository to contribute or run examples from source:
+
+1. **Setup Workspace**
+   ```bash
+   git clone https://github.com/objectql/objectql.git
+   cd objectql
+   npm install -g pnpm
+   pnpm install
+   ```
+
+2. **Build Packages**
+   You must build the core libraries before running examples, as they rely on local workspace builds.
+   ```bash
+   pnpm build
+   ```
+
+3. **Run Examples**
+   
+   These examples run as **scripts** to demonstrate the ObjectQL Core Engine capabilities (Validation, CRUD, Logic Hooks). They use an in-memory SQLite database.
+
+   **Starter (Project Tracker):**
+   ```bash
+   # Starts the API Server (http://localhost:3000)
+   pnpm --filter @objectql/example-project-tracker start
+   
+   # Note: Sample data (projects.data.yml) is automatically loaded on startup
+   ```
+
+   **Enterprise ERP:**
+   ```bash
+   pnpm --filter @objectql/example-enterprise-erp start
+   # Output: Plugin initialization, Employee creation logs, Audit trails
+   ```
 
 ---
 

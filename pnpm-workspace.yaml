@@ -3,11 +3,10 @@ packages:
   - packages/drivers/*
   - packages/runtime/*
   - packages/tools/*
-  - packages/starters/*
-  - examples/scenarios/*
-  - examples/starters/*
-  - examples/plugins/*
-  - examples/tutorials/*
+  - examples/quickstart/*
+  - examples/integrations/*
+  - examples/showcase/*
+  - examples/drivers/*
 
 onlyBuiltDependencies:
   - esbuild

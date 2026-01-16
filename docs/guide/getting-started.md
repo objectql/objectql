@@ -8,23 +8,69 @@
 2.  **Universal Protocol**: The query language is a JSON AST, making it easy for frontends or AI agents to generate queries.
 3.  **Action & Hook System**: Built-in support for "Button Actions" (RPC) and "Triggers" (Hooks), allowing you to model **Behavior** alongside **Data**.
 
-## Quick Start: The "Hello World"
+## Quick Start
 
-You can experience ObjectQL with a single file. No YAML, no complex config.
+The fastest way to get started is using the CLI to scaffold a project.
 
-### 1. Minimal Setup
+### 1. Create a New Project
 
-Install the core and SQLite driver (for zero-config database).
+The easiest way to start is using the generator.
 
 ```bash
-npm install @objectql/core @objectql/driver-sql sqlite3
-# or
-pnpm add @objectql/core @objectql/driver-sql sqlite3
+# Standard Setup (Recommended) - Full Project Tracker Demo
+npm create @objectql@latest my-app -- --template starter
+
+# Minimal Setup - Single File
+npm create @objectql@latest my-app -- --template hello-world
 ```
 
-### 2. The Universal Script
+This will create a new project with all necessary dependencies.
 
-Create `index.ts`. This script defines the schema, boots the engine, and runs queries in one go.
+### 2. Install VS Code Extension (Recommended) 🚨
+
+To treat your metadata like code (with validation and autocomplete), install the **Standard ObjectStack AI Extension**.
+
+1.  Open Visual Studio Code.
+2.  Go to the **Extensions** view (`Cmd+Shift+X`).
+3.  Search for `ObjectQL` and install.
+4.  Alternatively, when you open the created project, VS Code will prompt you to install recommended extensions.
+
+> **Why?** The extension understands your `*.object.yml` files, validating field types and relationships in real-time, just like TypeScript.
+
+### 3. Define the Protocol (Your Meta-Schema)
+
+Instead of passing objects to a constructor, we define them in YAML. This is the "AI-Native" way—separate the **Instruction** (YAML) from the **Execution** (Runtime).
+
+Create a file `src/objects/todo.object.yml`:
+
+```yaml
+name: todo
+label: Task
+fields:
+  title: 
+    type: text
+    required: true
+    searchable: true
+  completed: 
+    type: boolean
+    default: false
+  priority:
+    type: select
+    options: [low, medium, high]
+    default: medium
+```
+
+### 4. Run the Project
+
+```bash
+npm run dev
+```
+
+ObjectQL will detect the new file, generate the necessary database tables (in SQLite by default), and start the server.
+
+### 5. Manual Setup (Programmatic API)
+
+If you are integrating ObjectQL into an existing specialized backend (like a Lambda function or a custom script), you can use the Programmatic API.
 
 ```typescript
 import { ObjectQL } from '@objectql/core';
@@ -44,6 +90,7 @@ async function main() {
   });
 
   // 3. Define Metadata Inline (Code as Configuration)
+  // Note: We recommend YAML for scalability, but this works for scripts.
   app.registerObject({
     name: 'todo',
     fields: {
@@ -70,7 +117,7 @@ main();
 
 ## Scaling Up: The Metadata Approach
 
-Once you are comfortable with the core, you should move your definitions to YAML files.
+Once you are comfortable with the basics, notice that standard projects use file-based modules configuration.
 
 ```typescript
 import { ObjectQL } from '@objectql/core';
@@ -82,13 +129,12 @@ async function main() {
         // Detects 'sqlite', 'postgres', 'mongodb' automatically
         connection: 'sqlite://data.db', 
         
-        // 2. Schema Source
-        // Where your *.object.yml files are located
-        source: ['src/objects'],
-
-        // 3. Load Presets (Optional)
-        // Load standard objects from npm packages
-        presets: ['@objectql/preset-auth']
+        // 2. Load Modules
+        // Load schema from local directories OR npm packages
+        modules: [
+            'src/objects',           // Local Module
+            '@objectql/module-auth'  // External Module (NPM)
+        ]
     });
 
     await db.init();

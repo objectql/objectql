@@ -1,0 +1,33 @@
+# ObjectQL Validation Rules
+# Documentation: https://www.objectql.org/docs/spec/validation
+
+# Object-level validation rules
+rules:
+  # Cross-field validation example
+  - name: end_after_start
+    type: cross_field
+    message: "End date must be after start date"
+    fields: [start_date, end_date]
+    rule:
+      field: end_date
+      operator: ">"
+      compare_to: start_date
+    trigger: [create, update]
+    severity: error
+
+  # Business rule example
+  - name: status_approval_required
+    type: business_rule
+    message: "Approval required before activation"
+    constraint:
+      expression: "status === 'active' && approved === true"
+    trigger: [create, update]
+    severity: error
+
+  # Uniqueness validation
+  - name: unique_email
+    type: unique
+    message: "Email must be unique"
+    field: email
+    case_sensitive: false
+    trigger: [create, update]

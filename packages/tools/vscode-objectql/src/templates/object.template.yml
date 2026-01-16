@@ -1,0 +1,58 @@
+# ObjectQL Object Definition
+# Documentation: https://www.objectql.org/docs/spec/object
+
+name: {{name}}
+label: {{label}}
+description: "{{label}} object"
+
+fields:
+  name:
+    type: text
+    label: Name
+    required: true
+    searchable: true
+    help_text: "The name of the {{name}}"
+  
+  description:
+    type: textarea
+    label: Description
+    help_text: "Detailed description"
+  
+  status:
+    type: select
+    label: Status
+    options:
+      - label: Active
+        value: active
+      - label: Inactive
+        value: inactive
+    defaultValue: active
+  
+  created_by:
+    type: lookup
+    label: Created By
+    reference_to: users
+    readonly: true
+  
+  created_at:
+    type: datetime
+    label: Created At
+    readonly: true
+
+# Indexes for performance
+indexes:
+  name_idx:
+    fields: [name]
+  status_idx:
+    fields: [status]
+
+# Validation rules (optional)
+validation:
+  rules:
+    - name: name_required
+      type: cross_field
+      message: "Name is required"
+      rule:
+        field: name
+        operator: "!="
+        value: null
