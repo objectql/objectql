@@ -100,10 +100,25 @@ export class ExcelDriver implements Driver {
                 await this.workbook.xlsx.readFile(this.filePath);
                 this.loadDataFromWorkbook();
             } catch (error) {
+                const errorMessage = (error as Error).message;
+                
+                // Provide helpful error messages for common issues
+                let detailedMessage = `Failed to read Excel file: ${this.filePath}`;
+                if (errorMessage.includes('corrupted') || errorMessage.includes('invalid')) {
+                    detailedMessage += ' - File may be corrupted or not a valid .xlsx file';
+                } else if (errorMessage.includes('permission') || errorMessage.includes('EACCES')) {
+                    detailedMessage += ' - Permission denied. Check file permissions.';
+                } else if (errorMessage.includes('EBUSY')) {
+                    detailedMessage += ' - File is locked by another process. Close it and try again.';
+                }
+                
                 throw new ObjectQLError({
                     code: 'FILE_READ_ERROR',
-                    message: `Failed to read Excel file: ${this.filePath}`,
-                    details: { error: (error as Error).message }
+                    message: detailedMessage,
+                    details: { 
+                        filePath: this.filePath,
+                        error: errorMessage 
+                    }
                 });
             }
         } else if (this.config.createIfMissing) {
@@ -120,6 +135,11 @@ export class ExcelDriver implements Driver {
 
     /**
      * Load data from workbook into memory.
+     * 
+     * Expected Excel format:
+     * - First row contains column headers (field names)
+     * - Subsequent rows contain data records
+     * - Each worksheet represents one object type
      */
     private loadDataFromWorkbook(): void {
         this.workbook.eachSheet((worksheet) => {
@@ -130,20 +150,41 @@ export class ExcelDriver implements Driver {
             const headerRow = worksheet.getRow(1);
             const headers: string[] = [];
             headerRow.eachCell((cell, colNumber) => {
-                headers[colNumber - 1] = String(cell.value);
+                const headerValue = cell.value;
+                if (headerValue) {
+                    headers[colNumber - 1] = String(headerValue);
+                }
             });
             
+            // Warn if worksheet has no headers (might be corrupted or wrong format)
+            if (headers.length === 0 && worksheet.rowCount > 0) {
+                console.warn(`[ExcelDriver] Warning: Worksheet "${sheetName}" has no headers in first row. Skipping.`);
+                return;
+            }
+            
             // Skip first row (headers) and read data rows
+            let rowsProcessed = 0;
+            let rowsSkipped = 0;
+            
             worksheet.eachRow((row, rowNumber) => {
                 if (rowNumber === 1) return; // Skip header row
                 
                 const record: any = {};
+                let hasData = false;
+                
                 row.eachCell((cell, colNumber) => {
                     const header = headers[colNumber - 1];
                     if (header) {
                         record[header] = cell.value;
+                        hasData = true;
                     }
                 });
+                
+                // Skip completely empty rows
+                if (!hasData) {
+                    rowsSkipped++;
+                    return;
+                }
                 
                 // Ensure ID exists
                 if (!record.id) {
@@ -151,7 +192,13 @@ export class ExcelDriver implements Driver {
                 }
                 
                 records.push(record);
+                rowsProcessed++;
             });
+            
+            // Log summary for debugging
+            if (rowsSkipped > 0) {
+                console.warn(`[ExcelDriver] Worksheet "${sheetName}": Processed ${rowsProcessed} rows, skipped ${rowsSkipped} empty rows`);
+            }
             
             this.data.set(sheetName, records);
             this.updateIdCounter(sheetName, records);

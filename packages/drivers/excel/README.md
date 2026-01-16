@@ -99,10 +99,13 @@ const driver = new ExcelDriver({
 
 ## How It Works
 
-### Data Storage
+### Data Storage Format
 
+**Important**: The Excel file must follow this structure:
+
+- **One file** contains multiple worksheets
 - **Each worksheet = One object type** (e.g., `users`, `products`)
-- **First row = Column headers** (field names)
+- **First row = Column headers** (field names like `id`, `name`, `email`)
 - **Subsequent rows = Data records**
 
 Example Excel structure:
@@ -113,12 +116,44 @@ Example Excel structure:
 | user-1 | Alice | alice@example.com | admin | 2024-01-01T00:00:00Z |
 | user-2 | Bob | bob@example.com | user | 2024-01-02T00:00:00Z |
 
+**Sheet: products**
+| id | name | price | category |
+|----|------|-------|----------|
+| prod-1 | Laptop | 999.99 | Electronics |
+
 ### Workflow
 
 1. **Load**: Reads Excel file into memory on initialization
 2. **Query**: Performs operations in-memory (fast!)
 3. **Persist**: Writes changes back to Excel file
 4. **Auto-save**: Enabled by default for data safety
+
+### Error Handling
+
+The driver provides clear error messages for common issues:
+
+**Corrupted or Invalid Files:**
+```
+Failed to read Excel file - File may be corrupted or not a valid .xlsx file
+```
+
+**File Format Issues:**
+- Missing headers: Worksheets without headers in the first row are skipped with a warning
+- Empty rows: Completely empty rows are automatically skipped
+- Missing ID field: IDs are auto-generated if not present
+
+**File Access Issues:**
+```
+Failed to read Excel file - Permission denied. Check file permissions.
+Failed to read Excel file - File is locked by another process. Close it and try again.
+```
+
+**Data Format Mismatch:**
+If an existing Excel file doesn't match the expected format (no headers, wrong structure), the driver will:
+1. Log a warning to the console
+2. Skip problematic worksheets
+3. Continue loading valid worksheets
+4. You can check console output for warnings about skipped data
 
 ## API Reference
 
@@ -339,6 +374,38 @@ for (const record of records) {
 - **File locking**: Not suitable for concurrent multi-process writes
 - **Performance**: Slower than dedicated databases for large datasets
 - **Query optimization**: No indexes or query optimization
+- **File format**: Only supports .xlsx format (Excel 2007+), not .xls (Excel 97-2003)
+
+## Data Format Requirements
+
+To ensure proper operation, Excel files must follow these requirements:
+
+### File Structure
+✅ **Valid .xlsx file** (Excel 2007+ format)  
+✅ **First row contains headers** (column names)  
+✅ **One worksheet per object type**  
+✅ **Consistent column structure** within each worksheet  
+
+### Common Issues and Solutions
+
+| Issue | Symptom | Solution |
+|-------|---------|----------|
+| Corrupted file | `FILE_READ_ERROR: File may be corrupted` | Open in Excel, save as new .xlsx file, or restore from backup |
+| No headers | Warning: `Worksheet has no headers` | Add column names in first row (id, name, email, etc.) |
+| File locked | `File is locked by another process` | Close the file in Excel or other applications |
+| Permission denied | `Permission denied` | Check file permissions, run with appropriate access rights |
+| Wrong format | Data not loading | Ensure first row has headers, data starts from row 2 |
+| Empty rows | Rows skipped | Empty rows are automatically ignored, check console warnings |
+
+### Validating Your Excel File
+
+Before using an Excel file with the driver:
+
+1. **Check file format**: Ensure it's `.xlsx` (not `.xls`, `.csv`, or other formats)
+2. **Verify headers**: First row of each worksheet should contain column names
+3. **Check for corruption**: Open file in Excel to verify it's not corrupted
+4. **Review structure**: Each worksheet should represent one object type
+5. **Test with small file first**: Start with a simple file to verify compatibility
 
 ## Best Practices
 
@@ -347,6 +414,8 @@ for (const record of records) {
 3. **Backup files**: Keep backups of important Excel files
 4. **Validate data**: Excel doesn't enforce schemas - validate in your app
 5. **Batch operations**: Use `createMany`/`updateMany` for better performance
+6. **Monitor console warnings**: Check for warnings about skipped worksheets or rows
+7. **Use version control**: Track Excel file changes with git for critical data
 
 ## TypeScript Support
 
