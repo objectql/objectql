@@ -331,4 +331,91 @@ describe('FileSystemDriver', () => {
             expect(result).toBeNull();
         });
     });
+
+    describe('New Features', () => {
+        test('should load initial data', async () => {
+            const newDriver = new FileSystemDriver({
+                dataDir: path.join(testDataDir, 'initial'),
+                initialData: {
+                    products: [
+                        { id: 'p1', name: 'Product 1', price: 100 },
+                        { id: 'p2', name: 'Product 2', price: 200 }
+                    ]
+                }
+            });
+
+            const results = await newDriver.find('products', {});
+            expect(results.length).toBe(2);
+            expect(results[0].name).toBe('Product 1');
+            
+            await newDriver.disconnect();
+        });
+
+        test('should clear specific object data', async () => {
+            await driver.create('temp', { name: 'Test' });
+            
+            const before = await driver.find('temp', {});
+            expect(before.length).toBe(1);
+
+            await driver.clear('temp');
+
+            const after = await driver.find('temp', {});
+            expect(after.length).toBe(0);
+        });
+
+        test('should clear all data', async () => {
+            await driver.create('obj1', { name: 'Test 1' });
+            await driver.create('obj2', { name: 'Test 2' });
+
+            await driver.clearAll();
+
+            const obj1 = await driver.find('obj1', {});
+            const obj2 = await driver.find('obj2', {});
+            
+            expect(obj1.length).toBe(0);
+            expect(obj2.length).toBe(0);
+        });
+
+        test('should invalidate cache', async () => {
+            await driver.create('cache_test', { name: 'Test' });
+            
+            // Verify cache is populated
+            expect(driver.getCacheSize()).toBeGreaterThan(0);
+
+            driver.invalidateCache('cache_test');
+
+            // Cache should reload on next access
+            const results = await driver.find('cache_test', {});
+            expect(results.length).toBe(1);
+        });
+
+        test('should get cache size', async () => {
+            await driver.create('size1', { name: 'Test 1' });
+            await driver.create('size2', { name: 'Test 2' });
+
+            const size = driver.getCacheSize();
+            expect(size).toBeGreaterThanOrEqual(2);
+        });
+
+        test('should handle empty JSON file', async () => {
+            const filePath = path.join(testDataDir, 'empty.json');
+            fs.writeFileSync(filePath, '', 'utf8');
+
+            const results = await driver.find('empty', {});
+            expect(results).toEqual([]);
+        });
+
+        test('should handle invalid JSON file', async () => {
+            const filePath = path.join(testDataDir, 'invalid.json');
+            fs.writeFileSync(filePath, '{invalid json}', 'utf8');
+
+            try {
+                await driver.find('invalid', {});
+                fail('Should have thrown an error');
+            } catch (error: any) {
+                expect(error.code).toBe('INVALID_JSON_FORMAT');
+                expect(error.message).toContain('invalid JSON');
+            }
+        });
+    });
 });

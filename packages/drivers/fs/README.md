@@ -2,6 +2,8 @@
 
 File System Driver for ObjectQL - JSON file-based persistent storage with one file per table.
 
+> **中文文档**: [README.zh-CN.md](./README.zh-CN.md)
+
 ## Features
 
 ✅ **Persistent Storage** - Data survives process restarts  
@@ -80,6 +82,9 @@ interface FileSystemDriverConfig {
     
     /** Enable strict mode (throw on missing objects) (default: false) */
     strictMode?: boolean;
+    
+    /** Initial data to populate the store (optional) */
+    initialData?: Record<string, any[]>;
 }
 ```
 
@@ -90,7 +95,12 @@ const driver = new FileSystemDriver({
     dataDir: './data',
     prettyPrint: true,      // Human-readable JSON
     enableBackup: true,     // Create .bak files
-    strictMode: false       // Graceful handling of missing records
+    strictMode: false,      // Graceful handling of missing records
+    initialData: {          // Pre-populate with initial data
+        users: [
+            { id: 'admin', name: 'Admin User', role: 'admin' }
+        ]
+    }
 });
 ```
 
@@ -297,6 +307,24 @@ await products.create({
 
 ### Loading Initial Data
 
+**Method 1: Provide in configuration**
+
+```typescript
+const driver = new FileSystemDriver({
+    dataDir: './data',
+    initialData: {
+        users: [
+            { id: 'admin-001', name: 'Admin User', role: 'admin' }
+        ],
+        settings: [
+            { key: 'theme', value: 'dark' }
+        ]
+    }
+});
+```
+
+**Method 2: Pre-create JSON files**
+
 You can pre-populate JSON files:
 
 ```json
@@ -327,6 +355,22 @@ const devDriver = new FileSystemDriver({
 const testDriver = new FileSystemDriver({
     dataDir: './data/test'
 });
+```
+
+### Utility Methods
+
+```typescript
+// Clear all data for a specific object
+await driver.clear('users');
+
+// Clear all data for all objects
+await driver.clearAll();
+
+// Invalidate cache for an object
+driver.invalidateCache('users');
+
+// Get cache size
+const size = driver.getCacheSize();
 ```
 
 ## Comparison with Other Drivers

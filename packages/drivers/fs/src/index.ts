@@ -36,6 +36,8 @@ export interface FileSystemDriverConfig {
     enableBackup?: boolean;
     /** Optional: Enable strict mode (throw on missing objects) */
     strictMode?: boolean;
+    /** Optional: Initial data to populate the store */
+    initialData?: Record<string, any[]>;
 }
 
 /**
@@ -63,6 +65,30 @@ export class FileSystemDriver implements Driver {
         // Ensure data directory exists
         if (!fs.existsSync(this.config.dataDir)) {
             fs.mkdirSync(this.config.dataDir, { recursive: true });
+        }
+
+        // Load initial data if provided
+        if (config.initialData) {
+            this.loadInitialData(config.initialData);
+        }
+    }
+
+    /**
+     * Load initial data into the store.
+     */
+    private loadInitialData(data: Record<string, any[]>): void {
+        for (const [objectName, records] of Object.entries(data)) {
+            // Only load if file doesn't exist yet
+            const filePath = this.getFilePath(objectName);
+            if (!fs.existsSync(filePath)) {
+                const recordsWithIds = records.map(record => ({
+                    ...record,
+                    id: record.id || record._id || this.generateId(objectName),
+                    created_at: record.created_at || new Date().toISOString(),
+                    updated_at: record.updated_at || new Date().toISOString()
+                }));
+                this.saveRecords(objectName, recordsWithIds);
+            }
         }
     }
 
@@ -92,7 +118,23 @@ export class FileSystemDriver implements Driver {
 
         try {
             const content = fs.readFileSync(filePath, 'utf8');
-            const records = JSON.parse(content);
+            
+            // Handle empty file
+            if (!content || content.trim() === '') {
+                this.cache.set(objectName, []);
+                return [];
+            }
+            
+            let records;
+            try {
+                records = JSON.parse(content);
+            } catch (parseError) {
+                throw new ObjectQLError({
+                    code: 'INVALID_JSON_FORMAT',
+                    message: `File ${filePath} contains invalid JSON: ${(parseError as Error).message}`,
+                    details: { objectName, filePath, parseError }
+                });
+            }
             
             if (!Array.isArray(records)) {
                 throw new ObjectQLError({
@@ -105,6 +147,11 @@ export class FileSystemDriver implements Driver {
             this.cache.set(objectName, records);
             return records;
         } catch (error) {
+            // If it's already an ObjectQLError, rethrow it
+            if ((error as any).code && (error as any).code.startsWith('INVALID_')) {
+                throw error;
+            }
+            
             if ((error as any).code === 'ENOENT') {
                 this.cache.set(objectName, []);
                 return [];
@@ -415,6 +462,62 @@ export class FileSystemDriver implements Driver {
      */
     async disconnect(): Promise<void> {
         this.cache.clear();
+    }
+
+    /**
+     * Clear all data from a specific object.
+     * Useful for testing or data reset scenarios.
+     */
+    async clear(objectName: string): Promise<void> {
+        const filePath = this.getFilePath(objectName);
+        
+        // Remove file if exists
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+        
+        // Remove backup if exists
+        const backupPath = `${filePath}.bak`;
+        if (fs.existsSync(backupPath)) {
+            fs.unlinkSync(backupPath);
+        }
+        
+        // Clear cache
+        this.cache.delete(objectName);
+        this.idCounters.delete(objectName);
+    }
+
+    /**
+     * Clear all data from all objects.
+     * Removes all JSON files in the data directory.
+     */
+    async clearAll(): Promise<void> {
+        const files = fs.readdirSync(this.config.dataDir);
+        
+        for (const file of files) {
+            if (file.endsWith('.json') || file.endsWith('.json.bak') || file.endsWith('.json.tmp')) {
+                const filePath = path.join(this.config.dataDir, file);
+                fs.unlinkSync(filePath);
+            }
+        }
+        
+        this.cache.clear();
+        this.idCounters.clear();
+    }
+
+    /**
+     * Invalidate cache for a specific object.
+     * Forces reload from file on next access.
+     */
+    invalidateCache(objectName: string): void {
+        this.cache.delete(objectName);
+    }
+
+    /**
+     * Get the size of the cache (number of objects cached).
+     */
+    getCacheSize(): number {
+        return this.cache.size;
     }
 
     // ========== Helper Methods ==========

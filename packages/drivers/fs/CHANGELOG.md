@@ -2,6 +2,24 @@
 
 All notable changes to the @objectql/driver-fs package will be documented in this file.
 
+## [0.1.1] - 2024-01-16
+
+### Added
+- `initialData` configuration option to pre-populate data on initialization
+- `clear(objectName)` method to clear all data for a specific object
+- `clearAll()` method to clear all data from all objects
+- `invalidateCache(objectName)` method to force cache reload
+- `getCacheSize()` method to get the number of cached objects
+- Chinese documentation (README.zh-CN.md)
+- Better error handling for invalid JSON files
+- Support for empty JSON files
+
+### Improved
+- Enhanced JSON parse error messages with more detailed information
+- Better documentation with examples for all new features
+- Added 7 new test cases (total: 36 tests)
+- TypeScript configuration for proper workspace resolution
+
 ## [0.1.0] - 2024-01-16
 
 ### Added
