@@ -24,7 +24,8 @@
     "dist"
   ],
   "scripts": {
-    "start": "objectql serve --dir src",
+    "dev": "objectql dev --dir src",
+    "start": "objectql start --dir src",
     "seed": "ts-node src/seed.ts",
     "codegen": "objectql types -s src -o src/types",
     "build": "npm run codegen && tsc && rsync -a --include '*/' --include '*.yml' --exclude '*' src/ dist/",

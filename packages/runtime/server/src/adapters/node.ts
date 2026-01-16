@@ -6,6 +6,7 @@ import { generateOpenAPI } from '../openapi';
 import { createFileUploadHandler, createBatchFileUploadHandler, createFileDownloadHandler } from '../file-handler';
 import { LocalFileStorage } from '../storage';
 import { escapeRegexPath } from '../utils';
+import { getWelcomePageHtml } from '../templates';
 
 /**
  * Options for createNodeHandler
@@ -241,6 +242,13 @@ export function createNodeHandler(app: IObjectQL, options?: NodeHandlerOptions) 
 
         // Special case for root: since we accept POST / (RPC), correct response for GET / is 405
         if (pathName === '/') {
+            if (method === 'GET') {
+                res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                res.statusCode = 200;
+                res.end(getWelcomePageHtml(routes));
+                return;
+            }
+
             res.setHeader('Allow', 'POST');
             res.statusCode = 405;
             res.end(JSON.stringify({ error: { code: ErrorCode.INVALID_REQUEST, message: 'Method Not Allowed. Use POST for JSON-RPC.' } }));
