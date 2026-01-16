@@ -7,6 +7,16 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
+# IMPORTANT: For this workflow to work, you must enable the following setting:
+# Repository Settings > Actions > General > Workflow permissions
+# ☑ Allow GitHub Actions to create and approve pull requests
+# 
+# For organizations: This must be enabled at the organization level first:
+# Organization Settings > Actions > General > Workflow permissions
+# ☑ Allow GitHub Actions to create and approve pull requests
+#
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests
+
 permissions:
   contents: write
   issues: write

@@ -295,6 +295,28 @@ If you fork or clone the repository to contribute or run examples from source:
    # Output: Plugin initialization, Employee creation logs, Audit trails
    ```
 
+### For Repository Maintainers
+
+#### Release Process Setup
+
+The repository uses automated releases via Changesets. To enable the release workflow:
+
+1. Configure required GitHub settings (organization owners only):
+   - See [.github/RELEASE_SETUP.md](.github/RELEASE_SETUP.md) for detailed instructions
+   
+2. Add required secrets:
+   - `NPM_TOKEN`: Token for publishing to npm
+
+#### Adding Changes
+
+When making changes, add a changeset describing the change:
+
+```bash
+pnpm changeset
+```
+
+This creates a file in `.changeset/` that will be used to generate changelogs and version bumps.
+
 ---
 
 ## ⚖️ License
