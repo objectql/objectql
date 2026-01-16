@@ -1,0 +1,41 @@
+# ObjectQL Permission Rules
+# Documentation: https://www.objectql.org/docs/spec/permission
+
+# Role-based permissions
+roles:
+  admin:
+    permissions:
+      create: true
+      read: true
+      update: true
+      delete: true
+  
+  user:
+    permissions:
+      create: true
+      read: true
+      update: 
+        condition: "owner === $userId"
+      delete: false
+  
+  guest:
+    permissions:
+      create: false
+      read: true
+      update: false
+      delete: false
+
+# Field-level permissions
+field_permissions:
+  sensitive_data:
+    roles: [admin]
+    mask: true
+  
+  internal_notes:
+    roles: [admin, user]
+
+# Record-level security (Row-Level Security)
+record_permissions:
+  owner_only:
+    condition: "owner === $userId"
+    roles: [user]

@@ -1,0 +1,37 @@
+# ObjectQL Application Configuration
+# Documentation: https://www.objectql.org/docs/spec/app
+
+name: {{name}}
+label: {{label}}
+description: "{{label}} application"
+version: "1.0.0"
+
+# Application metadata
+metadata:
+  author: "Your Name"
+  license: "MIT"
+
+# Navigation and menu structure
+navigation:
+  - label: Home
+    path: /
+    icon: home
+  
+  - label: {{label}}
+    icon: database
+    children:
+      - label: List
+        path: /{{name}}
+        object: {{name}}
+      - label: Create New
+        path: /{{name}}/new
+        object: {{name}}
+
+# Objects included in this app
+objects:
+  - {{name}}
+
+# Themes and branding
+theme:
+  primary_color: "#0066cc"
+  secondary_color: "#6c757d"
