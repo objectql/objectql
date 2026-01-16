@@ -6,7 +6,7 @@ export default {
         }
     },
     modules: [
-        '@objectql/example-project-tracker',
-        '@objectql/example-enterprise-erp'
+        // '@objectql/example-project-tracker',
+        // '@objectql/example-enterprise-erp'
     ]
 };

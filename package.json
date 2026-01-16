@@ -10,8 +10,8 @@
     "format": "prettier --write \"packages/**/*.{ts,tsx,json,md}\"",
     
     "cli:dev": "ts-node packages/tools/cli/src/index.ts",
-    
-    "objectql": "pnpm objectql",
+
+    "objectql": "node packages/tools/cli/dist/index.js",
     "objectql:tracker": "pnpm objectql dev -d examples/showcase/project-tracker/src",
     "objectql:erp": "pnpm objectql dev -d examples/showcase/enterprise-erp/src",
     
