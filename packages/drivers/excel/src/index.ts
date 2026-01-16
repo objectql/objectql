@@ -111,12 +111,14 @@ export class ExcelDriver implements Driver {
             });
             
             // Convert array of objects to proper format
+            // Create new objects to avoid mutating original jsonData
             const records = jsonData.map((row: any) => {
+                const record = { ...row };
                 // Ensure ID exists
-                if (!row.id) {
-                    row.id = this.generateId(sheetName);
+                if (!record.id) {
+                    record.id = this.generateId(sheetName);
                 }
-                return row;
+                return record;
             });
             
             this.data.set(sheetName, records);

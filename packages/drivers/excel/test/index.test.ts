@@ -160,7 +160,8 @@ describe('ExcelDriver', () => {
                 email: 'alice@example.com'
             });
 
-            // Small delay to ensure updated_at timestamp differs
+            // Small delay to ensure updated_at timestamp differs from created_at
+            // Note: Using real setTimeout here is intentional to test actual timestamp behavior
             await new Promise(resolve => setTimeout(resolve, 10));
 
             const updated = await driver.update(TEST_OBJECT, created.id, {
