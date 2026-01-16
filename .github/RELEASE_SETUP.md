@@ -141,5 +141,5 @@ The default `GITHUB_TOKEN` has limited scope and cannot:
 
 ---
 
-**Last Updated**: January 2026  
+**Last Updated**: 2026-01-16  
 **Maintainer**: ObjectStack AI Team

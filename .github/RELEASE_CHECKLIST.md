@@ -79,5 +79,5 @@ graph TD
 
 ---
 
-**Last Updated**: January 2026  
+**Last Updated**: 2026-01-16  
 **Status**: ⚠️ Settings need to be enabled by organization owner
