@@ -42,11 +42,13 @@ This document describes all the GitHub Actions workflows configured for the Obje
 - Publishes packages to npm when merged
 - Requires NPM_TOKEN secret
 
-**⚠️ Setup Required:** This workflow requires enabling a GitHub setting. See [RELEASE_SETUP.md](RELEASE_SETUP.md) for detailed setup instructions.
+**⚠️ Setup Required:** This workflow requires enabling a GitHub setting. 
+- 📋 Quick Setup: [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) 
+- 📖 Detailed Guide: [RELEASE_SETUP.md](RELEASE_SETUP.md)
 
 **Common Issues:**
 - Error: "GitHub Actions is not permitted to create or approve pull requests"
-  - **Solution:** Enable the setting at organization/repository level (see setup guide)
+  - **Solution:** Enable the setting at organization/repository level (see guides above)
 
 ### 📝 [changelog-preview.yml](workflows/changelog-preview.yml) ✨ NEW
 **Purpose:** Preview changelog before release  

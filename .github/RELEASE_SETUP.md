@@ -1,5 +1,7 @@
 # Release Workflow Setup Guide
 
+> 📋 **Quick Start?** See [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) for a streamlined checklist version.
+
 This guide explains how to configure the repository and organization settings required for the automated release workflow to function correctly.
 
 ## Problem
