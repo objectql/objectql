@@ -1,0 +1,9 @@
+# fs-demo
+
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @objectql/core@1.9.1
+  - @objectql/driver-fs@0.1.1
