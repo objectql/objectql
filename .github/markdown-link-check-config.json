@@ -29,6 +29,24 @@
     },
     {
       "pattern": "^mailto:"
+    },
+    {
+      "pattern": "^https://img.shields.io/"
+    },
+    {
+      "pattern": "^https://www.typescriptlang.org"
+    },
+    {
+      "pattern": "^https://badge.fury.io/"
+    },
+    {
+      "pattern": "^https://unpkg.com/"
+    },
+    {
+      "pattern": "^https://cdn.jsdelivr.net/"
+    },
+    {
+      "pattern": "^https://discord.gg/"
     }
   ],
   "replacementPatterns": [],
