@@ -72,6 +72,10 @@ describe('FileSystemDriver', () => {
 
         test('should update a record', async () => {
             const created = await driver.create('users', { name: 'David', age: 25 });
+            
+            // Add small delay to ensure different timestamp
+            await new Promise(resolve => setTimeout(resolve, 10));
+            
             const updated = await driver.update('users', created.id, { age: 26 });
 
             expect(updated.age).toBe(26);

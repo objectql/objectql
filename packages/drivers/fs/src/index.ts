@@ -216,6 +216,15 @@ export class FileSystemDriver implements Driver {
      * Create a new record.
      */
     async create(objectName: string, data: any, options?: any): Promise<any> {
+        // Validate object name
+        if (!objectName || objectName.trim() === '') {
+            throw new ObjectQLError({
+                code: 'INVALID_OBJECT_NAME',
+                message: 'Object name cannot be empty',
+                details: { objectName }
+            });
+        }
+
         const records = this.loadRecords(objectName);
 
         // Generate ID if not provided
@@ -314,8 +323,10 @@ export class FileSystemDriver implements Driver {
             actualFilters = filters.filters;
         }
 
-        // If no filters, return total count
-        if (!actualFilters || (Array.isArray(actualFilters) && actualFilters.length === 0)) {
+        // If no filters or empty object/array, return total count
+        if (!actualFilters || 
+            (Array.isArray(actualFilters) && actualFilters.length === 0) ||
+            (typeof actualFilters === 'object' && !Array.isArray(actualFilters) && Object.keys(actualFilters).length === 0)) {
             return records.length;
         }
 
