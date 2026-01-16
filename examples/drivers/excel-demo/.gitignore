@@ -1,6 +1,7 @@
 # Generated Excel files
-data/*.xlsx
-data/*.xls
+data/**/*.xlsx
+data/**/*.xls
+data/
 
 # Build output
 dist/
