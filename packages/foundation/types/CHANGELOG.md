@@ -1,5 +1,11 @@
 # @objectql/types
 
+## 1.9.1
+
+### Patch Changes
+
+- Release version bump with latest improvements and bug fixes
+
 ## 1.9.0
 
 ### Minor Changes

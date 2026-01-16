@@ -1,10 +1,19 @@
 # Changelog
 
+## 0.1.1
+
+### Patch Changes
+
+- Release version bump with latest improvements and bug fixes
+- Updated dependencies
+  - @objectql/types@1.9.1
+
 All notable changes to the @objectql/driver-fs package will be documented in this file.
 
 ## [0.1.1] - 2024-01-16
 
 ### Added
+
 - `initialData` configuration option to pre-populate data on initialization
 - `clear(objectName)` method to clear all data for a specific object
 - `clearAll()` method to clear all data from all objects
@@ -15,6 +24,7 @@ All notable changes to the @objectql/driver-fs package will be documented in thi
 - Support for empty JSON files
 
 ### Improved
+
 - Enhanced JSON parse error messages with more detailed information
 - Better documentation with examples for all new features
 - Added 7 new test cases (total: 36 tests)
@@ -23,6 +33,7 @@ All notable changes to the @objectql/driver-fs package will be documented in thi
 ## [0.1.0] - 2024-01-16
 
 ### Added
+
 - Initial release of FileSystem Driver for ObjectQL
 - One JSON file per table/object type
 - Atomic write operations with temp file + rename strategy

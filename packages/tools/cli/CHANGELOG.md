@@ -1,5 +1,17 @@
 # @objectql/cli
 
+## 1.9.1
+
+### Patch Changes
+
+- Release version bump with latest improvements and bug fixes
+- Updated dependencies
+  - @objectql/types@1.9.1
+  - @objectql/core@1.9.1
+  - @objectql/platform-node@1.9.1
+  - @objectql/server@1.9.1
+  - @objectql/driver-sql@1.9.1
+
 ## 1.9.0
 
 ### Minor Changes

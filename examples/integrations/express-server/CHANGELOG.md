@@ -1,5 +1,16 @@
 # @objectql/starter-express-api
 
+## 1.8.6
+
+### Patch Changes
+
+- Updated dependencies
+  - @objectql/types@1.9.1
+  - @objectql/core@1.9.1
+  - @objectql/platform-node@1.9.1
+  - @objectql/server@1.9.1
+  - @objectql/driver-sql@1.9.1
+
 ## 1.8.5
 
 ### Patch Changes
