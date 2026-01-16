@@ -44,6 +44,32 @@ async function copyTemplates() {
     }
     console.log(`Copying ${task.src} -> ${task.dest}`);
     await fs.copy(task.src, task.dest, { filter: filterFunc });
+    
+    // Fix tsconfig.json (Remove dependency on monorepo base)
+    const tsconfigPath = path.join(task.dest, 'tsconfig.json');
+    if (fs.existsSync(tsconfigPath)) {
+      const tsconfig = await fs.readJson(tsconfigPath);
+      delete tsconfig.extends;
+      
+      // Inject standalone compiler options
+      tsconfig.compilerOptions = {
+        target: "ES2019",
+        module: "commonjs",
+        declaration: true,
+        strict: true,
+        esModuleInterop: true,
+        skipLibCheck: true,
+        forceConsistentCasingInFileNames: true,
+        moduleResolution: "node",
+        sourceMap: true,
+        outDir: "./dist",
+        rootDir: "./src",
+        resolveJsonModule: true,
+        ...tsconfig.compilerOptions // Keep any specific overrides
+      };
+      
+      await fs.writeJson(tsconfigPath, tsconfig, { spaces: 2 });
+    }
   }
   
   console.log('Templates copied successfully.');

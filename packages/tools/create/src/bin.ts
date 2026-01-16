@@ -69,6 +69,7 @@ program
     const pkgPath = path.join(root, 'package.json');
     if (fs.existsSync(pkgPath)) {
       const pkg = await fs.readJson(pkgPath);
+      pkg.name = path.basename(root);
       delete pkg.private;
       delete pkg.repository; 
       
