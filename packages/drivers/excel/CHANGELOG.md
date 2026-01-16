@@ -1,5 +1,13 @@
 # @objectql/driver-excel
 
+## 0.2.1
+
+### Patch Changes
+
+- Release version bump with latest improvements and bug fixes
+- Updated dependencies
+  - @objectql/types@1.9.1
+
 ## 0.2.0 - 2024-01-16
 
 ### Added
@@ -62,7 +70,7 @@
 ### Dependencies
 
 - exceljs@^4.4.0 - Secure Excel file read/write library (actively maintained, no known CVEs)
-- @objectql/types@workspace:* - Core ObjectQL types
+- @objectql/types@workspace:\* - Core ObjectQL types
 
 ### API Changes
 
