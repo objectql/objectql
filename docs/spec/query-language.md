@@ -472,3 +472,437 @@ AI context can suggest optimizations:
 }
 ```
 
+## 6. Pagination and Data Fetching
+
+Pagination is essential for managing large result sets efficiently. ObjectQL supports multiple pagination strategies.
+
+### 6.1 Offset-Based Pagination
+
+The traditional approach using `top` (LIMIT) and `skip` (OFFSET).
+
+**Basic Example:**
+
+```javascript
+{
+  "object": "products",
+  "fields": ["name", "price", "stock"],
+  "sort": [["name", "asc"]],
+  
+  // Page 1: First 20 records
+  "top": 20,
+  "skip": 0
+}
+```
+
+**Page 2:**
+
+```javascript
+{
+  "object": "products",
+  "fields": ["name", "price", "stock"],
+  "sort": [["name", "asc"]],
+  
+  // Page 2: Next 20 records
+  "top": 20,
+  "skip": 20  // Skip first page
+}
+```
+
+**Page 3:**
+
+```javascript
+{
+  "object": "products",
+  "fields": ["name", "price", "stock"],
+  "sort": [["name", "asc"]],
+  
+  // Page 3
+  "top": 20,
+  "skip": 40  // Skip first two pages
+}
+```
+
+**Calculating Skip:**
+```javascript
+// skip = (page - 1) * pageSize
+const page = 3;
+const pageSize = 20;
+const skip = (page - 1) * pageSize;  // 40
+
+const query = {
+  object: "products",
+  top: pageSize,
+  skip: skip
+};
+```
+
+**Response Format:**
+
+```javascript
+{
+  "data": [...],  // Array of records
+  "pagination": {
+    "total": 150,      // Total records matching query
+    "page": 3,         // Current page (calculated)
+    "pageSize": 20,    // Records per page
+    "totalPages": 8,   // Math.ceil(total / pageSize)
+    "hasMore": true,   // Whether more pages exist
+    "skip": 40,        // Current skip value
+    "top": 20          // Current limit
+  }
+}
+```
+
+### 6.2 Cursor-Based Pagination
+
+More efficient for large datasets, prevents data inconsistencies when records are added/removed.
+
+**First Request:**
+
+```javascript
+{
+  "object": "orders",
+  "fields": ["id", "order_no", "amount", "created_at"],
+  "sort": [["created_at", "desc"], ["id", "asc"]],  // Must include unique field
+  "top": 20,
+  
+  "ai_context": {
+    "intent": "First page of recent orders",
+    "pagination_strategy": "cursor"
+  }
+}
+```
+
+**Response:**
+
+```javascript
+{
+  "data": [
+    { "id": "100", "order_no": "ORD-100", "amount": 500, "created_at": "2024-01-15" },
+    // ... 19 more records
+    { "id": "81", "order_no": "ORD-81", "amount": 300, "created_at": "2024-01-14" }
+  ],
+  "cursor": {
+    "next": "eyJjcmVhdGVkX2F0IjoiMjAyNC0wMS0xNCIsImlkIjoiODEifQ==",  // Base64 encoded cursor
+    "hasMore": true
+  }
+}
+```
+
+**Next Page Request:**
+
+```javascript
+{
+  "object": "orders",
+  "fields": ["id", "order_no", "amount", "created_at"],
+  "sort": [["created_at", "desc"], ["id", "asc"]],
+  "top": 20,
+  
+  // Use cursor from previous response
+  "cursor": "eyJjcmVhdGVkX2F0IjoiMjAyNC0wMS0xNCIsImlkIjoiODEifQ==",
+  
+  "ai_context": {
+    "intent": "Next page of orders using cursor",
+    "pagination_strategy": "cursor"
+  }
+}
+```
+
+**Cursor Implementation:**
+
+The cursor encodes the last record's sort values:
+
+```javascript
+// Cursor contains: { created_at: "2024-01-14", id: "81" }
+// Query becomes:
+"filters": [
+  // Your original filters (if any)
+  // ... plus cursor filter:
+  "and",
+  [
+    ["created_at", "<", "2024-01-14"],
+    "or",
+    [
+      ["created_at", "=", "2024-01-14"],
+      "and",
+      ["id", ">", "81"]
+    ]
+  ]
+]
+```
+
+### 6.3 Keyset Pagination (Seek Method)
+
+Similar to cursor but explicitly defined in the query.
+
+```javascript
+{
+  "object": "customers",
+  "fields": ["id", "name", "created_at"],
+  "sort": [["created_at", "desc"], ["id", "asc"]],
+  "top": 20,
+  
+  // For page 2+, use seek criteria
+  "filters": [
+    // Start after the last record from previous page
+    [
+      ["created_at", "<", "2024-01-10"],
+      "or",
+      [
+        ["created_at", "=", "2024-01-10"],
+        "and",
+        ["id", ">", "12345"]
+      ]
+    ]
+  ],
+  
+  "ai_context": {
+    "intent": "Efficient keyset pagination",
+    "last_seen": { "created_at": "2024-01-10", "id": "12345" }
+  }
+}
+```
+
+### 6.4 Infinite Scroll Pattern
+
+For continuously loading data as user scrolls.
+
+**Initial Load:**
+
+```javascript
+{
+  "object": "posts",
+  "fields": ["id", "title", "content", "created_at"],
+  "sort": [["created_at", "desc"]],
+  "top": 20,
+  
+  "ai_context": {
+    "intent": "Initial load for infinite scroll feed",
+    "ui_pattern": "infinite_scroll"
+  }
+}
+```
+
+**Load More:**
+
+```javascript
+{
+  "object": "posts",
+  "fields": ["id", "title", "content", "created_at"],
+  "sort": [["created_at", "desc"]],
+  "top": 20,
+  "skip": 20,  // Or use cursor
+  
+  "ai_context": {
+    "intent": "Load more posts for infinite scroll",
+    "scroll_position": "after_20_items"
+  }
+}
+```
+
+### 6.5 Pagination with Filtering
+
+Pagination parameters work alongside filters.
+
+```javascript
+{
+  "object": "tasks",
+  "fields": ["title", "status", "assignee", "due_date"],
+  
+  // Filters reduce the total result set
+  "filters": [
+    ["status", "in", ["pending", "in_progress"]],
+    "and",
+    ["assignee_id", "=", "$current_user"]
+  ],
+  
+  "sort": [["due_date", "asc"]],
+  
+  // Pagination applies to filtered results
+  "top": 25,
+  "skip": 0,
+  
+  "ai_context": {
+    "intent": "Paginate through my active tasks",
+    "filtered_pagination": true
+  }
+}
+```
+
+**Response includes filtered totals:**
+
+```javascript
+{
+  "data": [...],
+  "pagination": {
+    "total": 67,         // Total matching the filters
+    "totalUnfiltered": 1523,  // Total records in table
+    "filtered": true,
+    "page": 1,
+    "pageSize": 25,
+    "totalPages": 3
+  }
+}
+```
+
+### 6.6 Pagination Best Practices
+
+#### 6.6.1 Performance Considerations
+
+**DO:**
+- Use `top` to limit result size (recommended: 10-100)
+- Include specific `fields` to reduce payload size
+- Use indexes on sort fields
+- Use cursor pagination for large datasets
+- Add `ai_context.expected_result_size` for optimization hints
+
+**DON'T:**
+- Omit `top` for unbounded queries
+- Use large `skip` values (>10,000) with offset pagination
+- Request all fields when only a few are needed
+- Skip pagination entirely for tables with >1000 records
+
+#### 6.6.2 Choosing Pagination Strategy
+
+| Strategy | Best For | Pros | Cons |
+|----------|----------|------|------|
+| **Offset** (`top`/`skip`) | Small-medium datasets, simple UIs | Simple, random access to pages | Slow for large offsets, inconsistent with concurrent changes |
+| **Cursor** | Large datasets, real-time data | Fast, consistent, efficient | No random page access, more complex |
+| **Keyset** | Ordered data, high performance | Very fast, efficient | Requires unique + sortable fields |
+
+#### 6.6.3 Complete Pagination Example
+
+```javascript
+{
+  "object": "invoices",
+  
+  "ai_context": {
+    "intent": "Paginated list of unpaid invoices",
+    "use_case": "Collections dashboard",
+    "pagination_strategy": "offset",
+    "expected_page_views": 5
+  },
+  
+  "fields": [
+    "invoice_no",
+    "customer.name",
+    "amount",
+    "due_date",
+    "days_overdue"
+  ],
+  
+  "filters": [
+    ["status", "!=", "paid"],
+    "and",
+    ["due_date", "<", "$today"]
+  ],
+  
+  "sort": [
+    ["days_overdue", "desc"],  // Most overdue first
+    ["amount", "desc"]         // Then by amount
+  ],
+  
+  // Page 1: 50 records
+  "top": 50,
+  "skip": 0,
+  
+  "expand": {
+    "customer": {
+      "fields": ["name", "email", "phone"]
+    }
+  }
+}
+```
+
+**Client-side pagination handler:**
+
+```typescript
+interface PaginationState {
+  page: number;
+  pageSize: number;
+  total?: number;
+  cursor?: string;
+}
+
+async function fetchPage(state: PaginationState) {
+  const query = {
+    object: "invoices",
+    fields: ["invoice_no", "amount", "due_date"],
+    filters: [["status", "!=", "paid"]],
+    sort: [["due_date", "asc"]],
+    
+    // Offset-based
+    top: state.pageSize,
+    skip: (state.page - 1) * state.pageSize,
+    
+    // Or cursor-based
+    // cursor: state.cursor
+  };
+  
+  const response = await objectql.query(query);
+  
+  return {
+    data: response.data,
+    total: response.pagination.total,
+    hasMore: response.pagination.hasMore
+  };
+}
+```
+
+### 6.7 Pagination Edge Cases
+
+#### 6.7.1 Empty Results
+
+```javascript
+{
+  "data": [],
+  "pagination": {
+    "total": 0,
+    "page": 1,
+    "pageSize": 20,
+    "totalPages": 0,
+    "hasMore": false
+  }
+}
+```
+
+#### 6.7.2 Single Page
+
+```javascript
+{
+  "data": [/* 15 records */],
+  "pagination": {
+    "total": 15,
+    "page": 1,
+    "pageSize": 20,
+    "totalPages": 1,
+    "hasMore": false
+  }
+}
+```
+
+#### 6.7.3 Last Page
+
+```javascript
+// Requesting page 5 with pageSize 20
+{
+  "data": [/* 7 records */],
+  "pagination": {
+    "total": 87,
+    "page": 5,
+    "pageSize": 20,
+    "totalPages": 5,
+    "hasMore": false,
+    "isLastPage": true
+  }
+}
+```
+
+## 7. See Also
+
+- [Query Best Practices Guide](../guide/query-best-practices.md) - Performance optimization and benchmarks
+- [Objects](./object.md) - Data model definitions
+- [Views](./view.md) - Saved queries and filters
+- [REST API](../api/rest.md) - REST endpoint for queries
+- [GraphQL API](../api/graphql.md) - GraphQL alternative
+

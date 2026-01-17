@@ -12,12 +12,25 @@ This section contains the complete metadata specifications for the ObjectQL plat
 *   [**Query Language (JSON-DSL)**](./query-language.md) - Unified query protocol for database-agnostic data access ✅
 *   [**Validation Rules**](./validation.md) - Data quality and business rule enforcement ✅
 *   [**Formula Fields**](./formula.md) - Read-only calculated fields with JavaScript expressions ✅
+*   [**Initial Data**](./data.md) - Seed data and default records for initialization ✅
 
 ## Business Logic Layer
 
 *   [**Hooks (Triggers)**](./hook.md) - Event-driven logic attached to data operations ✅
 *   [**Actions (RPC)**](./action.md) - Custom server-side functions and APIs ✅
 *   [**Workflows & Processes**](./workflow.md) - Automated business processes and approval chains ⚠️ *Spec complete, implementation pending*
+
+## User Interface Layer
+
+*   [**Pages**](./page.md) - UI page definitions, layouts, and navigation ✅
+*   [**Views**](./view.md) - Saved data queries, filters, and display configurations ✅
+*   [**Forms**](./form.md) - Data entry layouts and field configurations ✅
+*   [**Reports**](./report.md) - Analytics, visualizations, and data exports ✅
+*   [**Menus**](./menu.md) - Navigation structure and menu organization ✅
+
+## Application Organization
+
+*   [**Apps**](./app.md) - Application grouping, branding, and menu structure ✅
 
 ## Security & Access Control
 
