@@ -198,7 +198,184 @@ steps:
       field: manager_id
 ```
 
-### 3. Security & Access Control
+### 3. User Interface Layer
+
+#### [Pages](./page.md)
+**Purpose**: Define UI layouts and page structures.
+
+**What you define**:
+- List pages (table/grid views)
+- Detail pages (record details)
+- Dashboard pages (metrics and charts)
+- Custom pages (specialized UI)
+- Page sections and components
+- Responsive layouts
+
+**Example** (`project_list.page.yml`):
+```yaml
+# File: project_list.page.yml
+# Page name is inferred from filename!
+
+label: Projects
+type: list
+object: project
+
+view:
+  columns:
+    - name
+    - status
+    - owner
+    - end_date
+  
+  sort:
+    - field: end_date
+      direction: asc
+
+actions:
+  - create_project
+  - export_to_excel
+```
+
+#### [Views](./view.md)
+**Purpose**: Saved queries and display configurations.
+
+**What you define**:
+- Filters and sorting
+- Column selections
+- Grouping and aggregations
+- Chart visualizations
+- Kanban boards
+- Calendar views
+
+**Example** (`active_projects.view.yml`):
+```yaml
+# File: active_projects.view.yml
+# View name is inferred from filename!
+
+label: Active Projects
+object: project
+type: list
+
+filters:
+  - field: status
+    operator: "="
+    value: active
+
+columns:
+  - name
+  - owner
+  - end_date
+  - progress
+
+sort:
+  - field: end_date
+    direction: asc
+```
+
+#### [Forms](./form.md)
+**Purpose**: Data entry layouts and configurations.
+
+**What you define**:
+- Field layouts (sections, columns)
+- Field configurations (required, defaults)
+- Validation rules
+- Conditional fields
+- Form actions
+- Wizard forms (multi-step)
+
+**Example** (`project_create.form.yml`):
+```yaml
+# File: project_create.form.yml
+# Form name is inferred from filename!
+
+label: Create Project
+object: project
+type: create
+
+sections:
+  - label: Project Information
+    fields:
+      - name:
+          required: true
+      - status:
+          default: planning
+      - owner:
+          default: $current_user.id
+
+defaults:
+  priority: medium
+  status: planning
+```
+
+#### [Reports](./report.md)
+**Purpose**: Analytics and data exports.
+
+**What you define**:
+- Report types (tabular, summary, matrix, chart)
+- Data sources and joins
+- Grouping and aggregations
+- Visualizations
+- Export formats (PDF, Excel, CSV)
+- Scheduled distribution
+
+**Example** (`sales_summary.report.yml`):
+```yaml
+# File: sales_summary.report.yml
+# Report name is inferred from filename!
+
+label: Sales Summary
+type: summary
+object: order
+
+grouping:
+  - field: sales_rep
+    label: Sales Rep
+
+aggregations:
+  total_revenue:
+    field: amount
+    function: sum
+    format: currency
+  
+  order_count:
+    function: count
+```
+
+#### [Menus](./menu.md)
+**Purpose**: Navigation structure and organization.
+
+**What you define**:
+- Menu items and hierarchy
+- Navigation paths
+- Icons and labels
+- Permissions per item
+- Dynamic menu generation
+- Contextual actions
+
+**Example** (`main_menu.menu.yml`):
+```yaml
+# File: main_menu.menu.yml
+# Menu name is inferred from filename!
+
+label: Main Navigation
+type: main
+position: left
+
+items:
+  - label: Dashboard
+    icon: standard:home
+    path: /dashboard
+  
+  - label: CRM
+    icon: standard:account
+    items:
+      - label: Accounts
+        path: /accounts
+      - label: Contacts
+        path: /contacts
+```
+
+### 4. Security & Access Control
 
 #### [Permissions](./permission.md)
 **Purpose**: Control who can access what data and operations.
@@ -277,6 +454,32 @@ src/
   workflows/                 # Business processes
     order_approval.workflow.yml
     customer_onboarding.workflow.yml
+  
+  ui/                        # User interface
+    pages/
+      customer_list.page.yml
+      customer_detail.page.yml
+    views/
+      my_customers.view.yml
+      vip_customers.view.yml
+    forms/
+      customer_create.form.yml
+      customer_edit.form.yml
+    menus/
+      main_menu.menu.yml
+      admin_menu.menu.yml
+  
+  reports/                   # Analytics
+    sales_summary.report.yml
+    customer_ltv.report.yml
+  
+  data/                      # Initial data
+    default_users.data.yml
+    sample_customers.data.yml
+  
+  apps/                      # Application definitions
+    crm.app.yml
+    sales.app.yml
 ```
 
 ## Development Workflow
@@ -321,6 +524,11 @@ ObjectQL provides a universal loader and generic API for all metadata types.
 | Permission | `*.permission.yml` | Filename = Object name | `project.permission.yml` → applies to: `project` |
 | Validation | `*.validation.yml` | Filename = Object name | `project.validation.yml` → applies to: `project` |
 | Initial Data | `*.data.yml` | Filename = Object name | `users.data.yml` → applies to: `users` |
+| Page | `*.page.yml` | Filename = Page name | `dashboard.page.yml` → page: `dashboard` |
+| View | `*.view.yml` | Filename = View name | `active_projects.view.yml` → view: `active_projects` |
+| Form | `*.form.yml` | Filename = Form name | `customer_create.form.yml` → form: `customer_create` |
+| Report | `*.report.yml` | Filename = Report name | `sales_summary.report.yml` → report: `sales_summary` |
+| Menu | `*.menu.yml` | Filename = Menu name | `main_menu.menu.yml` → menu: `main_menu` |
 
 **Benefits:**
 - ✅ **Less redundancy** - No need to repeat the name inside the file
@@ -394,15 +602,25 @@ fields:
 
 ## Reference
 
+### Core Data Layer
 - [Objects & Fields](./object.md) - Data modeling
 - [Query Language](./query-language.md) - Data access
 - [Validation](./validation.md) - Data quality
+- [Formula Fields](./formula.md) - Calculated fields
+- [Initial Data](./data.md) - Seed data
+
+### Business Logic Layer
 - [Hooks](./hook.md) - Event triggers
 - [Actions](./action.md) - Custom operations
 - [Workflows](./workflow.md) - Process automation
+
+### User Interface Layer
 - [Pages](./page.md) - UI pages and components
 - [Views](./view.md) - Data presentation
 - [Forms](./form.md) - Data entry
 - [Reports](./report.md) - Analytics
 - [Menus](./menu.md) - Navigation
-- [Permissions](./permission.md) - Security
+
+### Application & Security
+- [Apps](./app.md) - Application organization
+- [Permissions](./permission.md) - Security and access control
