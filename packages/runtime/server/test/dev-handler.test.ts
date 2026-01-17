@@ -290,6 +290,24 @@ describe('DevHandler', () => {
     });
 
     describe('Security', () => {
+        it('should be disabled by default', async () => {
+            const defaultHandler = createDevHandler({
+                baseDir: testDir
+                // enabled not specified - should default to false
+            });
+
+            const defaultServer = createServer(defaultHandler);
+
+            const response = await request(defaultServer)
+                .get('/api/dev/files')
+                .expect(403);
+
+            expect(response.body).toHaveProperty('error');
+            expect(response.body.error.message).toContain('development mode');
+
+            defaultServer.close();
+        });
+
         it('should be disabled in production mode', async () => {
             const prodHandler = createDevHandler({
                 baseDir: testDir,

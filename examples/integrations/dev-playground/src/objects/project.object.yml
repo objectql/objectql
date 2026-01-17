@@ -1,0 +1,46 @@
+name: project
+label: Project
+icon: briefcase
+fields:
+  name:
+    type: text
+    required: true
+    label: Project Name
+    searchable: true
+  
+  status:
+    type: select
+    options:
+      - planning
+      - in_progress
+      - completed
+      - on_hold
+    defaultValue: planning
+    label: Status
+  
+  priority:
+    type: select
+    options:
+      - low
+      - medium
+      - high
+      - urgent
+    defaultValue: medium
+    label: Priority
+  
+  description:
+    type: textarea
+    label: Description
+  
+  start_date:
+    type: date
+    label: Start Date
+  
+  end_date:
+    type: date
+    label: End Date
+  
+  budget:
+    type: currency
+    label: Budget
+    scale: 2

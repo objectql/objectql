@@ -72,7 +72,7 @@ interface FileNode {
  */
 export function createDevHandler(options?: DevHandlerOptions) {
     const baseDir = options?.baseDir || process.cwd();
-    const enabled = options?.enabled ?? (process.env.NODE_ENV !== 'production');
+    const enabled = options?.enabled ?? false; // Default to false for security
     const allowedExtensions = options?.allowedExtensions || [
         '.yml', '.yaml', '.ts', '.js', '.json', '.md', 
         '.txt', '.object.yml', '.validation.yml', '.permission.yml', 

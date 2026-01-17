@@ -166,7 +166,7 @@ interface DevHandlerOptions {
     /** Base directory for file operations (defaults to process.cwd()) */
     baseDir?: string;
     
-    /** Enable dev mode (must be explicitly enabled) */
+    /** Enable dev mode (must be explicitly enabled, defaults to false) */
     enabled?: boolean;
     
     /** Allowed file extensions for editing */

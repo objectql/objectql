@@ -1,0 +1,43 @@
+name: task
+label: Task
+icon: check-square
+fields:
+  title:
+    type: text
+    required: true
+    label: Task Title
+  
+  status:
+    type: select
+    options:
+      - todo
+      - in_progress
+      - done
+    defaultValue: todo
+    label: Status
+  
+  priority:
+    type: select
+    options:
+      - low
+      - medium
+      - high
+    defaultValue: medium
+    label: Priority
+  
+  description:
+    type: textarea
+    label: Description
+  
+  assignee:
+    type: text
+    label: Assigned To
+  
+  due_date:
+    type: datetime
+    label: Due Date
+  
+  completed:
+    type: boolean
+    defaultValue: false
+    label: Completed
