@@ -50,6 +50,17 @@ This document describes all the GitHub Actions workflows configured for the Obje
 - Reminds contributors to add changesets
 - Comments on PRs with changelog preview
 
+### 📦 [publish-vscode-extension.yml](workflows/publish-vscode-extension.yml) ✨ NEW
+**Purpose:** Publish VSCode extension to marketplace  
+**Triggers:** Manual dispatch, Git tags (`vscode-v*.*.*`)  
+**What it does:**
+- Builds the ObjectQL VSCode extension
+- Packages the extension as `.vsix` file
+- Publishes to VSCode Marketplace (requires VSCE_PAT secret)
+- Creates GitHub Release with VSIX artifact
+- Supports dry-run mode for testing
+- See [PUBLISHING.md](../packages/tools/vscode-objectql/PUBLISHING.md) for detailed instructions
+
 ## Code Quality & Security
 
 ### 🔒 [codeql.yml](workflows/codeql.yml)

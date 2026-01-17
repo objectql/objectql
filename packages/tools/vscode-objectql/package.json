@@ -11,6 +11,7 @@
   "engines": {
     "vscode": "^1.85.0"
   },
+  "icon": "images/icon.png",
   "categories": [
     "Programming Languages",
     "Snippets",
