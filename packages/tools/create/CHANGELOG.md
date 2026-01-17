@@ -1,5 +1,22 @@
 # @objectql/create
 
+## 3.0.1
+
+### Patch Changes
+
+- 79d04e1: Patch release for January 2026 updates
+
+  This patch includes minor improvements and maintenance updates:
+
+  - Enhanced type safety across core packages
+  - Improved error handling in drivers
+  - Documentation updates
+  - Performance optimizations
+
+- faeef39: Release version 1.9.2 with latest improvements and bug fixes
+
+  This patch release includes stability improvements and bug fixes backported from the development branch.
+
 ## 3.0.0
 
 ### Major Changes
