@@ -1,5 +1,13 @@
 # @example/hello-world
 
+## 1.0.7
+
+### Patch Changes
+
+- Updated dependencies [38b01f4]
+  - @objectql/core@3.0.0
+  - @objectql/driver-sql@3.0.0
+
 ## 1.0.6
 
 ### Patch Changes
