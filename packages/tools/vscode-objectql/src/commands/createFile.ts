@@ -84,12 +84,9 @@ export async function createNewFile(
 
 function getTemplate(context: vscode.ExtensionContext, fileType: string, name: string): string {
     try {
-      let templatePath = path.join(context.extensionPath, 'src', 'templates', `${fileType}.template.yml`);
+      // Look for templates in the 'templates' folder at the root of the extension
+      let templatePath = vscode.Uri.joinPath(context.extensionUri, 'templates', `${fileType}.template.yml`).fsPath;
       
-      if (!fs.existsSync(templatePath)) {
-          templatePath = path.join(context.extensionPath, 'out', 'templates', `${fileType}.template.yml`);
-      }
-  
       if (fs.existsSync(templatePath)) {
           let content = fs.readFileSync(templatePath, 'utf8');
           content = content.replace(/{{name}}/g, name);

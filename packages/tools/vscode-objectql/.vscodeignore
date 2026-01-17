@@ -10,3 +10,5 @@ node_modules/**
 *.vsix
 CONTRIBUTING.md
 IMPLEMENTATION-SUMMARY.md
+out/**
+esbuild.js

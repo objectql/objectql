@@ -77,7 +77,7 @@ jobs:
       - name: Package Extension
         working-directory: packages/tools/vscode-objectql
         run: |
-          npx @vscode/vsce package --no-yarn
+          npx @vscode/vsce package --no-dependencies --no-yarn
           echo "VSIX_FILE=$(ls *.vsix)" >> $GITHUB_ENV
 
       - name: Upload VSIX as Artifact
