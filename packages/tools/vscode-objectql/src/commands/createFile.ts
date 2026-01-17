@@ -4,7 +4,7 @@ import * as fs from 'fs';
 
 export async function createNewFile(
     context: vscode.ExtensionContext, 
-    fileType: 'object' | 'validation' | 'permission' | 'app'
+    fileType: 'object' | 'validation' | 'permission' | 'workflow'
 ) {
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
   
@@ -36,8 +36,8 @@ export async function createNewFile(
   let folder = 'src';
   if (fileType === 'object') {
      folder = 'src/objects';
-  } else if (fileType === 'app') {
-     folder = 'src';
+  } else if (fileType === 'workflow') {
+     folder = 'src/workflows';
   }
   
   const fullFileName = `${fileName}.${fileType}.yml`;

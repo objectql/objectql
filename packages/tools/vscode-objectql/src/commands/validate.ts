@@ -12,7 +12,7 @@ export async function validateCurrentFile() {
   const fileName = path.basename(document.fileName);
 
   // Check if it's an ObjectQL file
-  const objectqlFilePattern = /\.(object|validation|permission|app)\.(yml|yaml)$/;
+  const objectqlFilePattern = /\.(object|validation|permission|workflow)\.(yml|yaml)$/;
   if (!objectqlFilePattern.test(fileName)) {
     vscode.window.showWarningMessage('This is not an ObjectQL metadata file');
     return;

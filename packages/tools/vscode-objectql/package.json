@@ -30,7 +30,7 @@
     "workspaceContains:**/*.object.yml",
     "workspaceContains:**/*.validation.yml",
     "workspaceContains:**/*.permission.yml",
-    "workspaceContains:**/*.app.yml",
+    "workspaceContains:**/*.workflow.yml",
     "workspaceContains:**/*.action.ts",
     "workspaceContains:**/*.hook.ts"
   ],
@@ -77,12 +77,12 @@
         "configuration": "./language-configuration.json"
       },
       {
-        "id": "objectql-app",
+        "id": "objectql-workflow",
         "aliases": [
-          "ObjectQL Application"
+          "ObjectQL Workflow"
         ],
         "extensions": [
-          ".app.yml"
+          ".workflow.yml"
         ],
         "configuration": "./language-configuration.json"
       }
@@ -93,8 +93,8 @@
         "url": "./schemas/object.schema.json"
       },
       {
-        "fileMatch": "*.app.yml",
-        "url": "./schemas/app.schema.json"
+        "fileMatch": "*.workflow.yml",
+        "url": "./schemas/workflow.schema.json"
       }
     ],
     "jsonValidation": [
@@ -103,8 +103,8 @@
         "url": "./schemas/object.schema.json"
       },
       {
-        "fileMatch": "*.app.json",
-        "url": "./schemas/app.schema.json"
+        "fileMatch": "*.workflow.json",
+        "url": "./schemas/workflow.schema.json"
       }
     ],
     "snippets": [
@@ -134,8 +134,8 @@
         "category": "ObjectQL"
       },
       {
-        "command": "objectql.newApp",
-        "title": "ObjectQL: New Application Config",
+        "command": "objectql.newWorkflow",
+        "title": "ObjectQL: New Workflow Definition",
         "category": "ObjectQL"
       },
       {
@@ -165,7 +165,7 @@
           "group": "objectql@3"
         },
         {
-          "command": "objectql.newApp",
+          "command": "objectql.newWorkflow",
           "group": "objectql@4"
         }
       ]

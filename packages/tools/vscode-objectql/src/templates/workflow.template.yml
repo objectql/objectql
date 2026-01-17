@@ -1,0 +1,27 @@
+# {{label}} Workflow
+name: {{name}}
+label: {{label}}
+description: "Workflow description"
+type: automation # automation | approval | scheduled | field_change
+
+trigger:
+  event: create_or_update
+  # fields: [status] # Only for field_change
+  # conditions:
+  #   - field: status
+  #     operator: =
+  #     value: active
+
+steps:
+  - name: check_condition
+    type: condition
+    conditions:
+      - field: amount
+        operator: ">"
+        value: 1000
+    yes:
+      - name: send_notification
+        type: notification
+        template: big_deal_alert
+        users: [admin]
+    no: []

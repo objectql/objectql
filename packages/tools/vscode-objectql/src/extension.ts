@@ -23,7 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('objectql.newObject', () => createNewFile(context, 'object')),
     vscode.commands.registerCommand('objectql.newValidation', () => createNewFile(context, 'validation')),
     vscode.commands.registerCommand('objectql.newPermission', () => createNewFile(context, 'permission')),
-    vscode.commands.registerCommand('objectql.newApp', () => createNewFile(context, 'app')),
+    vscode.commands.registerCommand('objectql.newWorkflow', () => createNewFile(context, 'workflow')),
     vscode.commands.registerCommand('objectql.validateSchema', validateCurrentFile)
   );
 
