@@ -1,5 +1,16 @@
 # @objectql/driver-redis
 
+## 1.9.3
+
+### Patch Changes
+
+- faeef39: Release version 1.9.2 with latest improvements and bug fixes
+
+  This patch release includes stability improvements and bug fixes backported from the development branch.
+
+- Updated dependencies [faeef39]
+  - @objectql/types@1.9.3
+
 ## 3.0.0
 
 ### Major Changes
