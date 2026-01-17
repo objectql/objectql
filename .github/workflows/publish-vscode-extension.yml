@@ -1,0 +1,133 @@
+name: Publish VSCode Extension
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (leave empty to use version from package.json)'
+        required: false
+        type: string
+      dry_run:
+        description: 'Dry run (package only, do not publish)'
+        required: false
+        type: boolean
+        default: false
+  push:
+    tags:
+      - 'vscode-v*.*.*'
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  publish:
+    name: Package and Publish VSCode Extension
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install Dependencies
+        run: pnpm install
+        timeout-minutes: 3
+
+      - name: Build Monorepo
+        run: pnpm run build
+        timeout-minutes: 5
+
+      - name: Build VSCode Extension
+        working-directory: packages/tools/vscode-objectql
+        run: pnpm run compile
+
+      - name: Update Version (if specified)
+        if: inputs.version != ''
+        working-directory: packages/tools/vscode-objectql
+        run: |
+          echo "Updating version to ${{ inputs.version }}"
+          npm version ${{ inputs.version }} --no-git-tag-version
+
+      - name: Package Extension
+        working-directory: packages/tools/vscode-objectql
+        run: |
+          npx @vscode/vsce package --no-yarn
+          echo "VSIX_FILE=$(ls *.vsix)" >> $GITHUB_ENV
+
+      - name: Upload VSIX as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vscode-objectql-extension
+          path: packages/tools/vscode-objectql/*.vsix
+          retention-days: 30
+
+      - name: Publish to VSCode Marketplace
+        if: inputs.dry_run != true
+        working-directory: packages/tools/vscode-objectql
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          if [ -z "$VSCE_PAT" ]; then
+            echo "::error::VSCE_PAT secret is not set. Cannot publish to marketplace."
+            exit 1
+          fi
+          npx @vscode/vsce publish --no-yarn --pat "$VSCE_PAT"
+
+      - name: Create GitHub Release
+        if: inputs.dry_run != true && startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: packages/tools/vscode-objectql/*.vsix
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "## 🎉 VSCode Extension Build Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Package Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **VSIX File:** \`${{ env.VSIX_FILE }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dry Run:** ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ inputs.dry_run }}" == "true" ]; then
+            echo "- **Status:** ✅ Packaged (not published)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Status:** ✅ Published to VSCode Marketplace" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ inputs.dry_run }}" == "true" ]; then
+            echo "- Download the VSIX artifact to test locally" >> $GITHUB_STEP_SUMMARY
+            echo "- Install in VSCode: Extensions → Install from VSIX" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Extension is now available in VSCode Marketplace" >> $GITHUB_STEP_SUMMARY
+            echo "- Search for 'ObjectQL' in VSCode Extensions" >> $GITHUB_STEP_SUMMARY
+          fi

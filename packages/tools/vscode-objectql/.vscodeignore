@@ -4,6 +4,9 @@ src/**
 .gitignore
 .vscodeignore
 tsconfig.json
+tsconfig.tsbuildinfo
 test-workspace/**
 node_modules/**
 *.vsix
+CONTRIBUTING.md
+IMPLEMENTATION-SUMMARY.md
