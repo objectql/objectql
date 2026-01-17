@@ -281,6 +281,15 @@ indexes:
 
 Contributions are welcome! Please see the main repository for contribution guidelines.
 
+### For Maintainers: Publishing
+
+This extension is automatically published to the VSCode Marketplace using GitHub Actions. See [PUBLISHING.md](PUBLISHING.md) for detailed instructions on:
+
+- Configuring VSCode Marketplace credentials
+- Publishing via GitHub Actions workflow
+- Version management
+- Testing before publishing
+
 ---
 
 ## 📄 License
