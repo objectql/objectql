@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ObjectQL Development Playground</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Monaco', 'Courier New', monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+        }
+        
+        /* Header */
+        header {
+            background: #252526;
+            padding: 12px 20px;
+            border-bottom: 1px solid #3e3e42;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        header h1 {
+            font-size: 1.2em;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo {
+            font-size: 1.5em;
+        }
+        
+        .badge {
+            background: #0e639c;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+        
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: #252526;
+            border-right: 1px solid #3e3e42;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .sidebar-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #3e3e42;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .sidebar-title {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #cccccc;
+        }
+        
+        .refresh-btn {
+            background: transparent;
+            border: none;
+            color: #cccccc;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 1.1em;
+        }
+        
+        .refresh-btn:hover {
+            background: #3e3e42;
+        }
+        
+        .file-tree {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+        
+        .tree-node {
+            padding: 6px 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9em;
+        }
+        
+        .tree-node:hover {
+            background: #2a2d2e;
+        }
+        
+        .tree-node.selected {
+            background: #094771;
+        }
+        
+        .tree-node.directory {
+            font-weight: 500;
+        }
+        
+        .tree-node .icon {
+            width: 16px;
+            text-align: center;
+        }
+        
+        .tree-children {
+            margin-left: 16px;
+        }
+        
+        /* Editor Area */
+        .editor-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #2d2d2d;
+            border-bottom: 1px solid #3e3e42;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            padding: 10px 16px;
+            border-right: 1px solid #3e3e42;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85em;
+            white-space: nowrap;
+        }
+        
+        .tab:hover {
+            background: #2a2a2a;
+        }
+        
+        .tab.active {
+            background: #1e1e1e;
+        }
+        
+        .tab .close {
+            margin-left: 8px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .tab:hover .close {
+            opacity: 1;
+        }
+        
+        .editor {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #codeEditor {
+            width: 100%;
+            height: 100%;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border: none;
+            padding: 16px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+        }
+        
+        .editor-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #6a737d;
+            font-size: 1.1em;
+        }
+        
+        /* Right Panel - API Testing */
+        .right-panel {
+            width: 400px;
+            background: #252526;
+            border-left: 1px solid #3e3e42;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #3e3e42;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .api-test {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.85em;
+            color: #cccccc;
+        }
+        
+        select, input, textarea {
+            width: 100%;
+            background: #3c3c3c;
+            border: 1px solid #3e3e42;
+            color: #d4d4d4;
+            padding: 8px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9em;
+        }
+        
+        textarea {
+            font-family: 'Consolas', 'Monaco', monospace;
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #0e639c;
+        }
+        
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9em;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #1177bb;
+        }
+        
+        button:active {
+            background: #0d5a8f;
+        }
+        
+        button.secondary {
+            background: #3e3e42;
+            margin-top: 8px;
+        }
+        
+        button.secondary:hover {
+            background: #4e4e52;
+        }
+        
+        .response {
+            margin-top: 16px;
+            background: #1e1e1e;
+            border: 1px solid #3e3e42;
+            border-radius: 4px;
+            padding: 12px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85em;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .response.error {
+            border-color: #f48771;
+            color: #f48771;
+        }
+        
+        .response.success {
+            border-color: #89d185;
+            color: #89d185;
+        }
+        
+        /* Status Bar */
+        .status-bar {
+            background: #007acc;
+            color: white;
+            padding: 4px 16px;
+            font-size: 0.75em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #424242;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4e4e4e;
+        }
+        
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>
+                <span class="logo">🚀</span>
+                ObjectQL Dev Playground
+                <span class="badge">Development Mode</span>
+            </h1>
+            <div style="font-size: 0.85em; color: #cccccc;">
+                Browse • Edit • Test APIs
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar: File Browser -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <span class="sidebar-title">📁 Files</span>
+                    <button class="refresh-btn" onclick="loadFiles()" title="Refresh">↻</button>
+                </div>
+                <div id="fileTree" class="file-tree">
+                    <div style="padding: 20px; text-align: center; color: #6a737d;">
+                        Loading files...
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Editor Area -->
+            <div class="editor-area">
+                <div id="tabs" class="tabs">
+                    <!-- Tabs will be added dynamically -->
+                </div>
+                <div class="editor">
+                    <div id="editorPlaceholder" class="editor-placeholder">
+                        Select a file to edit
+                    </div>
+                    <textarea id="codeEditor" style="display: none;"></textarea>
+                </div>
+            </div>
+            
+            <!-- Right Panel: API Testing -->
+            <div class="right-panel">
+                <div class="panel-header">
+                    🧪 API Testing Playground
+                </div>
+                <div class="api-test">
+                    <div class="form-group">
+                        <label>Object</label>
+                        <select id="apiObject">
+                            <option value="">Select Object</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Operation</label>
+                        <select id="apiOperation">
+                            <option value="find">find - List records</option>
+                            <option value="findOne">findOne - Get one record</option>
+                            <option value="create">create - Create record</option>
+                            <option value="update">update - Update record</option>
+                            <option value="delete">delete - Delete record</option>
+                            <option value="count">count - Count records</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Arguments (JSON)</label>
+                        <textarea id="apiArgs" placeholder='{"name": "Test Project"}'>{}</textarea>
+                    </div>
+                    
+                    <button onclick="executeAPI()">▶ Execute</button>
+                    <button class="secondary" onclick="clearResponse()">Clear Response</button>
+                    
+                    <div id="apiResponse" class="response" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-item">
+                <span id="statusMessage">Ready</span>
+            </div>
+            <div class="status-item">
+                <span id="fileCount">0 files</span>
+                <span>•</span>
+                <span id="currentFile">No file selected</span>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        // Global state
+        let fileTree = null;
+        let openTabs = new Map();
+        let currentFile = null;
+        let metadata = null;
+        
+        // Load file tree on startup
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadFiles();
+            await loadMetadata();
+        });
+        
+        // Load file tree
+        window.loadFiles = async function() {
+            try {
+                setStatus('Loading files...');
+                const response = await fetch('/api/dev/files');
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+                
+                fileTree = data.tree;
+                renderFileTree(fileTree);
+                
+                const count = countFiles(fileTree);
+                document.getElementById('fileCount').textContent = `${count} files`;
+                setStatus('Files loaded');
+                
+            } catch (error) {
+                console.error('Error loading files:', error);
+                setStatus('Error loading files', true);
+            }
+        };
+        
+        // Load metadata
+        async function loadMetadata() {
+            try {
+                const response = await fetch('/api/dev/metadata');
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+                
+                metadata = data;
+                
+                // Populate object dropdown
+                const select = document.getElementById('apiObject');
+                select.innerHTML = '<option value="">Select Object</option>';
+                
+                data.objects.forEach(objPath => {
+                    const name = objPath.replace(/\//g, '/').split('/').pop().replace('.object.yml', '');
+                    select.innerHTML += `<option value="${name}">${name}</option>`;
+                });
+                
+            } catch (error) {
+                console.error('Error loading metadata:', error);
+            }
+        }
+        
+        // Render file tree
+        function renderFileTree(nodes, container = null) {
+            if (!container) {
+                container = document.getElementById('fileTree');
+                container.innerHTML = '';
+            }
+            
+            nodes.forEach(node => {
+                const div = document.createElement('div');
+                
+                if (node.type === 'directory') {
+                    div.className = 'tree-node directory';
+                    div.innerHTML = `<span class="icon">📁</span>${node.name}`;
+                    div.onclick = (e) => {
+                        e.stopPropagation();
+                        toggleDirectory(div);
+                    };
+                    
+                    const childrenDiv = document.createElement('div');
+                    childrenDiv.className = 'tree-children';
+                    childrenDiv.style.display = 'none';
+                    
+                    container.appendChild(div);
+                    container.appendChild(childrenDiv);
+                    
+                    if (node.children && node.children.length > 0) {
+                        renderFileTree(node.children, childrenDiv);
+                    }
+                    
+                } else {
+                    div.className = 'tree-node';
+                    const icon = getFileIcon(node.extension);
+                    div.innerHTML = `<span class="icon">${icon}</span>${node.name}`;
+                    div.onclick = () => openFile(node.path);
+                    container.appendChild(div);
+                }
+            });
+        }
+        
+        function toggleDirectory(div) {
+            const childrenDiv = div.nextElementSibling;
+            if (childrenDiv && childrenDiv.classList.contains('tree-children')) {
+                const isHidden = childrenDiv.style.display === 'none';
+                childrenDiv.style.display = isHidden ? 'block' : 'none';
+                div.querySelector('.icon').textContent = isHidden ? '📂' : '📁';
+            }
+        }
+        
+        function getFileIcon(ext) {
+            const icons = {
+                '.yml': '📄',
+                '.yaml': '📄',
+                '.ts': '📘',
+                '.js': '📙',
+                '.json': '📋',
+                '.md': '📝'
+            };
+            return icons[ext] || '📄';
+        }
+        
+        function countFiles(nodes) {
+            let count = 0;
+            nodes.forEach(node => {
+                if (node.type === 'file') {
+                    count++;
+                } else if (node.children) {
+                    count += countFiles(node.children);
+                }
+            });
+            return count;
+        }
+        
+        // Open file
+        window.openFile = async function(path) {
+            try {
+                setStatus(`Loading ${path}...`);
+                
+                // Check if already open
+                if (openTabs.has(path)) {
+                    switchToTab(path);
+                    return;
+                }
+                
+                const response = await fetch(`/api/dev/files/${encodeURIComponent(path)}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+                
+                // Add to open tabs
+                openTabs.set(path, {
+                    path: data.path,
+                    content: data.content,
+                    original: data.content,
+                    modified: false
+                });
+                
+                // Render tabs
+                renderTabs();
+                switchToTab(path);
+                setStatus(`Loaded ${path}`);
+                
+            } catch (error) {
+                console.error('Error opening file:', error);
+                setStatus(`Error: ${error.message}`, true);
+            }
+        };
+        
+        // Render tabs
+        function renderTabs() {
+            const tabsContainer = document.getElementById('tabs');
+            tabsContainer.innerHTML = '';
+            
+            openTabs.forEach((tab, path) => {
+                const tabDiv = document.createElement('div');
+                tabDiv.className = 'tab' + (path === currentFile ? ' active' : '');
+                const filename = path.split('/').pop();
+                const modified = tab.modified ? ' •' : '';
+                tabDiv.innerHTML = `
+                    <span>${filename}${modified}</span>
+                    <span class="close" onclick="closeTab('${path}', event)">✕</span>
+                `;
+                tabDiv.onclick = () => switchToTab(path);
+                tabsContainer.appendChild(tabDiv);
+            });
+        }
+        
+        // Switch to tab
+        function switchToTab(path) {
+            currentFile = path;
+            const tab = openTabs.get(path);
+            
+            if (tab) {
+                const editor = document.getElementById('codeEditor');
+                const placeholder = document.getElementById('editorPlaceholder');
+                
+                editor.style.display = 'block';
+                placeholder.style.display = 'none';
+                editor.value = tab.content;
+                
+                // Update status
+                document.getElementById('currentFile').textContent = path.split('/').pop();
+                
+                renderTabs();
+            }
+        }
+        
+        // Close tab
+        window.closeTab = function(path, event) {
+            event.stopPropagation();
+            
+            const tab = openTabs.get(path);
+            if (tab && tab.modified) {
+                if (!confirm('File has unsaved changes. Close anyway?')) {
+                    return;
+                }
+            }
+            
+            openTabs.delete(path);
+            
+            if (currentFile === path) {
+                // Switch to another tab or show placeholder
+                const remaining = Array.from(openTabs.keys());
+                if (remaining.length > 0) {
+                    switchToTab(remaining[0]);
+                } else {
+                    currentFile = null;
+                    const editor = document.getElementById('codeEditor');
+                    const placeholder = document.getElementById('editorPlaceholder');
+                    editor.style.display = 'none';
+                    placeholder.style.display = 'flex';
+                    document.getElementById('currentFile').textContent = 'No file selected';
+                }
+            }
+            
+            renderTabs();
+        };
+        
+        // Track editor changes
+        document.getElementById('codeEditor').addEventListener('input', (e) => {
+            if (!currentFile) return;
+            
+            const tab = openTabs.get(currentFile);
+            if (tab) {
+                tab.content = e.target.value;
+                tab.modified = tab.content !== tab.original;
+                renderTabs();
+            }
+        });
+        
+        // Save file (Ctrl+S)
+        document.addEventListener('keydown', async (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                await saveCurrentFile();
+            }
+        });
+        
+        async function saveCurrentFile() {
+            if (!currentFile) return;
+            
+            const tab = openTabs.get(currentFile);
+            if (!tab || !tab.modified) return;
+            
+            try {
+                setStatus(`Saving ${currentFile}...`);
+                
+                const response = await fetch(`/api/dev/files/${encodeURIComponent(currentFile)}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: tab.content })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+                
+                tab.original = tab.content;
+                tab.modified = false;
+                renderTabs();
+                setStatus(`Saved ${currentFile}`);
+                
+            } catch (error) {
+                console.error('Error saving file:', error);
+                setStatus(`Error: ${error.message}`, true);
+            }
+        }
+        
+        // Execute API
+        window.executeAPI = async function() {
+            try {
+                const object = document.getElementById('apiObject').value;
+                const op = document.getElementById('apiOperation').value;
+                const argsText = document.getElementById('apiArgs').value;
+                
+                if (!object) {
+                    alert('Please select an object');
+                    return;
+                }
+                
+                let args;
+                try {
+                    args = JSON.parse(argsText);
+                } catch (e) {
+                    alert('Invalid JSON in arguments');
+                    return;
+                }
+                
+                const responseDiv = document.getElementById('apiResponse');
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response';
+                responseDiv.textContent = 'Executing...';
+                
+                const response = await fetch('/api/data/' + object, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ op, args })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    responseDiv.className = 'response error';
+                } else {
+                    responseDiv.className = 'response success';
+                }
+                
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+                
+            } catch (error) {
+                const responseDiv = document.getElementById('apiResponse');
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `Error: ${error.message}`;
+            }
+        };
+        
+        window.clearResponse = function() {
+            const responseDiv = document.getElementById('apiResponse');
+            responseDiv.style.display = 'none';
+            responseDiv.textContent = '';
+        };
+        
+        // Status bar
+        function setStatus(message, isError = false) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.style.color = isError ? '#f48771' : 'white';
+        }
+    </script>
+</body>
+</html>

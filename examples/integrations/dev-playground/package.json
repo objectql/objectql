@@ -1,0 +1,23 @@
+{
+  "name": "@objectql/example-dev-playground",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser-based development playground for ObjectQL with code editing and API testing",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "server": "ts-node server.ts"
+  },
+  "dependencies": {
+    "@objectql/core": "workspace:*",
+    "@objectql/driver-memory": "workspace:*",
+    "@objectql/server": "workspace:*",
+    "@objectql/types": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "ts-node": "^10.9.1"
+  }
+}
