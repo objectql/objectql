@@ -111,6 +111,7 @@ export function convertIntrospectedSchemaToObjects(
             if (foreignKey) {
                 // This is a lookup field
                 fieldConfig = {
+                    name: column.name,
                     type: 'lookup',
                     reference_to: foreignKey.referencedTable,
                     label: toTitleCase(column.name),
@@ -121,6 +122,7 @@ export function convertIntrospectedSchemaToObjects(
                 const fieldType = mapDatabaseTypeToFieldType(column.type);
                 
                 fieldConfig = {
+                    name: column.name,
                     type: fieldType,
                     label: toTitleCase(column.name),
                     required: !column.nullable
@@ -133,7 +135,7 @@ export function convertIntrospectedSchemaToObjects(
                 
                 // Add max length for text fields
                 if (column.maxLength && (fieldType === 'text' || fieldType === 'textarea')) {
-                    fieldConfig.max_length = column.maxLength;
+                    fieldConfig.maxLength = column.maxLength;
                 }
                 
                 // Add default value
