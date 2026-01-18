@@ -11,6 +11,15 @@ const guideSidebar = [
     ]
   },
   {
+    text: 'Project Planning',
+    items: [
+      { text: 'Roadmap', link: '/roadmap' },
+      { text: 'Development Plan', link: '/development-plan' },
+      { text: 'Project Status', link: '/project-status' },
+      { text: 'Contributing', link: '/contributing' },
+    ]
+  },
+  {
     text: 'Tutorials',
     items: [
       { text: 'Overview', link: '/tutorials/' },
@@ -83,6 +92,7 @@ export default defineConfig({
     // Top Navigation
     nav: [
       { text: 'Guide', link: '/guide/' },
+      { text: 'Planning', link: '/planning' },
       { text: 'AI-Native', link: '/ai/' },
       { text: 'API Reference', link: '/api/' },
       { text: 'Specification', link: '/spec/' },
@@ -98,6 +108,20 @@ export default defineConfig({
 
     // Sidebar Configuration
     sidebar: {
+      // Sidebar for Planning
+      '/planning': [
+        {
+          text: 'Project Planning',
+          items: [
+            { text: 'Overview', link: '/planning' },
+            { text: 'Roadmap', link: '/roadmap' },
+            { text: 'Development Plan', link: '/development-plan' },
+            { text: 'Project Status', link: '/project-status' },
+            { text: 'Contributing Guide', link: '/contributing' },
+          ]
+        }
+      ],
+
       // Sidebar for Tutorials
       '/tutorials/': guideSidebar,
       

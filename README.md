@@ -248,14 +248,26 @@ This validation logic runs:
 
 ---
 
-## 📊 Implementation Progress
+## 📊 Project Status & Planning
 
-For a complete status report on ObjectQL's implementation against the documented standard protocol, see **[PROGRESS.md](./PROGRESS.md)**.
+**Current Version:** 3.0.0  
+**Overall Completion:** ~75%
 
-**Current Status:** 70% Complete (v1.8.4)
-- ✅ Core Protocol & Runtime: 85%
-- ✅ Data Drivers (SQL/Mongo): 75%
-- ⚠️ Workflow Engine: 35%
+### Key Documents
+
+- **[Roadmap](./docs/roadmap.md)** - Long-term vision, milestones, and strategic direction
+- **[Development Plan](./docs/development-plan.md)** - Detailed 6-month development plan
+- **[Project Status](./docs/project-status.md)** - Current state and metrics
+- **[Contributing Guide](./docs/contributing.md)** - How to contribute
+
+### Current Status
+
+- ✅ Core Protocol & Runtime: 90%
+- ✅ Data Drivers (SQL/Mongo/Memory/LocalStorage): 85%
+- ✅ Developer Tools (CLI, VSCode Extension): 85%
+- 🔄 Workflow Engine: 35%
+- 🔄 Security & Permissions: 70%
+- 🔄 Documentation: 75%
 
 ---
 
