@@ -30,16 +30,40 @@ Traditional ORMs (TypeORM, Prisma) are built for humans writing code in IDEs. Ob
 
 ObjectQL is organized as a Monorepo to ensure modularity and universal compatibility.
 
+### Foundation Layer
+
 | Package | Environment | Description |
 | :--- | :--- | :--- |
 | **`@objectql/types`** | Universal | **The Contract.** Pure TypeScript interfaces defining the protocol. |
 | **`@objectql/core`** | Universal | **The Engine.** The runtime logic, validation, and repository pattern. |
-| **`@objectql/driver-sql`** | Node.js | Adapter for SQL databases (Postgres, MySQL, SQLite) via Knex. |
-| **`@objectql/driver-mongo`** | Node.js | Adapter for MongoDB. |
+| **`@objectql/platform-node`**| Node.js | Node.js platform utilities for file system integration, YAML loading, and plugin management. |
+
+### Driver Layer
+
+| Package | Environment | Description |
+| :--- | :--- | :--- |
+| **`@objectql/driver-sql`** | Node.js | SQL database driver (PostgreSQL, MySQL, SQLite, SQL Server) via Knex. |
+| **`@objectql/driver-mongo`** | Node.js | MongoDB driver with native aggregation pipeline support. |
 | **`@objectql/driver-memory`** | Universal | **In-Memory Driver.** Zero dependencies, perfect for testing and browser apps. |
 | **`@objectql/driver-localstorage`** | Browser | **Browser Storage.** Persistent client-side storage using LocalStorage. |
-| **`@objectql/sdk`** | Universal | **Remote Driver.** Connects to an ObjectQL server via HTTP. |
-| **`@objectql/platform-node`**| Node.js | Utilities for loading YAML files from the filesystem. |
+| **`@objectql/driver-fs`** | Node.js | File system driver with JSON file-based persistent storage. |
+| **`@objectql/driver-excel`** | Node.js | Excel file driver for using `.xlsx` spreadsheets as a data source. |
+| **`@objectql/driver-redis`** | Node.js | Redis driver (example/template implementation for key-value stores). |
+| **`@objectql/sdk`** | Universal | **Remote HTTP Driver.** Type-safe client for connecting to ObjectQL servers. |
+
+### Runtime Layer
+
+| Package | Environment | Description |
+| :--- | :--- | :--- |
+| **`@objectql/server`** | Node.js | HTTP server adapter for Node.js, Express, Next.js with REST and metadata APIs. |
+
+### Tools Layer
+
+| Package | Environment | Description |
+| :--- | :--- | :--- |
+| **`@objectql/cli`** | Node.js | Command-line interface with AI-powered generation, dev server, and project management. |
+| **`@objectql/create`** | Node.js | Project scaffolding tool (`npm create @objectql@latest`). |
+| **`vscode-objectql`** | VS Code | Official VS Code extension with IntelliSense, validation, and snippets. |
 
 ---
 
