@@ -113,13 +113,42 @@ export interface FieldOption {
  * Extends the Protocol Field definition with runtime-specific properties.
  * The Protocol Constitution (SpecField) defines the core field schema.
  * This adds runtime conveniences and extensions.
+ * 
+ * We make certain spec fields optional since Zod applies defaults at parse time.
  */
-export interface FieldConfig extends Omit<Field, 'type' | 'options'> {
+export interface FieldConfig extends Omit<Field, 'type' | 'options' | 'required' | 'multiple' | 'unique' | 'deleteBehavior' | 'hidden' | 'readonly' | 'encryption' | 'index' | 'externalId'> {
     /** The data type of the field (extended with runtime types) */
     type: FieldType;
     
     /** Options for select fields (extended to allow number values) */
     options?: FieldOption[];
+    
+    /** Whether the field is mandatory. Defaults to false. */
+    required?: boolean;
+    
+    /** Whether the field allows multiple values. */
+    multiple?: boolean;
+    
+    /** Whether the field is unique in the table. */
+    unique?: boolean;
+    
+    /** Delete behavior for relationships */
+    deleteBehavior?: 'set_null' | 'cascade' | 'restrict';
+    
+    /** Whether the field is hidden from default UI/API response. */
+    hidden?: boolean;
+    
+    /** Whether the field is read-only in UI. */
+    readonly?: boolean;
+    
+    /** Whether the field is encrypted */
+    encryption?: boolean;
+    
+    /** Whether to create a database index for this field. */
+    index?: boolean;
+    
+    /** Whether this is an external ID field */
+    externalId?: boolean;
     
     /**
      * RUNTIME EXTENSIONS BELOW
@@ -174,9 +203,34 @@ export interface FieldConfig extends Omit<Field, 'type' | 'options'> {
     
     /**
      * Regular expression pattern for validation.
-     * @deprecated Use SpecField validation pattern instead
+     * @deprecated Use validation.pattern instead
      */
     regex?: string;
+    
+    /** 
+     * Field validation configuration.
+     * Defines validation rules applied at the field level.
+     */
+    validation?: {
+        /** Format validation (email, url, etc.) */
+        format?: 'email' | 'url' | 'phone' | 'date' | 'datetime';
+        /** Allowed protocols for URL validation */
+        protocols?: string[];
+        /** Minimum value for numbers */
+        min?: number;
+        /** Maximum value for numbers */
+        max?: number;
+        /** Minimum length for strings */
+        min_length?: number;
+        /** Maximum length for strings */
+        max_length?: number;
+        /** Regular expression pattern for validation */
+        pattern?: string;
+        /** Regex pattern (alias for pattern) */
+        regex?: string;
+        /** Custom validation message */
+        message?: string;
+    };
     
     /**
      * AI context for the field.
