@@ -1,4 +1,11 @@
 "use strict";
+/**
+ * ObjectQL
+ * Copyright (c) 2026-present ObjectStack Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -36,16 +43,28 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = __importStar(require("vscode"));
-const path = __importStar(require("path"));
-const fs = __importStar(require("fs"));
+const createFile_1 = require("./commands/createFile");
+const validate_1 = require("./commands/validate");
+const ObjectIndex_1 = require("./services/ObjectIndex");
+const ObjectDefinitionProvider_1 = require("./providers/ObjectDefinitionProvider");
+const ObjectCompletionProvider_1 = require("./providers/ObjectCompletionProvider");
+const constants_1 = require("./utils/constants");
+let objectIndex;
 /**
  * Extension activation function
  * Called when VSCode activates the extension
  */
 function activate(context) {
     console.log('ObjectQL extension is now active!');
-    // Register commands
-    context.subscriptions.push(vscode.commands.registerCommand('objectql.newObject', () => createNewFile(context, 'object')), vscode.commands.registerCommand('objectql.newValidation', () => createNewFile(context, 'validation')), vscode.commands.registerCommand('objectql.newPermission', () => createNewFile(context, 'permission')), vscode.commands.registerCommand('objectql.newApp', () => createNewFile(context, 'app')), vscode.commands.registerCommand('objectql.validateSchema', validateCurrentFile));
+    // Initialize Services
+    objectIndex = new ObjectIndex_1.ObjectIndex();
+    // Register Commands
+    context.subscriptions.push(vscode.commands.registerCommand('objectql.newObject', () => (0, createFile_1.createNewFile)(context, 'object')), vscode.commands.registerCommand('objectql.newValidation', () => (0, createFile_1.createNewFile)(context, 'validation')), vscode.commands.registerCommand('objectql.newPermission', () => (0, createFile_1.createNewFile)(context, 'permission')), vscode.commands.registerCommand('objectql.newWorkflow', () => (0, createFile_1.createNewFile)(context, 'workflow')), vscode.commands.registerCommand('objectql.validateSchema', validate_1.validateCurrentFile));
+    // Register Providers
+    const selector = { language: constants_1.LANGUAGES.YAML, scheme: constants_1.SCHEMES.FILE };
+    context.subscriptions.push(vscode.languages.registerDefinitionProvider(selector, new ObjectDefinitionProvider_1.ObjectDefinitionProvider(objectIndex)), vscode.languages.registerCompletionItemProvider(selector, new ObjectCompletionProvider_1.ObjectCompletionProvider(objectIndex), ' '));
+    // Clean up
+    context.subscriptions.push(objectIndex);
     // Show welcome message on first activation
     const hasShownWelcome = context.globalState.get('objectql.hasShownWelcome', false);
     if (!hasShownWelcome) {
@@ -56,122 +75,10 @@ function activate(context) {
  * Extension deactivation function
  */
 function deactivate() {
+    if (objectIndex) {
+        objectIndex.dispose();
+    }
     console.log('ObjectQL extension is now deactivated');
-}
-/**
- * Create a new ObjectQL file from template
- */
-async function createNewFile(context, fileType) {
-    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-    if (!workspaceFolder) {
-        vscode.window.showErrorMessage('Please open a workspace folder first');
-        return;
-    }
-    // Prompt for filename
-    const fileName = await vscode.window.showInputBox({
-        prompt: `Enter ${fileType} name (without extension)`,
-        placeHolder: `my_${fileType}`,
-        validateInput: (value) => {
-            if (!value) {
-                return 'Name cannot be empty';
-            }
-            if (!/^[a-z_][a-z0-9_]*$/.test(value)) {
-                return 'Name must start with lowercase letter or underscore and contain only lowercase letters, numbers, and underscores';
-            }
-            return null;
-        }
-    });
-    if (!fileName) {
-        return;
-    }
-    // Determine file path
-    // Guess the location based on standard folder structure
-    let folder = 'src';
-    if (fileType === 'object') {
-        folder = 'src/objects';
-    }
-    else if (fileType === 'app') {
-        folder = 'src';
-    }
-    const fullFileName = `${fileName}.${fileType}.yml`;
-    const defaultPath = path.join(workspaceFolder.uri.fsPath, folder, fullFileName);
-    // Get template content
-    const template = getTemplate(context, fileType, fileName);
-    try {
-        // Ensure directory exists
-        const dir = path.dirname(defaultPath);
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
-        // Check if file already exists
-        if (fs.existsSync(defaultPath)) {
-            const overwrite = await vscode.window.showWarningMessage(`File ${fullFileName} already exists. Overwrite?`, 'Yes', 'No');
-            if (overwrite !== 'Yes') {
-                return;
-            }
-        }
-        // Write file
-        fs.writeFileSync(defaultPath, template, 'utf8');
-        // Open file
-        const document = await vscode.workspace.openTextDocument(defaultPath);
-        await vscode.window.showTextDocument(document);
-        vscode.window.showInformationMessage(`Created ${fullFileName}`);
-    }
-    catch (error) {
-        vscode.window.showErrorMessage(`Failed to create file: ${error}`);
-    }
-}
-/**
- * Get template content for file type from template files
- */
-function getTemplate(context, fileType, name) {
-    try {
-        // Check if we are running from 'out' or 'src'
-        // Usually extension path is the root of the package.
-        let templatePath = path.join(context.extensionPath, 'src', 'templates', `${fileType}.template.yml`);
-        // Fallback if not found (maybe flattened or in out)
-        if (!fs.existsSync(templatePath)) {
-            templatePath = path.join(context.extensionPath, 'out', 'templates', `${fileType}.template.yml`);
-        }
-        if (fs.existsSync(templatePath)) {
-            let content = fs.readFileSync(templatePath, 'utf8');
-            content = content.replace(/{{name}}/g, name);
-            content = content.replace(/{{label}}/g, capitalizeWords(name));
-            return content;
-        }
-        // Fallback to hardcoded string if file read fails (Safety net)
-        console.warn(`Template file not found at ${templatePath}, utilizing fallback.`);
-        return getFallbackTemplate(fileType, name);
-    }
-    catch (e) {
-        console.error('Error reading template:', e);
-        return getFallbackTemplate(fileType, name);
-    }
-}
-function getFallbackTemplate(fileType, name) {
-    // Minimal fallback
-    return `# ${capitalizeWords(name)} ${fileType}\nname: ${name}\n`;
-}
-/**
- * Validate current file by saving (triggers schema validation)
- */
-async function validateCurrentFile() {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) {
-        vscode.window.showWarningMessage('No active editor');
-        return;
-    }
-    const document = editor.document;
-    const fileName = path.basename(document.fileName);
-    // Check if it's an ObjectQL file
-    const objectqlFilePattern = /\.(object|validation|permission|app)\.(yml|yaml)$/;
-    if (!objectqlFilePattern.test(fileName)) {
-        vscode.window.showWarningMessage('This is not an ObjectQL metadata file');
-        return;
-    }
-    // Trigger validation by saving
-    await document.save();
-    vscode.window.showInformationMessage('Validation complete. Check Problems panel for issues.');
 }
 /**
  * Show welcome message
@@ -186,14 +93,5 @@ function showWelcomeMessage(context) {
         }
     });
     context.globalState.update('objectql.hasShownWelcome', true);
-}
-/**
- * Capitalize words for display names
- */
-function capitalizeWords(str) {
-    return str
-        .split('_')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ');
 }
 //# sourceMappingURL=extension.js.map

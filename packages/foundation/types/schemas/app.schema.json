@@ -6,6 +6,7 @@
       "additionalProperties": {
         "description": "Custom metadata/settings"
       },
+      "description": "ObjectQL Copyright (c) 2026-present ObjectStack Inc.\n\nThis source code is licensed under the MIT license found in the LICENSE file in the root directory of this source tree.",
       "properties": {
         "description": {
           "description": "Description of what this application does",
